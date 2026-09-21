@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeDOM Studio | Visual Metadata & Indicator Canvas</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Cytoscape.js Core -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <!-- Dagre Layout for Cytoscape -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+  <!-- JS-YAML for declarative manifest export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
+  <style>
+    #cy {
+      background-color: #090d16;
+      background-image: radial-gradient(#1e293b 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .stencil-card {
+      transition: all 0.2s ease-in-out;
+    }
+    .stencil-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px -2px rgba(56, 189, 248, 0.2);
+    }
+  </style>
+</head>
+
+<body class="h-full flex flex-col overflow-hidden select-none font-sans text-xs sm:text-sm">
+
+  <!-- TOP APPLICATION NAVBAR -->
+  <header class="h-14 bg-slate-900/90 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4 z-20 shrink-0">
+    <!-- Brand & Status -->
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+        <i class="fa-solid fa-diagram-project text-base"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-sm tracking-wide text-white">MeDOM Studio</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-950 text-sky-400 border border-sky-800">DLD v2.0</span>
+        </div>
+        <div class="text-[11px] text-slate-400">Ontological Data Lakehouse & Indicator Canvas</div>
+      </div>
+    </div>
+
+    <!-- Center Mode Switch -->
+    <div class="hidden md:flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
+      <button id="mode-select-btn" onclick="setInteractionMode('select')" class="px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow">
+        <i class="fa-solid fa-arrow-pointer"></i>
+        <span>Select & Move</span>
+      </button>
+      <button id="mode-connect-btn" onclick="setInteractionMode('connect')" class="px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-link"></i>
+        <span>Draw Edge</span>
+      </button>
+    </div>
+
+    <!-- Actions & Workflows -->
+    <div class="flex items-center space-x-2">
+      <button onclick="loadMimicDemo()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-hospital text-purple-400"></i>
+        <span class="hidden sm:inline">Load MIMIC Lakehouse</span>
+      </button>
+
+      <button onclick="runAutoLayout()" title="Auto-Layout Hierarchical DAG" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-sitemap text-sky-400"></i>
+        <span class="hidden sm:inline">Auto-Layout</span>
+      </button>
+
+      <button onclick="validateCanvasStageA()" class="px-3 py-1.5 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-bolt text-indigo-400"></i>
+        <span>Stage A: Validate</span>
+      </button>
+
+      <button onclick="commitCanvasToCatalog()" class="px-3 py-1.5 rounded-lg bg-emerald-900/70 hover:bg-emerald-800 text-emerald-100 border border-emerald-700 flex items-center space-x-1.5 transition shadow-sm">
+        <i class="fa-solid fa-box-archive text-emerald-400"></i>
+        <span>Stage C: Commit</span>
+      </button>
+
+      <button onclick="openExportModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Export Manifest YAML/JSON">
+        <i class="fa-solid fa-download"></i>
+      </button>
+
+      <button onclick="clearCanvasPrompt()" class="px-2.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/80 transition" title="Clear Canvas">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE 3-ZONE LAYOUT -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- ZONE 1: LEFT COMPONENT PALETTE (Drag & Drop) -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10">
+      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+        <span class="font-semibold text-xs text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+          <i class="fa-solid fa-cubes text-sky-400"></i>
+          <span>Entity Palette</span>
+        </span>
+        <span class="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">Drag to canvas</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+        <!-- Stencil 1: DataSet Complex -->
+        <div draggable="true" ondragstart="handleDragStart(event, 'DataSet', 'Complex')"
+             class="stencil-card p-3 rounded-lg bg-slate-950 border border-indigo-800/60 hover:border-indigo-500 cursor-grab active:cursor-grabbing">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded bg-indigo-950 border border-indigo-700 flex items-center justify-center text-indigo-400">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-xs text-indigo-200">DataSet (Complex)</div>
+              <div class="text-[10px] text-slate-400">Container / Sub-assembly</div>
+            </div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+            <span>AssemblyOf root</span>
+            <span class="text-indigo-400 font-mono">Nested</span>
+          </div>
+        </div>
+
+        <!-- Stencil 2: DataSet Simple -->
+        <div draggable="true" ondragstart="handleDragStart(event, 'DataSet', 'Simple')"
+             class="stencil-card p-3 rounded-lg bg-slate-950 border border-sky-800/60 hover:border-sky-500 cursor-grab active:cursor-grabbing">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-sky-400">
+              <i class="fa-solid fa-database"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-xs text-sky-200">DataSet (Simple)</div>
+              <div class="text-[10px] text-slate-400">Domain table collection</div>
+            </div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+            <span>Leaf unit</span>
+            <span class="text-sky-400 font-mono">Raw / Proc</span>
+          </div>
+        </div>
+
+        <!-- Stencil 3: DataObject -->
+        <div draggable="true" ondragstart="handleDragStart(event, 'DataObject', 'Table')"
+             class="stencil-card p-3 rounded-lg bg-slate-950 border border-emerald-800/60 hover:border-emerald-500 cursor-grab active:cursor-grabbing">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded bg-emerald-950 border border-emerald-700 flex items-center justify-center text-emerald-400">
+              <i class="fa-solid fa-table"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-xs text-emerald-200">DataObject</div>
+              <div class="text-[10px] text-slate-400">Physical Parquet / CSV</div>
+            </div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+            <span>File & Schema</span>
+            <span class="text-emerald-400 font-mono">PyArrow</span>
+          </div>
+        </div>
+
+        <!-- Stencil 4: Stakeholder -->
+        <div draggable="true" ondragstart="handleDragStart(event, 'Stakeholder', 'Role')"
+             class="stencil-card p-3 rounded-lg bg-slate-950 border border-amber-800/60 hover:border-amber-500 cursor-grab active:cursor-grabbing">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-xs text-amber-200">Stakeholder</div>
+              <div class="text-[10px] text-slate-400">Steward / HIPAA Officer</div>
+            </div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+            <span>Governance</span>
+            <span class="text-amber-400 font-mono">Required</span>
+          </div>
+        </div>
+
+        <!-- Quick Edge Linking Tool -->
+        <div class="pt-2 border-t border-slate-800">
+          <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+            <span>Default Edge Kind</span>
+            <i class="fa-solid fa-share-nodes text-slate-500"></i>
+          </div>
+          <select id="default-edge-type" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="AssemblyOf">AssemblyOf (Composition)</option>
+            <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage)</option>
+            <option value="GeneralizationOf">GeneralizationOf (ISA Hierarchy)</option>
+            <option value="RelatesTo">RelatesTo (Referential / Joins)</option>
+          </select>
+        </div>
+
+        <!-- Canvas Metrics -->
+        <div class="pt-2 border-t border-slate-800">
+          <div class="bg-slate-950 rounded-lg p-2.5 border border-slate-800 space-y-1.5 text-[11px]">
+            <div class="flex justify-between text-slate-400">
+              <span>DataSets:</span>
+              <span id="metric-datasets" class="text-white font-mono font-bold">0</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>DataObjects:</span>
+              <span id="metric-objects" class="text-white font-mono font-bold">0</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Relationships:</span>
+              <span id="metric-edges" class="text-white font-mono font-bold">0</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Stakeholders:</span>
+              <span id="metric-stakeholders" class="text-white font-mono font-bold">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ZONE 2: 2D INTERACTIVE GRAPH CANVAS (Cytoscape.js) -->
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+      <!-- Status & Cycle Alert Notification Bar -->
+      <div id="toast-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium shadow-xl border flex items-center space-x-2 transition-all duration-300">
+        <i id="toast-icon" class="fa-solid"></i>
+        <span id="toast-msg"></span>
+      </div>
+
+      <!-- Canvas Connection Mode Tip -->
+      <div id="connect-mode-tip" class="hidden absolute top-3 left-4 z-20 px-3 py-1.5 rounded-lg bg-sky-900/80 border border-sky-600 text-sky-100 text-xs font-medium shadow-lg backdrop-blur flex items-center space-x-2">
+        <i class="fa-solid fa-info-circle text-sky-400"></i>
+        <span>Click <strong>Source Node</strong>, then click <strong>Target Node</strong> to draw edge.</span>
+        <button onclick="setInteractionMode('select')" class="ml-2 text-sky-300 hover:text-white underline">Done</button>
+      </div>
+
+      <!-- Cytoscape Container with Drag/Drop Listeners -->
+      <div id="cy" class="flex-1 w-full h-full"
+           ondragover="handleDragOver(event)"
+           ondrop="handleCanvasDrop(event)">
+      </div>
+
+      <!-- Floating Zoom / View Controls -->
+      <div class="absolute bottom-4 left-4 z-20 flex items-center space-x-1 bg-slate-900/90 backdrop-blur border border-slate-800 p-1 rounded-lg shadow-lg">
+        <button onclick="zoomIn()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Zoom In">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+        <button onclick="zoomOut()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Zoom Out">
+          <i class="fa-solid fa-minus"></i>
+        </button>
+        <button onclick="fitView()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Fit to Screen">
+          <i class="fa-solid fa-expand"></i>
+        </button>
+        <button onclick="runAutoLayout()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Hierarchical Auto-Layout">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+    </main>
+
+    <!-- ZONE 3: RIGHT CONTEXT INSPECTOR (Stage B 7 V-Words) -->
+    <aside id="inspector-panel" class="w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-10">
+      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div id="inspector-badge" class="w-3 h-3 rounded-full bg-slate-600"></div>
+          <span id="inspector-title" class="font-bold text-xs text-white uppercase tracking-wide">Context Inspector</span>
+        </div>
+        <button onclick="clearSelection()" class="text-slate-500 hover:text-slate-300 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Empty State / No Node Selected -->
+      <div id="inspector-empty" class="flex-1 p-6 flex flex-col items-center justify-center text-center text-slate-400">
+        <div class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 text-2xl">
+          <i class="fa-solid fa-hand-pointer"></i>
+        </div>
+        <h4 class="font-semibold text-slate-200 text-sm">No Element Selected</h4>
+        <p class="text-xs text-slate-400 mt-1 max-w-xs">
+          Click any node or edge on the canvas to inspect its DLD configuration and bind <strong>Stage B 7 V-word indicators</strong>.
+        </p>
+        <div class="mt-6 p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-left text-xs space-y-2 w-full">
+          <div class="font-semibold text-slate-300">Quick Tips:</div>
+          <div class="text-slate-400 flex items-start space-x-2">
+            <i class="fa-solid fa-plus text-sky-400 mt-0.5"></i>
+            <span>Drag items from the left palette to add entities.</span>
+          </div>
+          <div class="text-slate-400 flex items-start space-x-2">
+            <i class="fa-solid fa-link text-indigo-400 mt-0.5"></i>
+            <span>Switch to "Draw Edge" to link datasets and join keys.</span>
+          </div>
+          <div class="text-slate-400 flex items-start space-x-2">
+            <i class="fa-solid fa-file-waveform text-emerald-400 mt-0.5"></i>
+            <span>Inspect DataObjects to auto-profile files via PyArrow.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Inspector Form -->
+      <div id="inspector-form" class="hidden flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <!-- Node Header Info -->
+        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="form-entity-type" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-950 text-sky-400 border border-sky-800">DataSet</span>
+            <span id="form-entity-id" class="text-[11px] font-mono text-slate-400">id_placeholder</span>
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Entity Name</label>
+            <input id="form-name" type="text" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-500">
+          </div>
+          <div id="form-desc-group">
+            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Description</label>
+            <textarea id="form-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+          </div>
+        </div>
+
+        <!-- DataSet-specific Configuration -->
+        <div id="group-dataset-props" class="space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Structure Type</label>
+              <select id="form-structure-type" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+                <option value="Simple">Simple</option>
+                <option value="Complex">Complex</option>
+                <option value="Abstract">Abstract</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Lifecycle Stage</label>
+              <select id="form-lifecycle-stage" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+                <option value="Raw">Raw</option>
+                <option value="Processed">Processed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Stage B: 7 V-Words Accordion -->
+          <div class="border-t border-slate-800 pt-3">
+            <div class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+              <i class="fa-solid fa-chart-pie"></i>
+              <span>Stage B: 7 V-Word Indicators</span>
+            </div>
+
+            <!-- TVolume -->
+            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
+              <div class="text-[11px] font-semibold text-indigo-300 flex items-center justify-between">
+                <span>1. TVolume (Size & Records)</span>
+                <i class="fa-solid fa-weight-hanging text-indigo-400"></i>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-400">Logical Rows</label>
+                  <input id="form-volume-rows" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400">Bytes Size</label>
+                  <input id="form-volume-bytes" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- TVeracity -->
+            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
+              <div class="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
+                <span>2. TVeracity (Quality & Nulls)</span>
+                <i class="fa-solid fa-shield-heart text-emerald-400"></i>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400">Completeness Rate (0 - 1.0)</label>
+                <input id="form-veracity-completeness" type="number" step="0.01" min="0" max="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              </div>
+            </div>
+
+            <!-- TVulnerability -->
+            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
+              <div class="text-[11px] font-semibold text-amber-300 flex items-center justify-between">
+                <span>3. TVulnerability (Governance)</span>
+                <i class="fa-solid fa-lock text-amber-400"></i>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400">Classification</label>
+                <select id="form-vulnerability-class" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                  <option value="Public">Public (Open Data)</option>
+                  <option value="Internal">Internal Org Use</option>
+                  <option value="Confidential_HIPAA">Confidential (HIPAA De-identified)</option>
+                  <option value="Restricted">Restricted (High Security)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- TVariety -->
+            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
+              <div class="text-[11px] font-semibold text-purple-300 flex items-center justify-between">
+                <span>4. TVariety (Modality & Format)</span>
+                <i class="fa-solid fa-shapes text-purple-400"></i>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-400">Column Count</label>
+                  <input id="form-variety-cols" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400">Format</label>
+                  <input id="form-variety-format" type="text" placeholder="Parquet, CSV" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- TValue (Processed) -->
+            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
+              <div class="text-[11px] font-semibold text-rose-300 flex items-center justify-between">
+                <span>5. TValue (Business Impact)</span>
+                <i class="fa-solid fa-gem text-rose-400"></i>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400">Criticality Tier</label>
+                <select id="form-value-criticality" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                  <option value="Low">Low (Ad-hoc exploratory)</option>
+                  <option value="Medium">Medium (Internal reporting)</option>
+                  <option value="High">High (Departmental ops)</option>
+                  <option value="Critical">Critical (Mission-critical production)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DataObject-specific Configuration & Auto-Profiler -->
+        <div id="group-object-props" class="hidden space-y-3">
+          <div>
+            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Physical Format</label>
+            <select id="form-obj-type" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              <option value="Parquet">Parquet (Snappy/GZIP)</option>
+              <option value="CSV">CSV / Delimited</option>
+              <option value="DICOM">DICOM Radiology Image</option>
+              <option value="Waveform_Dat">Waveform Binary (.dat)</option>
+              <option value="JSON">JSON / Document</option>
+            </select>
+          </div>
+
+          <!-- One-Click PyArrow Local File Auto-Profiler -->
+          <div class="bg-emerald-950/40 border border-emerald-800/80 rounded-lg p-3 space-y-2">
+            <div class="flex items-center space-x-1.5 text-emerald-300 font-semibold text-xs">
+              <i class="fa-solid fa-bolt-lightning text-emerald-400"></i>
+              <span>One-Click PyArrow File Profiler</span>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              Inspects local Parquet/CSV file headers in milliseconds without table scans.
+            </p>
+            <div>
+              <input id="auto-profile-path" type="text" placeholder="e.g. C:\data\icustays.parquet"
+                     class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-white placeholder:text-slate-600">
+            </div>
+            <button onclick="runAutoProfileOnFile()" class="w-full py-1.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition">
+              <i class="fa-solid fa-microchip"></i>
+              <span>Profile & Auto-Fill Indicators</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Edge / Relationship Configuration -->
+        <div id="group-edge-props" class="hidden space-y-3">
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+            <div class="text-[11px] text-slate-400 flex items-center justify-between">
+              <span>Connection Kind:</span>
+              <span id="form-edge-kind" class="font-bold text-sky-400">RelatesTo</span>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Relationship Type</label>
+              <select id="form-edge-type-select" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                <option value="AssemblyOf">AssemblyOf (Parent Composition)</option>
+                <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage Pipeline)</option>
+                <option value="GeneralizationOf">GeneralizationOf (ISA Archetype)</option>
+                <option value="RelatesTo">RelatesTo (Referential / Join Edge)</option>
+              </select>
+            </div>
+            <div id="form-edge-join-group" class="space-y-2 pt-2 border-t border-slate-800">
+              <label class="block text-[10px] uppercase font-semibold text-slate-400">Join Keys / Mapping</label>
+              <input id="form-edge-keys" type="text" placeholder="e.g. hadm_id = hadm_id" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              <label class="block text-[10px] uppercase font-semibold text-slate-400">Cardinality</label>
+              <select id="form-edge-cardinality" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                <option value="1:N">1:N (One to Many)</option>
+                <option value="1:1">1:1 (One to One)</option>
+                <option value="M:N">M:N (Many to Many)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save & Delete Action Buttons -->
+        <div class="pt-3 border-t border-slate-800 flex items-center space-x-2">
+          <button onclick="saveCurrentEntity()" class="flex-1 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow flex items-center justify-center space-x-1.5 transition">
+            <i class="fa-solid fa-check"></i>
+            <span>Save Element</span>
+          </button>
+          <button onclick="deleteCurrentEntity()" class="px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-200 border border-rose-800 text-xs transition" title="Delete from Canvas">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- CONNECTION MODAL DIALOG -->
+  <div id="connection-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-sky-400">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <h3 class="font-bold text-sm text-white">Connect Canvas Entities</h3>
+        </div>
+        <button onclick="closeConnectionModal()" class="text-slate-500 hover:text-slate-300">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+          <span id="modal-src-name" class="font-mono text-sky-300">source_node</span>
+          <i class="fa-solid fa-arrow-right text-slate-500"></i>
+          <span id="modal-tgt-name" class="font-mono text-indigo-300">target_node</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Relationship Kind</label>
+          <select id="modal-edge-kind" onchange="toggleModalRelFields()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-500">
+            <option value="AssemblyOf">AssemblyOf (Parent contains Sub-Dataset)</option>
+            <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage Pipeline)</option>
+            <option value="GeneralizationOf">GeneralizationOf (ISA Hierarchical Archetype)</option>
+            <option value="RelatesTo">RelatesTo (Referential Foreign Key / Join)</option>
+          </select>
+        </div>
+
+        <div id="modal-join-fields" class="space-y-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Join Key Mapping (e.g. hadm_id = hadm_id)</label>
+            <input id="modal-join-key" type="text" value="hadm_id = hadm_id" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Multiplicity / Cardinality</label>
+            <select id="modal-cardinality" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
+              <option value="1:N">1:N (One to Many)</option>
+              <option value="1:1">1:1 (One to One)</option>
+              <option value="M:N">M:N (Many to Many)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end space-x-2">
+        <button onclick="closeConnectionModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
+          Cancel
+        </button>
+        <button onclick="confirmEdgeCreation()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow flex items-center space-x-1.5">
+          <i class="fa-solid fa-plus"></i>
+          <span>Create Relationship</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT MANIFEST MODAL -->
+  <div id="export-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full p-5 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-file-code text-sky-400 text-base"></i>
+          <h3 class="font-bold text-sm text-white">Export DLD & MeDOM Manifest</h3>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="setExportFormat('yaml')" id="tab-yaml" class="px-2.5 py-1 rounded bg-sky-600 text-white text-xs">YAML</button>
+          <button onclick="setExportFormat('json')" id="tab-json" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs">JSON</button>
+          <button onclick="closeExportModal()" class="text-slate-500 hover:text-slate-300 ml-2">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 my-3 overflow-hidden">
+        <textarea id="export-content" readonly class="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-emerald-400 resize-none focus:outline-none custom-scrollbar"></textarea>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+        <span class="text-xs text-slate-400">Compatible with <code class="text-sky-400">quick_register.py</code> & <code class="text-sky-400">DLDManifest</code></span>
+        <div class="flex space-x-2">
+          <button onclick="copyExportToClipboard()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs flex items-center space-x-1">
+            <i class="fa-solid fa-copy"></i>
+            <span>Copy</span>
+          </button>
+          <button onclick="downloadExportFile()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs flex items-center space-x-1.5 shadow">
+            <i class="fa-solid fa-download"></i>
+            <span>Download</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CYTOSCAPE APP LOGIC & ENGINE INTEGRATION -->
+  <script>
+    let cy = null;
+    let interactionMode = 'select';
+    let connectSourceNode = null;
+    let selectedElement = null;
+    let currentExportFormat = 'yaml';
+    let nextIdCounter = 1;
+
+    const defaultStakeholder = {
+      id: "stk_physionet_curator",
+      name: "Lead Data Steward",
+      role: "Chief Medical Data Steward",
+      email: "steward@lakehouse.org",
+      department: "Data Governance Board"
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCytoscape();
+      updateCanvasMetrics();
+    });
+
+    function initCytoscape() {
+      cy = cytoscape({
+        container: document.getElementById('cy'),
+        boxSelectionEnabled: false,
+        autounselectify: false,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(name)',
+              'text-valign': 'bottom',
+              'text-margin-y': 6,
+              'color': '#cbd5e1',
+              'font-size': '11px',
+              'font-family': 'Inter, system-ui, sans-serif',
+              'font-weight': 600,
+              'text-outline-width': 2,
+              'text-outline-color': '#090d16',
+              'transition-property': 'background-color, line-color, target-arrow-color, width, height',
+              'transition-duration': '0.15s'
+            }
+          },
+          {
+            selector: 'node[entityType = "DataSet"][structureType = "Complex"]',
+            style: {
+              'shape': 'round-rectangle',
+              'width': 140,
+              'height': 48,
+              'background-color': '#312e81',
+              'border-width': 2,
+              'border-color': '#818cf8',
+              'border-opacity': 0.9,
+              'background-opacity': 0.85
+            }
+          },
+          {
+            selector: 'node[entityType = "DataSet"][structureType = "Simple"]',
+            style: {
+              'shape': 'round-rectangle',
+              'width': 130,
+              'height': 44,
+              'background-color': '#075985',
+              'border-width': 2,
+              'border-color': '#38bdf8',
+              'border-opacity': 0.9,
+              'background-opacity': 0.85
+            }
+          },
+          {
+            selector: 'node[entityType = "DataSet"][structureType = "Abstract"]',
+            style: {
+              'shape': 'diamond',
+              'width': 110,
+              'height': 48,
+              'background-color': '#581c87',
+              'border-width': 2,
+              'border-color': '#c084fc',
+              'border-opacity': 0.9,
+              'background-opacity': 0.85
+            }
+          },
+          {
+            selector: 'node[entityType = "DataObject"]',
+            style: {
+              'shape': 'round-tag',
+              'width': 120,
+              'height': 38,
+              'background-color': '#064e3b',
+              'border-width': 2,
+              'border-color': '#34d399',
+              'border-opacity': 0.9,
+              'background-opacity': 0.85
+            }
+          },
+          {
+            selector: 'node[entityType = "Stakeholder"]',
+            style: {
+              'shape': 'hexagon',
+              'width': 110,
+              'height': 44,
+              'background-color': '#78350f',
+              'border-width': 2,
+              'border-color': '#fbbf24',
+              'border-opacity': 0.9,
+              'background-opacity': 0.85
+            }
+          },
+          {
+            selector: 'node:selected',
+            style: {
+              'border-color': '#ffffff',
+              'border-width': 3,
+              'shadow-blur': 15,
+              'shadow-color': '#38bdf8',
+              'shadow-opacity': 0.8
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'bezier',
+              'font-size': '9px',
+              'font-family': 'Inter, system-ui, sans-serif',
+              'color': '#94a3b8',
+              'text-background-color': '#090d16',
+              'text-background-opacity': 0.85,
+              'text-background-padding': 3,
+              'text-background-shape': 'roundrectangle',
+              'text-border-color': '#334155',
+              'text-border-width': 1,
+              'text-border-opacity': 0.8,
+              'arrow-scale': 1.1
+            }
+          },
+          {
+            selector: 'edge[kind = "AssemblyOf"]',
+            style: {
+              'line-color': '#64748b',
+              'line-style': 'solid',
+              'width': 2.5,
+              'target-arrow-shape': 'square',
+              'target-arrow-color': '#64748b',
+              'label': 'AssemblyOf'
+            }
+          },
+          {
+            selector: 'edge[kind = "ProcessedFrom"]',
+            style: {
+              'line-color': '#10b981',
+              'line-style': 'dashed',
+              'line-dash-pattern': [6, 3],
+              'width': 2.5,
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#10b981',
+              'label': 'ProcessedFrom'
+            }
+          },
+          {
+            selector: 'edge[kind = "GeneralizationOf"]',
+            style: {
+              'line-color': '#c084fc',
+              'line-style': 'solid',
+              'width': 2.5,
+              'target-arrow-shape': 'vee',
+              'target-arrow-color': '#c084fc',
+              'label': 'ISA'
+            }
+          },
+          {
+            selector: 'edge[kind = "RelatesTo"]',
+            style: {
+              'line-color': '#38bdf8',
+              'line-style': 'dotted',
+              'width': 2.5,
+              'target-arrow-shape': 'circle',
+              'target-arrow-color': '#38bdf8',
+              'label': 'data(label)'
+            }
+          },
+          {
+            selector: 'edge[kind = "InteractsWith"]',
+            style: {
+              'line-color': '#f59e0b',
+              'line-style': 'dashed',
+              'line-dash-pattern': [3, 3],
+              'width': 1.5,
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#f59e0b',
+              'label': 'Governance'
+            }
+          },
+          {
+            selector: 'edge:selected',
+            style: {
+              'line-color': '#ffffff',
+              'target-arrow-color': '#ffffff',
+              'width': 3.5
+            }
+          }
+        ]
+      });
+
+      cy.on('tap', 'node', (evt) => {
+        const node = evt.target;
+        if (interactionMode === 'connect') {
+          handleConnectNodeClick(node);
+        } else {
+          inspectNode(node);
+        }
+      });
+
+      cy.on('tap', 'edge', (evt) => {
+        if (interactionMode !== 'connect') {
+          inspectEdge(evt.target);
+        }
+      });
+
+      cy.on('tap', (evt) => {
+        if (evt.target === cy) {
+          clearSelection();
+        }
+      });
+    }
+
+    function handleDragStart(e, entityType, subType) {
+      e.dataTransfer.setData('application/json', JSON.stringify({ entityType, subType }));
+      e.dataTransfer.effectAllowed = 'copy';
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+
+    function handleCanvasDrop(e) {
+      e.preventDefault();
+      const rawData = e.dataTransfer.getData('application/json');
+      if (!rawData) return;
+      const data = JSON.parse(rawData);
+
+      const cyContainer = document.getElementById('cy');
+      const rect = cyContainer.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+
+      const pan = cy.pan();
+      const zoom = cy.zoom();
+      const modelPos = {
+        x: (clientX - pan.x) / zoom,
+        y: (clientY - pan.y) / zoom
+      };
+
+      createEntityAtPosition(data.entityType, data.subType, modelPos);
+    }
+
+    function createEntityAtPosition(entityType, subType, pos) {
+      const idNum = nextIdCounter++;
+      let newNodeData = {};
+
+      if (entityType === 'DataSet') {
+        const dsId = `ds_entity_${idNum}`;
+        newNodeData = {
+          id: dsId,
+          name: `New DataSet ${idNum}`,
+          entityType: 'DataSet',
+          structureType: subType || 'Simple',
+          lifecycleStage: 'Processed',
+          description: `User-defined ${subType} dataset created on canvas.`,
+          tags: ['canvas_created'],
+          interacts_with: [defaultStakeholder.id],
+          volume_records: 100000,
+          volume_bytes: 10485760,
+          veracity_completeness: 0.98,
+          vulnerability_tier: 'Confidential_HIPAA',
+          variety_format: 'Parquet',
+          variety_cols: 12,
+          value_criticality: 'High'
+        };
+      } else if (entityType === 'DataObject') {
+        const objId = `obj_table_${idNum}`;
+        newNodeData = {
+          id: objId,
+          name: `table_${idNum}.parquet`,
+          entityType: 'DataObject',
+          physicalType: 'Parquet',
+          description: `Physical data file`,
+          volume_records: 50000,
+          volume_bytes: 5242880,
+          variety_cols: 8,
+          variety_format: 'Parquet'
+        };
+      } else if (entityType === 'Stakeholder') {
+        const stkId = `stk_steward_${idNum}`;
+        newNodeData = {
+          id: stkId,
+          name: `Steward ${idNum}`,
+          entityType: 'Stakeholder',
+          role: 'Data Governance Steward',
+          email: `steward_${idNum}@lakehouse.org`,
+          department: 'Data Operations'
+        };
+      }
+
+      const node = cy.add({
+        group: 'nodes',
+        data: newNodeData,
+        position: pos
+      });
+
+      updateCanvasMetrics();
+      showToast(`Added ${entityType} '${newNodeData.name}'`, 'success');
+      inspectNode(node);
+    }
+
+    function setInteractionMode(mode) {
+      interactionMode = mode;
+      connectSourceNode = null;
+
+      const selBtn = document.getElementById('mode-select-btn');
+      const connBtn = document.getElementById('mode-connect-btn');
+      const tip = document.getElementById('connect-mode-tip');
+
+      if (mode === 'select') {
+        selBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
+        connBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white";
+        tip.classList.add('hidden');
+        cy.elements().removeClass('connect-active');
+      } else {
+        connBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
+        selBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white";
+        tip.classList.remove('hidden');
+      }
+    }
+
+    function handleConnectNodeClick(node) {
+      if (!connectSourceNode) {
+        connectSourceNode = node;
+        node.addClass('connect-active');
+        showToast(`Selected source '${node.data('name')}'. Now click target node.`, 'info');
+      } else {
+        if (connectSourceNode.id() === node.id()) {
+          showToast('Cannot connect a node to itself', 'warning');
+          return;
+        }
+        const source = connectSourceNode;
+        const target = node;
+        connectSourceNode.removeClass('connect-active');
+        connectSourceNode = null;
+
+        openEdgeModal(source, target);
+      }
+    }
+
+    let pendingEdgeSource = null;
+    let pendingEdgeTarget = null;
+
+    function openEdgeModal(source, target) {
+      pendingEdgeSource = source;
+      pendingEdgeTarget = target;
+
+      document.getElementById('modal-src-name').innerText = source.data('name') || source.id();
+      document.getElementById('modal-tgt-name').innerText = target.data('name') || target.id();
+
+      const defaultType = document.getElementById('default-edge-type').value;
+      document.getElementById('modal-edge-kind').value = defaultType;
+      toggleModalRelFields();
+
+      document.getElementById('connection-modal').classList.remove('hidden');
+    }
+
+    function closeConnectionModal() {
+      document.getElementById('connection-modal').classList.add('hidden');
+      pendingEdgeSource = null;
+      pendingEdgeTarget = null;
+    }
+
+    function toggleModalRelFields() {
+      const kind = document.getElementById('modal-edge-kind').value;
+      const joinFields = document.getElementById('modal-join-fields');
+      if (kind === 'RelatesTo') {
+        joinFields.classList.remove('hidden');
+      } else {
+        joinFields.classList.add('hidden');
+      }
+    }
+
+    function confirmEdgeCreation() {
+      if (!pendingEdgeSource || !pendingEdgeTarget) return;
+
+      const kind = document.getElementById('modal-edge-kind').value;
+      const joinKey = document.getElementById('modal-join-key').value;
+      const cardinality = document.getElementById('modal-cardinality').value;
+
+      let edgeData = {
+        id: `rel_${pendingEdgeSource.id()}_to_${pendingEdgeTarget.id()}_${Date.now()}`,
+        source: pendingEdgeSource.id(),
+        target: pendingEdgeTarget.id(),
+        kind: kind,
+        label: kind === 'RelatesTo' ? `${joinKey}` : kind
+      };
+
+      if (kind === 'RelatesTo') {
+        edgeData.join_key = joinKey;
+        edgeData.cardinality = cardinality;
+      }
+
+      cy.add({ group: 'edges', data: edgeData });
+      closeConnectionModal();
+      updateCanvasMetrics();
+      showToast(`Linked ${pendingEdgeSource.data('name')} ➔ ${pendingEdgeTarget.data('name')} (${kind})`, 'success');
+    }
+
+    function inspectNode(node) {
+      selectedElement = node;
+      cy.elements().unselect();
+      node.select();
+
+      document.getElementById('inspector-empty').classList.add('hidden');
+      document.getElementById('inspector-form').classList.remove('hidden');
+
+      const data = node.data();
+      const entityType = data.entityType || 'DataSet';
+
+      document.getElementById('inspector-title').innerText = `${entityType} Inspector`;
+      document.getElementById('form-entity-type').innerText = entityType;
+      document.getElementById('form-entity-id').innerText = data.id;
+      document.getElementById('form-name').value = data.name || data.id;
+      document.getElementById('form-desc').value = data.description || '';
+
+      const badge = document.getElementById('inspector-badge');
+      const dsProps = document.getElementById('group-dataset-props');
+      const objProps = document.getElementById('group-object-props');
+      const edgeProps = document.getElementById('group-edge-props');
+
+      edgeProps.classList.add('hidden');
+
+      if (entityType === 'DataSet') {
+        badge.className = "w-3 h-3 rounded-full bg-sky-500 shadow-lg shadow-sky-500/50";
+        dsProps.classList.remove('hidden');
+        objProps.classList.add('hidden');
+
+        document.getElementById('form-structure-type').value = data.structureType || 'Simple';
+        document.getElementById('form-lifecycle-stage').value = data.lifecycleStage || 'Processed';
+
+        document.getElementById('form-volume-rows').value = data.volume_records || 0;
+        document.getElementById('form-volume-bytes').value = data.volume_bytes || 0;
+        document.getElementById('form-veracity-completeness').value = data.veracity_completeness || 1.0;
+        document.getElementById('form-vulnerability-class').value = data.vulnerability_tier || 'Confidential_HIPAA';
+        document.getElementById('form-variety-cols').value = data.variety_cols || 0;
+        document.getElementById('form-variety-format').value = data.variety_format || 'Parquet';
+        document.getElementById('form-value-criticality').value = data.value_criticality || 'High';
+
+      } else if (entityType === 'DataObject') {
+        badge.className = "w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50";
+        dsProps.classList.add('hidden');
+        objProps.classList.remove('hidden');
+
+        document.getElementById('form-obj-type').value = data.physicalType || 'Parquet';
+        document.getElementById('auto-profile-path').value = data.file_path || '';
+
+      } else if (entityType === 'Stakeholder') {
+        badge.className = "w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50";
+        dsProps.classList.add('hidden');
+        objProps.classList.add('hidden');
+      }
+    }
+
+    function inspectEdge(edge) {
+      selectedElement = edge;
+      cy.elements().unselect();
+      edge.select();
+
+      document.getElementById('inspector-empty').classList.add('hidden');
+      document.getElementById('inspector-form').classList.remove('hidden');
+
+      document.getElementById('inspector-badge').className = "w-3 h-3 rounded-full bg-indigo-500";
+      document.getElementById('inspector-title').innerText = "Edge Inspector";
+      document.getElementById('form-entity-type').innerText = "Relationship";
+      document.getElementById('form-entity-id').innerText = edge.id();
+      document.getElementById('form-name').value = edge.data('label') || edge.data('kind');
+      document.getElementById('form-desc-group').classList.add('hidden');
+
+      document.getElementById('group-dataset-props').classList.add('hidden');
+      document.getElementById('group-object-props').classList.add('hidden');
+      document.getElementById('group-edge-props').classList.remove('hidden');
+
+      document.getElementById('form-edge-kind').innerText = edge.data('kind');
+      document.getElementById('form-edge-type-select').value = edge.data('kind');
+      document.getElementById('form-edge-keys').value = edge.data('join_key') || '';
+      document.getElementById('form-edge-cardinality').value = edge.data('cardinality') || '1:N';
+    }
+
+    function clearSelection() {
+      selectedElement = null;
+      cy.elements().unselect();
+      document.getElementById('inspector-empty').classList.remove('hidden');
+      document.getElementById('inspector-form').classList.add('hidden');
+    }
+
+    function saveCurrentEntity() {
+      if (!selectedElement) return;
+
+      const name = document.getElementById('form-name').value;
+      selectedElement.data('name', name);
+
+      if (selectedElement.isNode()) {
+        const entityType = selectedElement.data('entityType');
+        selectedElement.data('description', document.getElementById('form-desc').value);
+
+        if (entityType === 'DataSet') {
+          selectedElement.data('structureType', document.getElementById('form-structure-type').value);
+          selectedElement.data('lifecycleStage', document.getElementById('form-lifecycle-stage').value);
+
+          selectedElement.data('volume_records', parseInt(document.getElementById('form-volume-rows').value) || 0);
+          selectedElement.data('volume_bytes', parseInt(document.getElementById('form-volume-bytes').value) || 0);
+          selectedElement.data('veracity_completeness', parseFloat(document.getElementById('form-veracity-completeness').value) || 1.0);
+          selectedElement.data('vulnerability_tier', document.getElementById('form-vulnerability-class').value);
+          selectedElement.data('variety_cols', parseInt(document.getElementById('form-variety-cols').value) || 0);
+          selectedElement.data('variety_format', document.getElementById('form-variety-format').value);
+          selectedElement.data('value_criticality', document.getElementById('form-value-criticality').value);
+        } else if (entityType === 'DataObject') {
+          selectedElement.data('physicalType', document.getElementById('form-obj-type').value);
+          selectedElement.data('file_path', document.getElementById('auto-profile-path').value);
+        }
+      } else if (selectedElement.isEdge()) {
+        const kind = document.getElementById('form-edge-type-select').value;
+        const joinKey = document.getElementById('form-edge-keys').value;
+        const cardinality = document.getElementById('form-edge-cardinality').value;
+
+        selectedElement.data('kind', kind);
+        selectedElement.data('join_key', joinKey);
+        selectedElement.data('cardinality', cardinality);
+        selectedElement.data('label', kind === 'RelatesTo' ? joinKey : kind);
+      }
+
+      showToast('Saved attributes to entity', 'success');
+      updateCanvasMetrics();
+    }
+
+    function deleteCurrentEntity() {
+      if (!selectedElement) return;
+      const name = selectedElement.data('name') || selectedElement.id();
+      cy.remove(selectedElement);
+      clearSelection();
+      updateCanvasMetrics();
+      showToast(`Removed '${name}' from canvas`, 'info');
+    }
+
+    async function runAutoProfileOnFile() {
+      const path = document.getElementById('auto-profile-path').value.trim();
+      if (!path) {
+        showToast('Please enter a valid file path', 'warning');
+        return;
+      }
+
+      showToast('Inspecting file metadata via PyArrow...', 'info');
+      try {
+        const response = await fetch('/pilot/profile-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filepath: path })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Profiling failed');
+        }
+
+        const data = await response.json();
+        const stats = data.stats;
+
+        if (selectedElement && selectedElement.isNode()) {
+          selectedElement.data('volume_bytes', stats.byte_size || 0);
+          selectedElement.data('volume_records', stats.record_count || 0);
+          selectedElement.data('variety_cols', stats.column_count || 0);
+          selectedElement.data('variety_format', stats.file_format || 'Parquet');
+          selectedElement.data('name', path.split(/[\/\\]/).pop());
+          inspectNode(selectedElement);
+        }
+
+        showToast(`Auto-profiled: ${stats.record_count || 0} rows, ${(stats.byte_size / (1024*1024)).toFixed(2)} MB`, 'success');
+      } catch (err) {
+        showToast(`Profiling error: ${err.message}`, 'error');
+      }
+    }
+
+    async function loadMimicDemo() {
+      showToast('Loading MIMIC Multimodal Lakehouse manifest...', 'info');
+      try {
+        const res = await fetch('/pilot/sample/mimic');
+        if (!res.ok) throw new Error('Failed to fetch MIMIC sample manifest');
+        const manifest = await res.json();
+
+        cy.elements().remove();
+
+        (manifest.stakeholders || []).forEach(stk => {
+          cy.add({
+            group: 'nodes',
+            data: {
+              id: stk.id,
+              name: stk.name,
+              entityType: 'Stakeholder',
+              role: stk.role,
+              email: stk.email,
+              department: stk.department
+            }
+          });
+        });
+
+        (manifest.datasets || []).forEach(ds => {
+          cy.add({
+            group: 'nodes',
+            data: {
+              id: ds.id,
+              name: ds.name,
+              entityType: 'DataSet',
+              structureType: ds.structure_type,
+              lifecycleStage: ds.lifecycle_stage,
+              description: ds.description || '',
+              tags: ds.tags || [],
+              interacts_with: ds.interacts_with || [],
+              volume_records: 1000000,
+              volume_bytes: 1073741824,
+              veracity_completeness: 0.99,
+              vulnerability_tier: 'Confidential_HIPAA',
+              variety_format: 'Parquet',
+              variety_cols: 25,
+              value_criticality: ds.structure_type === 'Complex' ? 'Critical' : 'High'
+            }
+          });
+
+          (ds.data_objects || []).forEach(obj => {
+            cy.add({
+              group: 'nodes',
+              data: {
+                id: obj.id,
+                name: obj.name,
+                entityType: 'DataObject',
+                physicalType: obj.physical_type,
+                dataset_id: ds.id,
+                volume_bytes: 104857600
+              }
+            });
+
+            cy.add({
+              group: 'edges',
+              data: {
+                id: `obj_rel_${ds.id}_${obj.id}`,
+                source: ds.id,
+                target: obj.id,
+                kind: 'AssemblyOf',
+                label: 'Contains'
+              }
+            });
+          });
+
+          (ds.assembly_children || []).forEach(childId => {
+            cy.add({
+              group: 'edges',
+              data: {
+                id: `asm_${ds.id}_${childId}`,
+                source: ds.id,
+                target: childId,
+                kind: 'AssemblyOf',
+                label: 'AssemblyOf'
+              }
+            });
+          });
+
+          (ds.generalization_children || []).forEach(genId => {
+            cy.add({
+              group: 'edges',
+              data: {
+                id: `gen_${ds.id}_${genId}`,
+                source: ds.id,
+                target: genId,
+                kind: 'GeneralizationOf',
+                label: 'ISA'
+              }
+            });
+          });
+
+          (ds.processed_from || []).forEach(parentId => {
+            cy.add({
+              group: 'edges',
+              data: {
+                id: `proc_${parentId}_${ds.id}`,
+                source: parentId,
+                target: ds.id,
+                kind: 'ProcessedFrom',
+                label: 'ProcessedFrom'
+              }
+            });
+          });
+        });
+
+        (manifest.relationships || []).forEach((rel, idx) => {
+          const keys = rel.attributes && rel.attributes.join_keys ? rel.attributes.join_keys.join(', ') : 'Join';
+          cy.add({
+            group: 'edges',
+            data: {
+              id: `rel_${rel.source_dataset_id}_${rel.target_dataset_id}_${idx}`,
+              source: rel.source_dataset_id,
+              target: rel.target_dataset_id,
+              kind: 'RelatesTo',
+              label: `${keys}`
+            }
+          });
+        });
+
+        runAutoLayout();
+        updateCanvasMetrics();
+        showToast('MIMIC Lakehouse Loaded (15 DataSets, Multi-modal Links)', 'success');
+      } catch (err) {
+        showToast(`Failed to load demo: ${err.message}`, 'error');
+      }
+    }
+
+    function runAutoLayout() {
+      if (!cy || cy.nodes().length === 0) return;
+      try {
+        const layout = cy.layout({
+          name: 'dagre',
+          rankDir: 'TB',
+          nodeSep: 60,
+          rankSep: 80,
+          edgeSep: 30,
+          animate: true,
+          animationDuration: 400
+        });
+        layout.run();
+      } catch (e) {
+        const fallback = cy.layout({
+          name: 'breadthfirst',
+          directed: true,
+          padding: 30,
+          animate: true
+        });
+        fallback.run();
+      }
+    }
+
+    function zoomIn() { cy.zoom(cy.zoom() * 1.2); }
+    function zoomOut() { cy.zoom(cy.zoom() / 1.2); }
+    function fitView() { cy.fit(null, 40); }
+
+    async function validateCanvasStageA() {
+      const manifest = compileCanvasManifest();
+      if (manifest.datasets.length === 0) {
+        showToast('Canvas is empty. Add datasets first or Load Demo.', 'warning');
+        return;
+      }
+
+      showToast('Running Stage A DAG topological & cycle validation...', 'info');
+
+      try {
+        const res = await fetch('/pilot/canvas/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(manifest)
+        });
+
+        const data = await res.json();
+        if (data.valid) {
+          showToast(`Stage A PASSED: ${data.status}`, 'success');
+        } else {
+          showToast(`Stage A Cycle/Topology Alert: ${data.status}`, 'error');
+        }
+      } catch (err) {
+        showToast(`Validation request failed: ${err.message}`, 'error');
+      }
+    }
+
+    async function commitCanvasToCatalog() {
+      const manifest = compileCanvasManifest();
+      if (manifest.datasets.length === 0) {
+        showToast('Canvas is empty. Cannot commit empty catalog.', 'warning');
+        return;
+      }
+
+      showToast('Executing Stage C: Flattening and Registering catalog...', 'info');
+
+      try {
+        const res = await fetch('/pilot/canvas/commit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(manifest)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Catalog commit failed');
+        }
+
+        const data = await res.json();
+        showToast(`Stage C SUCCESS: Catalog Persisted! (${manifest.datasets.length} DataSets)`, 'success');
+      } catch (err) {
+        showToast(`Commit failed: ${err.message}`, 'error');
+      }
+    }
+
+    function compileCanvasManifest() {
+      const datasets = [];
+      const stakeholders = [defaultStakeholder];
+      const relationships = [];
+
+      cy.nodes('[entityType = "Stakeholder"]').forEach(n => {
+        const d = n.data();
+        if (d.id !== defaultStakeholder.id) {
+          stakeholders.push({
+            id: d.id,
+            name: d.name,
+            role: d.role || 'Steward',
+            email: d.email || `${d.id}@org.com`,
+            department: d.department || 'Data'
+          });
+        }
+      });
+
+      cy.nodes('[entityType = "DataSet"]').forEach(n => {
+        const d = n.data();
+        const dsId = d.id;
+
+        const assemblyChildren = [];
+        cy.edges(`[source = "${dsId}"][kind = "AssemblyOf"]`).forEach(e => {
+          const tgt = cy.getElementById(e.data('target'));
+          if (tgt.data('entityType') === 'DataSet') {
+            assemblyChildren.push(tgt.id());
+          }
+        });
+
+        const genChildren = [];
+        cy.edges(`[source = "${dsId}"][kind = "GeneralizationOf"]`).forEach(e => {
+          const tgt = cy.getElementById(e.data('target'));
+          if (tgt.data('entityType') === 'DataSet') {
+            genChildren.push(tgt.id());
+          }
+        });
+
+        const processedFrom = [];
+        cy.edges(`[target = "${dsId}"][kind = "ProcessedFrom"]`).forEach(e => {
+          const src = cy.getElementById(e.data('source'));
+          if (src.data('entityType') === 'DataSet') {
+            processedFrom.push(src.id());
+          }
+        });
+
+        const dataObjects = [];
+        cy.edges(`[source = "${dsId}"][kind = "AssemblyOf"]`).forEach(e => {
+          const tgt = cy.getElementById(e.data('target'));
+          if (tgt.data('entityType') === 'DataObject') {
+            dataObjects.push({
+              id: tgt.id(),
+              name: tgt.data('name'),
+              physical_type: tgt.data('physicalType') || 'Parquet'
+            });
+          }
+        });
+
+        datasets.push({
+          id: dsId,
+          name: d.name || dsId,
+          structure_type: d.structureType || 'Simple',
+          lifecycle_stage: d.lifecycleStage || 'Processed',
+          description: d.description || '',
+          tags: d.tags || ['lakehouse'],
+          interacts_with: d.interacts_with && d.interacts_with.length > 0 ? d.interacts_with : [defaultStakeholder.id],
+          assembly_children: assemblyChildren,
+          generalization_children: genChildren,
+          processed_from: processedFrom,
+          data_objects: dataObjects
+        });
+      });
+
+      cy.edges('[kind = "RelatesTo"]').forEach(e => {
+        relationships.push({
+          relationship_type: 'Referential',
+          source_dataset_id: e.data('source'),
+          target_dataset_id: e.data('target'),
+          attributes: {
+            join_keys: [e.data('join_key') || 'hadm_id'],
+            cardinality: e.data('cardinality') || '1:N'
+          }
+        });
+      });
+
+      return {
+        stakeholders: stakeholders,
+        datasets: datasets,
+        relationships: relationships
+      };
+    }
+
+    function openExportModal() {
+      const manifest = compileCanvasManifest();
+      const contentArea = document.getElementById('export-content');
+
+      if (currentExportFormat === 'yaml') {
+        contentArea.value = jsyaml.dump(manifest);
+      } else {
+        contentArea.value = JSON.stringify(manifest, null, 2);
+      }
+
+      document.getElementById('export-modal').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('export-modal').classList.add('hidden');
+    }
+
+    function setExportFormat(fmt) {
+      currentExportFormat = fmt;
+      const yamlBtn = document.getElementById('tab-yaml');
+      const jsonBtn = document.getElementById('tab-json');
+
+      if (fmt === 'yaml') {
+        yamlBtn.className = "px-2.5 py-1 rounded bg-sky-600 text-white text-xs";
+        jsonBtn.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs";
+      } else {
+        jsonBtn.className = "px-2.5 py-1 rounded bg-sky-600 text-white text-xs";
+        yamlBtn.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs";
+      }
+
+      openExportModal();
+    }
+
+    function copyExportToClipboard() {
+      const text = document.getElementById('export-content').value;
+      navigator.clipboard.writeText(text);
+      showToast('Copied manifest to clipboard!', 'success');
+    }
+
+    function downloadExportFile() {
+      const text = document.getElementById('export-content').value;
+      const ext = currentExportFormat === 'yaml' ? 'yaml' : 'json';
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dld_manifest_${Date.now()}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function updateCanvasMetrics() {
+      if (!cy) return;
+      document.getElementById('metric-datasets').innerText = cy.nodes('[entityType = "DataSet"]').length;
+      document.getElementById('metric-objects').innerText = cy.nodes('[entityType = "DataObject"]').length;
+      document.getElementById('metric-edges').innerText = cy.edges().length;
+      document.getElementById('metric-stakeholders').innerText = cy.nodes('[entityType = "Stakeholder"]').length;
+    }
+
+    function clearCanvasPrompt() {
+      if (confirm('Are you sure you want to clear the canvas? All unsaved nodes will be removed.')) {
+        cy.elements().remove();
+        clearSelection();
+        updateCanvasMetrics();
+        showToast('Canvas cleared', 'info');
+      }
+    }
+
+    function showToast(msg, type = 'info') {
+      const banner = document.getElementById('toast-banner');
+      const icon = document.getElementById('toast-icon');
+      const label = document.getElementById('toast-msg');
+
+      label.innerText = msg;
+      banner.className = "absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium shadow-xl border flex items-center space-x-2 transition-all duration-300 ";
+
+      if (type === 'success') {
+        banner.classList.add('bg-emerald-950/90', 'border-emerald-600', 'text-emerald-200');
+        icon.className = "fa-solid fa-circle-check text-emerald-400";
+      } else if (type === 'error') {
+        banner.classList.add('bg-rose-950/90', 'border-rose-600', 'text-rose-200');
+        icon.className = "fa-solid fa-triangle-exclamation text-rose-400";
+      } else if (type === 'warning') {
+        banner.classList.add('bg-amber-950/90', 'border-amber-600', 'text-amber-200');
+        icon.className = "fa-solid fa-circle-exclamation text-amber-400";
+      } else {
+        banner.classList.add('bg-sky-950/90', 'border-sky-600', 'text-sky-200');
+        icon.className = "fa-solid fa-circle-info text-sky-400";
+      }
+
+      banner.classList.remove('hidden');
+      setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

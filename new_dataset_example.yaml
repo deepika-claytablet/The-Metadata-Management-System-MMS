@@ -1,0 +1,44 @@
+# =====================================================================
+# MeDOM & DLD Declarative Dataset Manifest
+# Drop this file into git or run: python quick_register.py --manifest new_dataset_example.yaml
+# =====================================================================
+
+stakeholders:
+  - id: "stk_marketing"
+    name: "Sarah Marketing Lead"
+    role: "Data Analyst"
+    email: "sarah@company.com"
+
+dataset:
+  id: "ds_customer_churn"
+  name: "Customer Churn Prediction Dataset"
+  structure_type: "Simple"       # Simple, Complex, Abstract
+  lifecycle_stage: "Raw"         # Raw or Processed
+  tags:
+    - "crm"
+    - "churn"
+    - "ml_features"
+  interacts_with:
+    - "stk_marketing"
+
+# Physical storage artifact (Auto-profiled by Step 3 Extraction Helpers!)
+data_objects:
+  - id: "obj_churn_file"
+    name: "churn_features.csv"
+    physical_type: "CSV"
+    storage_path: "H:/Papers/Metadata Tool/sample_data/raw_sensors.csv"
+
+# Governance & Technical Indicators (TV-Words)
+indicators:
+  velocity:
+    expected_refresh_interval_sec: 86400  # 1 day TTL
+    ingestion_mode: "Batch Daily"
+  veracity:
+    source_origin: "CRM Production Database (PostgreSQL)"
+    quality_score: 0.98
+  vulnerability:
+    classification: "Confidential"
+    access_control_policy: "Policy: Restricted to ML Engineering & Retention Team"
+    authorized_roles:
+      - "data_scientist"
+      - "retention_lead"
