@@ -39,6 +39,12 @@ class BusinessCriticality(str, Enum):
     TIER_3 = "Tier-3 (Analytical / Low)"
 
 
+class CandidateStatus(str, Enum):
+    SUGGESTED = "Suggested"
+    CONFIRMED = "Confirmed"
+    REJECTED = "Rejected"
+
+
 # =====================================================================
 # Step 1: Core DLD Entities
 # =====================================================================
@@ -108,6 +114,9 @@ class DatasetRelationshipInput(BaseModel):
     source_dataset_id: str
     target_dataset_id: str
     attributes: Dict[str, Any] = Field(default_factory=dict)
+    status: CandidateStatus = Field(default=CandidateStatus.CONFIRMED, description="Suggested candidate or Confirmed edge")
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0, description="Inference confidence score")
+    provenance: Optional[str] = Field(default="manual", description="Heuristic or source of relationship")
 
 
 class DLDManifest(BaseModel):

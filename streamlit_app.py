@@ -79,6 +79,36 @@ if "Metadata Engineer" in persona:
     # STAGE A: Visual Hierarchy & Relationship Linker
     # -----------------------------------------------------------------
     with tab_stage_a:
+        with st.expander("⚡ Automated In-Place Cold Scan (Zero Data Movement)", expanded=False):
+            st.markdown(
+                "Perform in-place metadata discovery across storage partitions. The engine extracts schemas and indicators "
+                "from **Parquet footers** (~4-32 KB) or **MySQL `INFORMATION_SCHEMA` catalogs** without downloading or scanning payload data."
+            )
+            col_s1, col_s2 = st.columns([2, 1])
+            src_type = col_s1.selectbox(
+                "Storage / Catalog Source Type",
+                ["Local / Network Parquet Directory", "MySQL Database (INFORMATION_SCHEMA)"],
+                key="cold_scan_src_type"
+            )
+            root_assembly = col_s2.text_input("Root Assembly Name", value="Clinical Health Lakehouse", key="scan_root_asm")
+
+            if "Parquet" in src_type:
+                scan_dir = st.text_input("Directory Path / URI", value="H:\\Papers\\Metadata Tool", key="scan_pq_dir")
+                if st.button("🚀 Run In-Place Parquet Scan", key="btn_scan_pq"):
+                    from ColdScanEngine import ParquetColdScanner, CandidateGraphBuilder
+                    scanner = ParquetColdScanner(root_dir=scan_dir)
+                    scan_res = scanner.scan()
+                    builder = CandidateGraphBuilder()
+                    cand = builder.build_candidate_graph(scan_res["datasets"], root_assembly_name=root_assembly)
+                    st.success(f"Scan Complete: Discovered {len(cand['manifest']['datasets'])} DataSets, {cand['summary']['suggested_relationships']} Suggested Joins!")
+                    st.json(cand["summary"])
+            else:
+                mc1, mc2, mc3 = st.columns(3)
+                m_host = mc1.text_input("Host", value="localhost", key="m_h")
+                m_port = mc2.number_input("Port", value=3306, key="m_p")
+                m_db = mc3.text_input("Database Name", value="mimic_clinical", key="m_db")
+                st.caption("Zero table row scans: Reads schema, row counts, and foreign keys directly from system catalogs.")
+
         st.subheader("Visual Hierarchy: MIMIC-IV Multimodal Assembly Tree")
         col_tree, col_linker = st.columns([3, 2])
 

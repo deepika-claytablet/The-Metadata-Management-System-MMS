@@ -25,6 +25,7 @@ from MetadataServices import (
 )
 from ExtractionHelpers import profile_parquet_file, profile_csv_file, profile_os_file
 from mimic_case_study import get_mimic_dld_manifest
+from ColdScanEngine import ParquetColdScanner, MySQLColdScanner, CandidateGraphBuilder
 
 app = FastAPI(
     title="MeDOM & DLD Metadata Management Service",
@@ -73,6 +74,27 @@ class BindVulnerabilityRequest(BaseModel):
 class ProfileFileRequest(BaseModel):
     filepath: str
     physical_type: Optional[str] = None
+
+
+class ColdScanParquetRequest(BaseModel):
+    directory_path: str
+    root_assembly_name: Optional[str] = None
+
+
+class ColdScanMySQLRequest(BaseModel):
+    host: str = "localhost"
+    port: int = 3306
+    user: str = "root"
+    password: str = ""
+    database: str
+    mock_schema: Optional[Dict[str, Any]] = None
+    root_assembly_name: Optional[str] = None
+
+
+class ConfirmEdgeRequest(BaseModel):
+    source_dataset_id: str
+    target_dataset_id: str
+    action: str = "confirm"  # "confirm" or "reject"
 
 
 # =====================================================================
@@ -406,4 +428,80 @@ def commit_canvas_to_catalog(manifest: DLDManifest) -> Dict[str, Any]:
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Commit failed: {str(e)}")
+
+
+# =====================================================================
+# Automated Cold-Scan Discovery Endpoints (Stage A Automation)
+# =====================================================================
+
+@app.post("/pilot/cold-scan/parquet", tags=["Automated Cold Scan"])
+def cold_scan_parquet_endpoint(req: ColdScanParquetRequest) -> Dict[str, Any]:
+    """
+    Executes an automated, in-place cold scan over a Parquet directory.
+    Reads only metadata footers via PyArrow, infers Simple Datasets and Assembly containment,
+    and runs heuristic relationship discovery to output a Candidate DLD Graph.
+    """
+    if not os.path.exists(req.directory_path):
+        raise HTTPException(status_code=404, detail=f"Directory or file not found: {req.directory_path}")
+
+    try:
+        scanner = ParquetColdScanner(root_dir=req.directory_path)
+        scan_res = scanner.scan()
+        builder = CandidateGraphBuilder()
+        candidate_graph = builder.build_candidate_graph(
+            datasets=scan_res["datasets"],
+            root_assembly_name=req.root_assembly_name,
+        )
+        return candidate_graph
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Parquet cold scan failed: {str(e)}")
+
+
+@app.post("/pilot/cold-scan/mysql", tags=["Automated Cold Scan"])
+def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
+    """
+    Executes an automated cold scan over a MySQL database schema via INFORMATION_SCHEMA.
+    Extracts table volumes, column varieties, and 100% confidence foreign key joins
+    with zero table payload scans.
+    """
+    try:
+        scanner = MySQLColdScanner(
+            host=req.host,
+            port=req.port,
+            user=req.user,
+            password=req.password,
+            database=req.database,
+            mock_schema=req.mock_schema,
+        )
+        scan_res = scanner.scan()
+        builder = CandidateGraphBuilder()
+        candidate_graph = builder.build_candidate_graph(
+            datasets=scan_res["datasets"],
+            explicit_relationships=scan_res.get("relationships", []),
+            root_assembly_name=req.root_assembly_name,
+        )
+        return candidate_graph
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"MySQL cold scan failed: {str(e)}")
+
+
+@app.post("/pilot/candidate/confirm-edge", tags=["Automated Cold Scan"])
+def confirm_candidate_edge(req: ConfirmEdgeRequest) -> Dict[str, Any]:
+    """
+    1-Click human-in-the-loop action to confirm or reject a suggested candidate relationship.
+    """
+    action = req.action.lower()
+    if action not in ["confirm", "reject", "approve", "dismiss"]:
+        raise HTTPException(status_code=400, detail="Action must be 'confirm'/'approve' or 'reject'/'dismiss'")
+
+    status_str = "Confirmed" if action in ["confirm", "approve"] else "Rejected"
+    return {
+        "status": "success",
+        "action": action,
+        "relationship": {
+            "source_dataset_id": req.source_dataset_id,
+            "target_dataset_id": req.target_dataset_id,
+            "status": status_str,
+        },
+    }
 
