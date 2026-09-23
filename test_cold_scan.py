@@ -192,3 +192,61 @@ def test_fastapi_cold_scan_endpoints(tmp_path):
     })
     assert reject_res.status_code == 200
     assert reject_res.json()["relationship"]["status"] == "Rejected"
+
+
+def test_cloud_storage_uri_cold_scan():
+    """Verify that ParquetColdScanner handles cloud object store URIs (s3://, gs://, hdfs://)."""
+    s3_scanner = ParquetColdScanner("s3://mimic4-lakehouse/hosp/")
+    res = s3_scanner.scan()
+    assert len(res["datasets"]) == 3
+    assert len(res["data_objects"]) == 3
+    adm_obj = next(o for o in res["data_objects"] if "admissions" in o["name"])
+    assert adm_obj["OVolume"]["logical_record_count"] == 124500
+    assert "hadm_id" in adm_obj["OVariety"]["columns"]
+
+
+def test_mysql_uri_and_simulated_scan():
+    """Verify MySQL URI parsing and simulated hospital schema cold scan."""
+    from ColdScanEngine import parse_mysql_uri
+    parsed = parse_mysql_uri("mysql://admin:secret@lakehouse-db:3306/mimic_clinical")
+    assert parsed["host"] == "lakehouse-db"
+    assert parsed["port"] == 3306
+    assert parsed["user"] == "admin"
+    assert parsed["password"] == "secret"
+    assert parsed["database"] == "mimic_clinical"
+
+    # Test via FastAPI endpoint with simulated mock
+    res = client.post("/pilot/cold-scan/mysql", json={
+        "connection_uri": "mysql://root@localhost:3306/mimic_clinical",
+        "use_mock": True,
+        "root_assembly_name": "Hospital MySQL Lakehouse"
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["summary"]["total_datasets"] == 5
+    assert len(data["manifest"]["relationships"]) >= 3
+
+
+def test_mysql_test_connection_endpoint():
+    """Verify the /pilot/cold-scan/test-connection endpoint with mock and failure cases."""
+    # 1. With mock enabled
+    res = client.post("/pilot/cold-scan/test-connection", json={
+        "database": "banking",
+        "use_mock": True
+    })
+    assert res.status_code == 200
+    assert res.json()["status"] == "success"
+    assert res.json()["mock"] is True
+
+    # 2. Live connection with invalid password generates clear Error 1045 or connection error
+    fail_res = client.post("/pilot/cold-scan/test-connection", json={
+        "host": "localhost",
+        "port": 3306,
+        "user": "invalid_user_xyz",
+        "password": "wrong_password_123",
+        "database": "banking",
+        "use_mock": False
+    })
+    assert fail_res.status_code == 400
+    assert "detail" in fail_res.json()
+

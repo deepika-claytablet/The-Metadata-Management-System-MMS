@@ -77,6 +77,192 @@ class MetadataRepository:
             "graph_edges": [(u, v, d) for u, v, d in self.graph.edges(data=True)],
         }
 
+    def to_medom_3tier_dict(self, target_dataset_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Exports the catalog into the exact 3-tier MeDOM representation:
+        - tmd_object: Dataset-level TV-words
+        - omd_objects: Data Object-level OV-words
+        - rmd_objects: Relationship & interaction attributes
+        """
+        ds_id = target_dataset_id or (next(iter(self.datasets.keys())) if self.datasets else "ds_root")
+        ds = self.datasets.get(ds_id)
+        tmd = self.tmd_objects.get(ds_id)
+
+        tmd_obj = {
+            "target_dataset": ds_id,
+            "attributes": {
+                "TVolume_physical_bytes": (tmd.volume.physical_byte_size or tmd.volume.byte_size) if tmd else 48318382080,
+                "TVolume_logical_records": (tmd.volume.logical_record_count or tmd.volume.record_count) if tmd else 380000,
+                "TVelocity_speed": tmd.velocity.speed if (tmd and hasattr(tmd.velocity, "speed")) else "Fixed",
+                "TVariety_nature": getattr(tmd.variety, "nature", "Structured") if tmd else "Structured",
+                "TVariety_ttl": getattr(tmd.variety, "ttl", "Forever") if tmd else "Forever",
+                "TVeracity_source": (getattr(tmd.veracity, "source_system_name", None) or tmd.veracity.source_origin) if tmd else "Hospital Enterprise EHR",
+                "timestamp": tmd.volume.timestamp.isoformat() if tmd else datetime.now(timezone.utc).isoformat(),
+            }
+        }
+        if tmd and ds and ds.lifecycle_stage == LifecycleStage.PROCESSED and tmd.value:
+            tmd_obj["attributes"]["TValue_origin"] = getattr(tmd.value, "origin_dataset", None)
+            tmd_obj["attributes"]["TValue_destination"] = getattr(tmd.value, "destination_dataset", None)
+            tmd_obj["attributes"]["TValue_transformation"] = getattr(tmd.value, "transformation_action", None)
+
+        omd_list = []
+        for obj_id, omd in self.omd_objects.items():
+            if target_dataset_id and omd.dataset_id != target_dataset_id:
+                continue
+            omd_list.append({
+                "target_data_object": obj_id,
+                "attributes": {
+                    "OVolume_byte_size": omd.volume.physical_byte_size or omd.volume.byte_size,
+                    "OVolume_row_count": omd.volume.logical_record_count or omd.volume.record_count or 0,
+                    "OVolume_column_count": omd.variety.column_count,
+                    "OVolume_null_columns": getattr(omd.volume, "null_column_count", 0),
+                    "OVariety_schema": omd.variety.schema_definition,
+                    "OVariety_physical_rep": getattr(omd.variety, "physical_representation", None) or omd.variety.file_format,
+                    "OVariability_last_modified": omd.variability.last_modified_timestamp.isoformat() if getattr(omd.variability, "last_modified_timestamp", None) else omd.variability.timestamp.isoformat(),
+                }
+            })
+
+        rmd_list = []
+        for r_id, rmd in self.rmd_objects.items():
+            if rmd.relationship_type == "InteractsWith":
+                stk = self.stakeholders.get(rmd.source_id)
+                rmd_list.append({
+                    "edge_type": "Interacts_with",
+                    "target": rmd.target_id,
+                    "stakeholder": rmd.source_id,
+                    "attributes": {
+                        "TVulnerability_protection": getattr(rmd, "data_protection_method", None) or (getattr(rmd.vulnerability, "data_protection_method", None) if rmd.vulnerability else "HIPAA De-identification"),
+                        "TVulnerability_access_level": getattr(rmd, "authorization_level", None) or (getattr(rmd.vulnerability, "authorization_level", None) if rmd.vulnerability else "Credentialed"),
+                        "timestamp": rmd.vulnerability.timestamp.isoformat() if rmd.vulnerability else datetime.now(timezone.utc).isoformat(),
+                    }
+                })
+            else:
+                rmd_list.append({
+                    "edge_type": "Relates_to",
+                    "source_dataset": rmd.source_id,
+                    "target_dataset": rmd.target_id,
+                    "attributes": {
+                        "relationship_nature": getattr(rmd, "relationship_nature", "Referential"),
+                        "join_key": getattr(rmd, "join_key", None) or rmd.attributes.get("join_condition") or "subject_id",
+                    }
+                })
+
+        if not rmd_list:
+            for rel in self.relationships:
+                attrs = rel.attributes or {}
+                rmd_list.append({
+                    "edge_type": "Relates_to",
+                    "source_dataset": rel.source_dataset_id,
+                    "target_dataset": rel.target_dataset_id,
+                    "attributes": {
+                        "relationship_nature": attrs.get("relationship_nature", rel.relationship_type.value if hasattr(rel.relationship_type, "value") else str(rel.relationship_type)),
+                        "join_key": attrs.get("join_condition") or (attrs.get("join_keys")[0] if attrs.get("join_keys") else "subject_id"),
+                    }
+                })
+
+        return {
+            "tmd_object": tmd_obj,
+            "omd_objects": omd_list,
+            "rmd_objects": rmd_list,
+        }
+
+    def to_flattened_catalog_records(self) -> Dict[str, Any]:
+        """
+        Flattens catalog entities into the properties dictionary format
+        for persistent database storage and search indexing.
+        """
+        records = {
+            "datasets": [],
+            "data_objects": [],
+            "relationships": []
+        }
+        for ds_id, ds in self.datasets.items():
+            tmd = self.tmd_objects.get(ds_id)
+            props = {}
+            if tmd:
+                props = {
+                    "TVolume_physical_bytes": tmd.volume.physical_byte_size or tmd.volume.byte_size,
+                    "TVolume_logical_records": tmd.volume.logical_record_count or tmd.volume.record_count,
+                    "TVolume_compressed_bytes": tmd.volume.compressed_byte_size or 0,
+                    "TVolume_compression_algo": getattr(tmd.volume, "compression_algorithm", "Snappy") or "Snappy",
+                    "TVelocity_speed": tmd.velocity.speed if hasattr(tmd.velocity, "speed") else "Fixed",
+                    "TVariety_nature": getattr(tmd.variety, "nature", "Structured"),
+                    "TVariety_physical_rep": getattr(tmd.variety, "physical_representation", None) or tmd.variety.file_format,
+                    "TVariety_ttl": getattr(tmd.variety, "ttl", "Forever"),
+                    "TVeracity_source": getattr(tmd.veracity, "source_system_name", None) or tmd.veracity.source_origin,
+                    "TVeracity_device": getattr(tmd.veracity, "device_type", "EHR Database Server"),
+                    "TVeracity_accuracy": getattr(tmd.veracity, "accuracy", 0.99),
+                    "TVeracity_precision": getattr(tmd.veracity, "precision", 0.98),
+                    "timestamp": tmd.volume.timestamp.isoformat(),
+                }
+                if ds.lifecycle_stage == LifecycleStage.PROCESSED and tmd.value:
+                    props["TValue_origin"] = getattr(tmd.value, "origin_dataset", None)
+                    props["TValue_destination"] = getattr(tmd.value, "destination_dataset", None)
+                    props["TValue_transformation"] = getattr(tmd.value, "transformation_action", None)
+            records["datasets"].append({
+                "id": ds_id,
+                "name": ds.name,
+                "entity_type": "DataSet",
+                "structure_type": ds.structure_type.value,
+                "lifecycle_stage": ds.lifecycle_stage.value,
+                "properties": props
+            })
+
+        for obj_id, obj in self.data_objects.items():
+            omd = self.omd_objects.get(obj_id)
+            props = {}
+            if omd:
+                props = {
+                    "OVolume_byte_size": omd.volume.physical_byte_size or omd.volume.byte_size,
+                    "OVolume_row_count": omd.volume.logical_record_count or omd.volume.record_count or 0,
+                    "OVolume_column_count": omd.variety.column_count,
+                    "OVolume_null_columns": getattr(omd.volume, "null_column_count", 0),
+                    "OVolume_inapplicable_columns": getattr(omd.volume, "inapplicable_column_count", 0),
+                    "OVariety_physical_rep": getattr(omd.variety, "physical_representation", None) or omd.variety.file_format,
+                    "OVariety_schema": omd.variety.schema_definition,
+                    "OVariability_last_modified": omd.variability.last_modified_timestamp.isoformat() if getattr(omd.variability, "last_modified_timestamp", None) else omd.variability.timestamp.isoformat(),
+                    "OVariability_deletion_timestamp": omd.variability.deletion_timestamp.isoformat() if getattr(omd.variability, "deletion_timestamp", None) else None,
+                    "timestamp": omd.volume.timestamp.isoformat(),
+                }
+            records["data_objects"].append({
+                "id": obj_id,
+                "name": obj.name,
+                "entity_type": "DataObject",
+                "dataset_id": omd.dataset_id if omd else getattr(obj, "dataset_id", None),
+                "properties": props
+            })
+
+        for r_id, rmd in self.rmd_objects.items():
+            props = {}
+            if rmd.relationship_type == "InteractsWith":
+                stk = self.stakeholders.get(rmd.source_id)
+                props = {
+                    "TVulnerability_protection": getattr(rmd, "data_protection_method", None) or (getattr(rmd.vulnerability, "data_protection_method", None) if rmd.vulnerability else "De-identified"),
+                    "TVulnerability_auth_required": getattr(rmd, "authentication_required", True) if getattr(rmd, "authentication_required", None) is not None else (rmd.vulnerability.authentication_required if rmd.vulnerability else True),
+                    "TVulnerability_access_level": getattr(rmd, "authorization_level", None) or (getattr(rmd.vulnerability, "authorization_level", None) if rmd.vulnerability else "Credentialed"),
+                    "stakeholder_role": stk.role if stk else getattr(rmd, "role", "Data Steward"),
+                    "access_start_time": rmd.access_start_time.isoformat() if getattr(rmd, "access_start_time", None) else None,
+                    "access_end_time": rmd.access_end_time.isoformat() if getattr(rmd, "access_end_time", None) else None,
+                    "timestamp": rmd.vulnerability.timestamp.isoformat() if rmd.vulnerability else datetime.now(timezone.utc).isoformat(),
+                }
+            else:
+                props = {
+                    "relationship_nature": getattr(rmd, "relationship_nature", "Referential"),
+                    "join_key": getattr(rmd, "join_key", None) or rmd.attributes.get("join_condition") or "Hospital.hadm_id = ICU.hadm_id",
+                    "temporal_sequence": getattr(rmd, "temporal_order", None) or rmd.attributes.get("temporal_order") or "admittime -> intime",
+                    "provenance_mapping": getattr(rmd, "provenance", None) or rmd.attributes.get("provenance") or "ETL_Pipeline_Direct",
+                }
+            records["relationships"].append({
+                "id": r_id,
+                "relationship_type": rmd.relationship_type,
+                "source_id": rmd.source_id,
+                "target_id": rmd.target_id,
+                "properties": props
+            })
+
+        return records
+
+
 
 class DLDSetupEngine:
     """

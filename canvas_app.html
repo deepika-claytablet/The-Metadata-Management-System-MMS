@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full bg-white text-slate-800">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,8 +19,8 @@
 
   <style>
     #cy {
-      background-color: #090d16;
-      background-image: radial-gradient(#1e293b 1px, transparent 1px);
+      background-color: #ffffff;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
       background-size: 24px 24px;
     }
     .custom-scrollbar::-webkit-scrollbar {
@@ -28,50 +28,50 @@
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #0f172a;
+      background: #f8fafc;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #334155;
+      background: #cbd5e1;
       border-radius: 3px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #475569;
+      background: #94a3b8;
     }
     .stencil-card {
       transition: all 0.2s ease-in-out;
     }
     .stencil-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px -2px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 4px 12px -2px rgba(2, 132, 199, 0.15);
     }
   </style>
 </head>
 
-<body class="h-full flex flex-col overflow-hidden select-none font-sans text-xs sm:text-sm">
+<body class="h-full flex flex-col overflow-hidden select-none font-sans text-xs sm:text-sm bg-white text-slate-800">
 
   <!-- TOP APPLICATION NAVBAR -->
-  <header class="h-14 bg-slate-900/90 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4 z-20 shrink-0">
+  <header class="h-14 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-4 z-20 shrink-0">
     <!-- Brand & Status -->
     <div class="flex items-center space-x-3">
-      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
         <i class="fa-solid fa-diagram-project text-base"></i>
       </div>
       <div>
         <div class="flex items-center space-x-2">
-          <span class="font-bold text-sm tracking-wide text-white">MeDOM Studio</span>
-          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-950 text-sky-400 border border-sky-800">DLD v2.0</span>
+          <span class="font-bold text-sm tracking-wide text-slate-900">MeDOM Studio</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">DLD v2.0</span>
         </div>
-        <div class="text-[11px] text-slate-400">Ontological Data Lakehouse & Indicator Canvas</div>
+        <div class="text-[11px] text-slate-500">Ontological Data Lakehouse & Indicator Canvas</div>
       </div>
     </div>
 
     <!-- Center Mode Switch -->
-    <div class="hidden md:flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
+    <div class="hidden md:flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
       <button id="mode-select-btn" onclick="setInteractionMode('select')" class="px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow">
         <i class="fa-solid fa-arrow-pointer"></i>
         <span>Select & Move</span>
       </button>
-      <button id="mode-connect-btn" onclick="setInteractionMode('connect')" class="px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white">
+      <button id="mode-connect-btn" onclick="setInteractionMode('connect')" class="px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-600 hover:text-slate-900">
         <i class="fa-solid fa-link"></i>
         <span>Draw Edge</span>
       </button>
@@ -79,35 +79,36 @@
 
     <!-- Actions & Workflows -->
     <div class="flex items-center space-x-2">
-      <button onclick="openColdScanModal()" class="px-3 py-1.5 rounded-lg bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-700 flex items-center space-x-1.5 transition shadow-sm">
-        <i class="fa-solid fa-radar text-amber-400"></i>
+      <button onclick="openColdScanModal()" class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 flex items-center space-x-1.5 transition shadow-sm font-semibold">
+        <i class="fa-solid fa-bolt text-amber-600"></i>
         <span class="hidden sm:inline">⚡ Cold Scan</span>
       </button>
-      <button onclick="loadMimicDemo()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center space-x-1.5 transition">
-        <i class="fa-solid fa-hospital text-purple-400"></i>
+
+      <button onclick="loadMimicDemo()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 flex items-center space-x-1.5 transition font-medium">
+        <i class="fa-solid fa-hospital text-purple-600"></i>
         <span class="hidden sm:inline">Load MIMIC Lakehouse</span>
       </button>
 
-      <button onclick="runAutoLayout()" title="Auto-Layout Hierarchical DAG" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center space-x-1.5 transition">
-        <i class="fa-solid fa-sitemap text-sky-400"></i>
+      <button onclick="runAutoLayout()" title="Auto-Layout Hierarchical DAG" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 flex items-center space-x-1.5 transition font-medium">
+        <i class="fa-solid fa-sitemap text-sky-600"></i>
         <span class="hidden sm:inline">Auto-Layout</span>
       </button>
 
-      <button onclick="validateCanvasStageA()" class="px-3 py-1.5 rounded-lg bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 flex items-center space-x-1.5 transition">
-        <i class="fa-solid fa-bolt text-indigo-400"></i>
+      <button onclick="validateCanvasStageA()" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center space-x-1.5 transition font-medium">
+        <i class="fa-solid fa-check-double text-indigo-600"></i>
         <span>Stage A: Validate</span>
       </button>
 
-      <button onclick="commitCanvasToCatalog()" class="px-3 py-1.5 rounded-lg bg-emerald-900/70 hover:bg-emerald-800 text-emerald-100 border border-emerald-700 flex items-center space-x-1.5 transition shadow-sm">
-        <i class="fa-solid fa-box-archive text-emerald-400"></i>
+      <button onclick="commitCanvasToCatalog()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-600 flex items-center space-x-1.5 transition shadow-sm font-medium">
+        <i class="fa-solid fa-box-archive"></i>
         <span>Stage C: Commit</span>
       </button>
 
-      <button onclick="openExportModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Export Manifest YAML/JSON">
+      <button onclick="openExportModal()" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition" title="Export Manifest YAML/JSON">
         <i class="fa-solid fa-download"></i>
       </button>
 
-      <button onclick="clearCanvasPrompt()" class="px-2.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/80 transition" title="Clear Canvas">
+      <button onclick="clearCanvasPrompt()" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition" title="Clear Canvas">
         <i class="fa-solid fa-trash-can"></i>
       </button>
     </div>
@@ -117,95 +118,95 @@
   <div class="flex-1 flex overflow-hidden relative">
 
     <!-- ZONE 1: LEFT COMPONENT PALETTE (Drag & Drop) -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10">
-      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
-        <span class="font-semibold text-xs text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-          <i class="fa-solid fa-cubes text-sky-400"></i>
+    <aside class="w-64 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 z-10">
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between">
+        <span class="font-semibold text-xs text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+          <i class="fa-solid fa-cubes text-sky-600"></i>
           <span>Entity Palette</span>
         </span>
-        <span class="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">Drag to canvas</span>
+        <span class="text-[10px] text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">Drag to canvas</span>
       </div>
 
       <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
-        <!-- Stencil 1: DataSet Complex -->
+        <!-- Stencil 1: DataSet Complex (Box/Cube) -->
         <div draggable="true" ondragstart="handleDragStart(event, 'DataSet', 'Complex')"
-             class="stencil-card p-3 rounded-lg bg-slate-950 border border-indigo-800/60 hover:border-indigo-500 cursor-grab active:cursor-grabbing">
+             class="stencil-card p-3 rounded-lg bg-white border border-indigo-200 hover:border-indigo-500 cursor-grab active:cursor-grabbing shadow-sm">
           <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded bg-indigo-950 border border-indigo-700 flex items-center justify-center text-indigo-400">
-              <i class="fa-solid fa-layer-group"></i>
+            <div class="w-7 h-7 rounded bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+              <i class="fa-solid fa-folder text-xs"></i>
             </div>
             <div>
-              <div class="font-semibold text-xs text-indigo-200">DataSet (Complex)</div>
-              <div class="text-[10px] text-slate-400">Container / Sub-assembly</div>
+              <div class="font-semibold text-xs text-indigo-950">DataSet (Complex Box)</div>
+              <div class="text-[10px] text-slate-500">Container / Sub-assembly</div>
             </div>
           </div>
-          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+          <div class="mt-2 text-[10px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 flex items-center justify-between">
             <span>AssemblyOf root</span>
-            <span class="text-indigo-400 font-mono">Nested</span>
+            <span class="text-indigo-600 font-mono font-bold flex items-center space-x-1"><i class="fa-solid fa-folder text-[10px]"></i><span>Box (Folder)</span></span>
           </div>
         </div>
 
-        <!-- Stencil 2: DataSet Simple -->
+        <!-- Stencil 2: DataSet Simple (Box/Cube) -->
         <div draggable="true" ondragstart="handleDragStart(event, 'DataSet', 'Simple')"
-             class="stencil-card p-3 rounded-lg bg-slate-950 border border-sky-800/60 hover:border-sky-500 cursor-grab active:cursor-grabbing">
+             class="stencil-card p-3 rounded-lg bg-white border border-sky-200 hover:border-sky-500 cursor-grab active:cursor-grabbing shadow-sm">
           <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-sky-400">
-              <i class="fa-solid fa-database"></i>
+            <div class="w-7 h-7 rounded bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
+              <i class="fa-solid fa-file-lines text-xs"></i>
             </div>
             <div>
-              <div class="font-semibold text-xs text-sky-200">DataSet (Simple)</div>
-              <div class="text-[10px] text-slate-400">Domain table collection</div>
+              <div class="font-semibold text-xs text-sky-950">DataSet (Simple Box)</div>
+              <div class="text-[10px] text-slate-500">Domain table collection</div>
             </div>
           </div>
-          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+          <div class="mt-2 text-[10px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 flex items-center justify-between">
             <span>Leaf unit</span>
-            <span class="text-sky-400 font-mono">Raw / Proc</span>
+            <span class="text-sky-600 font-mono font-bold flex items-center space-x-1"><i class="fa-solid fa-file-lines text-[10px]"></i><span>Box (Note)</span></span>
           </div>
         </div>
 
-        <!-- Stencil 3: DataObject -->
+        <!-- Stencil 3: DataObject (Cylinder / File) -->
         <div draggable="true" ondragstart="handleDragStart(event, 'DataObject', 'Table')"
-             class="stencil-card p-3 rounded-lg bg-slate-950 border border-emerald-800/60 hover:border-emerald-500 cursor-grab active:cursor-grabbing">
+             class="stencil-card p-3 rounded-lg bg-white border border-emerald-200 hover:border-emerald-500 cursor-grab active:cursor-grabbing shadow-sm">
           <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded bg-emerald-950 border border-emerald-700 flex items-center justify-center text-emerald-400">
-              <i class="fa-solid fa-table"></i>
+            <div class="w-7 h-7 rounded bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+              <i class="fa-solid fa-database text-xs"></i>
             </div>
             <div>
-              <div class="font-semibold text-xs text-emerald-200">DataObject</div>
-              <div class="text-[10px] text-slate-400">Physical Parquet / CSV</div>
+              <div class="font-semibold text-xs text-emerald-950">DataObject (Cylinder)</div>
+              <div class="text-[10px] text-slate-500">Atomic Storage Unit / File</div>
             </div>
           </div>
-          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
-            <span>File & Schema</span>
-            <span class="text-emerald-400 font-mono">PyArrow</span>
+          <div class="mt-2 text-[10px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 flex items-center justify-between">
+            <span>Storage Unit</span>
+            <span class="text-emerald-600 font-mono font-bold">Cylinder</span>
           </div>
         </div>
 
-        <!-- Stencil 4: Stakeholder -->
-        <div draggable="true" ondragstart="handleDragStart(event, 'Stakeholder', 'Role')"
-             class="stencil-card p-3 rounded-lg bg-slate-950 border border-amber-800/60 hover:border-amber-500 cursor-grab active:cursor-grabbing">
+        <!-- Stencil 4: Stakeholder (Actor / Circle) -->
+        <div draggable="true" ondragstart="handleDragStart(event, 'Stakeholder', 'Steward')"
+             class="stencil-card p-3 rounded-lg bg-white border border-amber-200 hover:border-amber-500 cursor-grab active:cursor-grabbing shadow-sm">
           <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
-              <i class="fa-solid fa-user-shield"></i>
+            <div class="w-7 h-7 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <i class="fa-solid fa-circle-user text-xs"></i>
             </div>
             <div>
-              <div class="font-semibold text-xs text-amber-200">Stakeholder</div>
-              <div class="text-[10px] text-slate-400">Steward / HIPAA Officer</div>
+              <div class="font-semibold text-xs text-amber-950">Stakeholder (Actor)</div>
+              <div class="text-[10px] text-slate-500">Steward / Persona</div>
             </div>
           </div>
-          <div class="mt-2 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 flex items-center justify-between">
+          <div class="mt-2 text-[10px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 flex items-center justify-between">
             <span>Governance</span>
-            <span class="text-amber-400 font-mono">Required</span>
+            <span class="text-amber-600 font-mono font-bold">Circle</span>
           </div>
         </div>
 
         <!-- Quick Edge Linking Tool -->
-        <div class="pt-2 border-t border-slate-800">
-          <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <div class="pt-2 border-t border-slate-200">
+          <div class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2 flex items-center justify-between">
             <span>Default Edge Kind</span>
-            <i class="fa-solid fa-share-nodes text-slate-500"></i>
+            <i class="fa-solid fa-share-nodes text-slate-400"></i>
           </div>
-          <select id="default-edge-type" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+          <select id="default-edge-type" class="w-full bg-white border border-slate-300 rounded-md px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500">
             <option value="AssemblyOf">AssemblyOf (Composition)</option>
             <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage)</option>
             <option value="GeneralizationOf">GeneralizationOf (ISA Hierarchy)</option>
@@ -214,23 +215,23 @@
         </div>
 
         <!-- Canvas Metrics -->
-        <div class="pt-2 border-t border-slate-800">
-          <div class="bg-slate-950 rounded-lg p-2.5 border border-slate-800 space-y-1.5 text-[11px]">
-            <div class="flex justify-between text-slate-400">
+        <div class="pt-2 border-t border-slate-200">
+          <div class="bg-white rounded-lg p-2.5 border border-slate-200 space-y-1.5 text-[11px] shadow-sm">
+            <div class="flex justify-between text-slate-600">
               <span>DataSets:</span>
-              <span id="metric-datasets" class="text-white font-mono font-bold">0</span>
+              <span id="metric-datasets" class="text-slate-900 font-mono font-bold">0</span>
             </div>
-            <div class="flex justify-between text-slate-400">
+            <div class="flex justify-between text-slate-600">
               <span>DataObjects:</span>
-              <span id="metric-objects" class="text-white font-mono font-bold">0</span>
+              <span id="metric-objects" class="text-slate-900 font-mono font-bold">0</span>
             </div>
-            <div class="flex justify-between text-slate-400">
+            <div class="flex justify-between text-slate-600">
               <span>Relationships:</span>
-              <span id="metric-edges" class="text-white font-mono font-bold">0</span>
+              <span id="metric-edges" class="text-slate-900 font-mono font-bold">0</span>
             </div>
-            <div class="flex justify-between text-slate-400">
+            <div class="flex justify-between text-slate-600">
               <span>Stakeholders:</span>
-              <span id="metric-stakeholders" class="text-white font-mono font-bold">0</span>
+              <span id="metric-stakeholders" class="text-slate-900 font-mono font-bold">0</span>
             </div>
           </div>
         </div>
@@ -238,428 +239,822 @@
     </aside>
 
     <!-- ZONE 2: 2D INTERACTIVE GRAPH CANVAS (Cytoscape.js) -->
-    <main class="flex-1 flex flex-col relative overflow-hidden">
-      <!-- Status & Cycle Alert Notification Bar -->
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-white">
+      <!-- Status & Alert Notification Toast -->
       <div id="toast-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium shadow-xl border flex items-center space-x-2 transition-all duration-300">
         <i id="toast-icon" class="fa-solid"></i>
         <span id="toast-msg"></span>
       </div>
 
       <!-- Canvas Connection Mode Tip -->
-      <div id="connect-mode-tip" class="hidden absolute top-3 left-4 z-20 px-3 py-1.5 rounded-lg bg-sky-900/80 border border-sky-600 text-sky-100 text-xs font-medium shadow-lg backdrop-blur flex items-center space-x-2">
-        <i class="fa-solid fa-info-circle text-sky-400"></i>
-        <span>Click <strong>Source Node</strong>, then click <strong>Target Node</strong> to draw edge.</span>
-        <button onclick="setInteractionMode('select')" class="ml-2 text-sky-300 hover:text-white underline">Done</button>
+      <div id="connect-mode-tip" class="hidden absolute top-3 left-4 z-20 px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-300 text-sky-900 text-xs font-medium shadow-md flex items-center space-x-2">
+        <i class="fa-solid fa-info-circle text-sky-600"></i>
+        <span><b>Connect Mode:</b> Click a source node, then click a target node to wire.</span>
       </div>
 
-      <!-- Cytoscape Container with Drag/Drop Listeners -->
-      <div id="cy" class="flex-1 w-full h-full"
-           ondragover="handleDragOver(event)"
-           ondrop="handleCanvasDrop(event)">
-      </div>
-
-      <!-- Floating Zoom / View Controls -->
-      <div class="absolute bottom-4 left-4 z-20 flex items-center space-x-1 bg-slate-900/90 backdrop-blur border border-slate-800 p-1 rounded-lg shadow-lg">
-        <button onclick="zoomIn()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Zoom In">
-          <i class="fa-solid fa-plus"></i>
-        </button>
-        <button onclick="zoomOut()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Zoom Out">
-          <i class="fa-solid fa-minus"></i>
-        </button>
-        <button onclick="fitView()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Fit to Screen">
-          <i class="fa-solid fa-expand"></i>
-        </button>
-        <button onclick="runAutoLayout()" class="w-8 h-8 rounded hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Hierarchical Auto-Layout">
-          <i class="fa-solid fa-arrows-rotate"></i>
-        </button>
-      </div>
+      <!-- The Cytoscape Container -->
+      <div id="cy" class="flex-1 w-full h-full" ondragover="handleDragOver(event)" ondrop="handleCanvasDrop(event)"></div>
     </main>
 
-    <!-- ZONE 3: RIGHT CONTEXT INSPECTOR (Stage B 7 V-Words) -->
-    <aside id="inspector-panel" class="w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-10">
-      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+    <!-- ZONE 3: RIGHT CONTEXT INSPECTOR (Stage B Indicators & Attributes) -->
+    <aside class="w-80 bg-slate-50 border-l border-slate-200 flex flex-col shrink-0 z-10">
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between">
         <div class="flex items-center space-x-2">
-          <div id="inspector-badge" class="w-3 h-3 rounded-full bg-slate-600"></div>
-          <span id="inspector-title" class="font-bold text-xs text-white uppercase tracking-wide">Context Inspector</span>
+          <div id="inspector-badge" class="w-2.5 h-2.5 rounded-full bg-slate-400"></div>
+          <span id="inspector-title" class="font-semibold text-xs text-slate-800 uppercase tracking-wider">Context Inspector</span>
         </div>
-        <button onclick="clearSelection()" class="text-slate-500 hover:text-slate-300 text-xs">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <span id="inspector-mode-tag" class="text-[10px] text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">Properties</span>
       </div>
 
-      <!-- Empty State / No Node Selected -->
-      <div id="inspector-empty" class="flex-1 p-6 flex flex-col items-center justify-center text-center text-slate-400">
-        <div class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 text-2xl">
-          <i class="fa-solid fa-hand-pointer"></i>
+      <!-- Empty State -->
+      <div id="inspector-empty" class="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-400">
+        <div class="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-3 shadow-sm">
+          <i class="fa-solid fa-hand-pointer text-slate-400 text-lg"></i>
         </div>
-        <h4 class="font-semibold text-slate-200 text-sm">No Element Selected</h4>
-        <p class="text-xs text-slate-400 mt-1 max-w-xs">
-          Click any node or edge on the canvas to inspect its DLD configuration and bind <strong>Stage B 7 V-word indicators</strong>.
-        </p>
-        <div class="mt-6 p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-left text-xs space-y-2 w-full">
-          <div class="font-semibold text-slate-300">Quick Tips:</div>
-          <div class="text-slate-400 flex items-start space-x-2">
-            <i class="fa-solid fa-plus text-sky-400 mt-0.5"></i>
-            <span>Drag items from the left palette to add entities.</span>
-          </div>
-          <div class="text-slate-400 flex items-start space-x-2">
-            <i class="fa-solid fa-link text-indigo-400 mt-0.5"></i>
-            <span>Switch to "Draw Edge" to link datasets and join keys.</span>
-          </div>
-          <div class="text-slate-400 flex items-start space-x-2">
-            <i class="fa-solid fa-file-waveform text-emerald-400 mt-0.5"></i>
-            <span>Inspect DataObjects to auto-profile files via PyArrow.</span>
-          </div>
-        </div>
+        <p class="text-xs text-slate-600 font-medium">Select a node or edge</p>
+        <p class="text-[11px] text-slate-400 mt-1">Click any entity on the canvas to inspect or edit attributes and 7 V-Word indicators.</p>
       </div>
 
-      <!-- Active Inspector Form -->
-      <div id="inspector-form" class="hidden flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-        <!-- Node Header Info -->
-        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+      <!-- Active Form -->
+      <div id="inspector-form" class="hidden flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+        <!-- Common Identity -->
+        <div class="space-y-2 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between">
-            <span id="form-entity-type" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-950 text-sky-400 border border-sky-800">DataSet</span>
-            <span id="form-entity-id" class="text-[11px] font-mono text-slate-400">id_placeholder</span>
+            <span id="form-entity-type" class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">DataSet</span>
+            <span id="form-entity-id" class="text-[10px] font-mono text-slate-500">id_placeholder</span>
           </div>
           <div>
-            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Entity Name</label>
-            <input id="form-name" type="text" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-500">
+            <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Display Name</label>
+            <input id="form-name" type="text" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-sky-500">
           </div>
           <div id="form-desc-group">
-            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Description</label>
-            <textarea id="form-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+            <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Description</label>
+            <textarea id="form-desc" rows="2" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-sky-500"></textarea>
           </div>
         </div>
 
-        <!-- DataSet-specific Configuration -->
+        <!-- TIER 1: TMD OBJECT (Dataset-Level TV-Words) -->
         <div id="group-dataset-props" class="space-y-3">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Structure Type</label>
-              <select id="form-structure-type" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
-                <option value="Simple">Simple</option>
-                <option value="Complex">Complex</option>
-                <option value="Abstract">Abstract</option>
-              </select>
+          <!-- Structure & Lifecycle -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-sky-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-cube text-sky-600"></i>
+              <span>TMD Object: Dataset Abstraction</span>
             </div>
-            <div>
-              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Lifecycle Stage</label>
-              <select id="form-lifecycle-stage" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
-                <option value="Raw">Raw</option>
-                <option value="Processed">Processed</option>
-              </select>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Structure</label>
+                <select id="form-structure-type" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="Simple">Simple (Leaf)</option>
+                  <option value="Complex">Complex (Assembly)</option>
+                  <option value="Abstract">Abstract (Parent ISA)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Lifecycle</label>
+                <select id="form-lifecycle-stage" onchange="handleLifecycleChange()" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="Raw">Raw (Ingested)</option>
+                  <option value="Processed">Processed (Curated)</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <!-- Stage B: 7 V-Words Accordion -->
-          <div class="border-t border-slate-800 pt-3">
-            <div class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-              <i class="fa-solid fa-chart-pie"></i>
-              <span>Stage B: 7 V-Word Indicators</span>
+          <!-- TVolume Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-indigo-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-weight-hanging text-indigo-600"></i>
+              <span>TVolume Attributes</span>
             </div>
-
-            <!-- TVolume -->
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
-              <div class="text-[11px] font-semibold text-indigo-300 flex items-center justify-between">
-                <span>1. TVolume (Size & Records)</span>
-                <i class="fa-solid fa-weight-hanging text-indigo-400"></i>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[10px] text-slate-400">Logical Rows</label>
-                  <input id="form-volume-rows" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400">Bytes Size</label>
-                  <input id="form-volume-bytes" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                </div>
-              </div>
-            </div>
-
-            <!-- TVeracity -->
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
-              <div class="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
-                <span>2. TVeracity (Quality & Nulls)</span>
-                <i class="fa-solid fa-shield-heart text-emerald-400"></i>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-500">Logical Records</label>
+                <input id="form-tmd-volume-rows" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
               </div>
               <div>
-                <label class="block text-[10px] text-slate-400">Completeness Rate (0 - 1.0)</label>
-                <input id="form-veracity-completeness" type="number" step="0.01" min="0" max="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-              </div>
-            </div>
-
-            <!-- TVulnerability -->
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
-              <div class="text-[11px] font-semibold text-amber-300 flex items-center justify-between">
-                <span>3. TVulnerability (Governance)</span>
-                <i class="fa-solid fa-lock text-amber-400"></i>
+                <label class="block text-[10px] text-slate-500">Physical Bytes</label>
+                <input id="form-tmd-volume-bytes" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
               </div>
               <div>
-                <label class="block text-[10px] text-slate-400">Classification</label>
-                <select id="form-vulnerability-class" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                  <option value="Public">Public (Open Data)</option>
-                  <option value="Internal">Internal Org Use</option>
-                  <option value="Confidential_HIPAA">Confidential (HIPAA De-identified)</option>
-                  <option value="Restricted">Restricted (High Security)</option>
+                <label class="block text-[10px] text-slate-500">Compressed Bytes</label>
+                <input id="form-tmd-volume-compressed" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Compression Algo</label>
+                <select id="form-tmd-volume-algo" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="Snappy">Snappy</option>
+                  <option value="Gzip">Gzip</option>
+                  <option value="ZSTD">ZSTD</option>
+                  <option value="None">None</option>
                 </select>
               </div>
             </div>
-
-            <!-- TVariety -->
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
-              <div class="text-[11px] font-semibold text-purple-300 flex items-center justify-between">
-                <span>4. TVariety (Modality & Format)</span>
-                <i class="fa-solid fa-shapes text-purple-400"></i>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[10px] text-slate-400">Column Count</label>
-                  <input id="form-variety-cols" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                </div>
-                <div>
-                  <label class="block text-[10px] text-slate-400">Format</label>
-                  <input id="form-variety-format" type="text" placeholder="Parquet, CSV" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                </div>
-              </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-tmd-volume-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
             </div>
+          </div>
 
-            <!-- TValue (Processed) -->
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2 space-y-2">
-              <div class="text-[11px] font-semibold text-rose-300 flex items-center justify-between">
-                <span>5. TValue (Business Impact)</span>
-                <i class="fa-solid fa-gem text-rose-400"></i>
-              </div>
+          <!-- TVelocity Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-cyan-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-gauge-high text-cyan-600"></i>
+              <span>TVelocity Attributes</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500 mb-1">Speed / Arrival Mode</label>
+              <select id="form-tmd-velocity-speed" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                <option value="Fixed">Fixed (Batch Scheduled)</option>
+                <option value="On arrival">On arrival (Event Triggered)</option>
+                <option value="Dynamic 1000 msg/sec">Dynamic arrival rates</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-tmd-velocity-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            </div>
+          </div>
+
+          <!-- TVariety Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-amber-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-shapes text-amber-600"></i>
+              <span>TVariety Attributes</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[10px] text-slate-400">Criticality Tier</label>
-                <select id="form-value-criticality" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                  <option value="Low">Low (Ad-hoc exploratory)</option>
-                  <option value="Medium">Medium (Internal reporting)</option>
-                  <option value="High">High (Departmental ops)</option>
-                  <option value="Critical">Critical (Mission-critical production)</option>
+                <label class="block text-[10px] text-slate-500">Nature</label>
+                <select id="form-tmd-variety-nature" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="Structured">Structured</option>
+                  <option value="Semi-structured">Semi-structured</option>
+                  <option value="Unstructured">Unstructured</option>
                 </select>
               </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Physical Rep</label>
+                <input id="form-tmd-variety-rep" type="text" placeholder="CSV, Parquet, MySQL..." class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">TTL (Retention)</label>
+              <select id="form-tmd-variety-ttl" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                <option value="Forever">Forever</option>
+                <option value="Current">Current</option>
+                <option value="90 Days">90 Days</option>
+                <option value="365 Days">365 Days</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-tmd-variety-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            </div>
+          </div>
+
+          <!-- TVeracity Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-square-check text-emerald-600"></i>
+              <span>TVeracity Attributes</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Source System Name</label>
+              <input id="form-tmd-veracity-source" type="text" placeholder="e.g. MetaVision CIS, Hospital EHR" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Device Type</label>
+              <input id="form-tmd-veracity-device" type="text" placeholder="e.g. EHR Database Server, ICU Telemetry" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-500">Accuracy (0 - 1)</label>
+                <input id="form-tmd-veracity-accuracy" type="number" step="0.01" min="0" max="1" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Precision (0 - 1)</label>
+                <input id="form-tmd-veracity-precision" type="number" step="0.01" min="0" max="1" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-tmd-veracity-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            </div>
+          </div>
+
+          <!-- TValue Attributes (Mandatory for Processed Datasets) -->
+          <div id="form-tmd-value-section" class="bg-purple-50 p-3 rounded-lg border border-purple-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-purple-800 font-semibold text-xs border-b border-purple-200 pb-1">
+              <i class="fa-solid fa-diagram-next text-purple-600"></i>
+              <span>TValue Attributes (Processed Dataset)</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-900 font-medium">Origin Dataset</label>
+              <input id="form-tmd-value-origin" type="text" placeholder="e.g. ds_admissions" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-900 font-medium">Destination Dataset</label>
+              <input id="form-tmd-value-dest" type="text" placeholder="e.g. ds_icu_summary" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-900 font-medium">Transformation Action</label>
+              <textarea id="form-tmd-value-transformation" rows="2" placeholder="e.g. Aggregate vitals and compute SOFA scores" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900"></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] text-purple-700">Timestamp</label>
+              <input id="form-tmd-value-ts" type="text" class="w-full bg-purple-100/50 border border-purple-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
             </div>
           </div>
         </div>
 
-        <!-- DataObject-specific Configuration & Auto-Profiler -->
+        <!-- TIER 2: OMD OBJECT (Data Object-Level OV-Words) -->
         <div id="group-object-props" class="hidden space-y-3">
-          <div>
-            <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Physical Format</label>
-            <select id="form-obj-type" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-              <option value="Parquet">Parquet (Snappy/GZIP)</option>
-              <option value="CSV">CSV / Delimited</option>
-              <option value="DICOM">DICOM Radiology Image</option>
-              <option value="Waveform_Dat">Waveform Binary (.dat)</option>
-              <option value="JSON">JSON / Document</option>
-            </select>
-          </div>
-
-          <!-- One-Click PyArrow Local File Auto-Profiler -->
-          <div class="bg-emerald-950/40 border border-emerald-800/80 rounded-lg p-3 space-y-2">
-            <div class="flex items-center space-x-1.5 text-emerald-300 font-semibold text-xs">
-              <i class="fa-solid fa-bolt-lightning text-emerald-400"></i>
-              <span>One-Click PyArrow File Profiler</span>
+          <!-- Physical Profiler -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-file-waveform text-emerald-600"></i>
+              <span>OMD Object: Physical Storage Unit</span>
             </div>
-            <p class="text-[11px] text-slate-400">
-              Inspects local Parquet/CSV file headers in milliseconds without table scans.
-            </p>
             <div>
-              <input id="auto-profile-path" type="text" placeholder="e.g. C:\data\icustays.parquet"
-                     class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-white placeholder:text-slate-600">
+              <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Local File Path / URI</label>
+              <input id="form-obj-filepath" type="text" placeholder="e.g. s3://lakehouse/data.parquet" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 font-mono">
             </div>
-            <button onclick="runAutoProfileOnFile()" class="w-full py-1.5 rounded bg-emerald-700 hover:bg-emerald-600 text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition">
+            <button onclick="runAutoProfileOnFile()" class="w-full py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition shadow-xs">
               <i class="fa-solid fa-microchip"></i>
               <span>Profile & Auto-Fill Indicators</span>
             </button>
           </div>
-        </div>
 
-        <!-- Edge / Relationship Configuration -->
-        <div id="group-edge-props" class="hidden space-y-3">
-          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-            <div class="text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Connection Kind:</span>
-              <span id="form-edge-kind" class="font-bold text-sky-400">RelatesTo</span>
+          <!-- OVolume Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-hard-drive text-emerald-600"></i>
+              <span>OVolume Attributes</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-500">Physical Size (Bytes)</label>
+                <input id="form-omd-volume-bytes" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Logical Records</label>
+                <input id="form-omd-volume-rows" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Column Count</label>
+                <input id="form-omd-volume-cols" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Null Columns</label>
+                <input id="form-omd-volume-nulls" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
             </div>
             <div>
-              <label class="block text-[10px] uppercase font-semibold text-slate-400 mb-1">Relationship Type</label>
-              <select id="form-edge-type-select" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+              <label class="block text-[10px] text-slate-500">Inapplicable Column Count</label>
+              <input id="form-omd-volume-inapplicable" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-omd-volume-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            </div>
+          </div>
+
+          <!-- OVariety Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-teal-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-code-fork text-teal-600"></i>
+              <span>OVariety Attributes</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Physical Format</label>
+              <select id="form-omd-variety-format" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                <option value="Parquet">Parquet</option>
+                <option value="CSV">CSV</option>
+                <option value="DICOM">DICOM (PACS Archive)</option>
+                <option value="WFDB">WFDB (Waveform DB)</option>
+                <option value="JSON">JSON / JSONL</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500 mb-1">OVariety_schema (Field Names & Types)</label>
+              <textarea id="form-omd-variety-schema" rows="4" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900" placeholder='{"col1": "INTEGER", "col2": "VARCHAR"}'></textarea>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400">Timestamp</label>
+              <input id="form-omd-variety-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            </div>
+          </div>
+
+          <!-- OVariability Attributes -->
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-slate-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
+              <span>OVariability Attributes</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Last Modified Timestamp</label>
+              <input id="form-omd-variability-modified" type="text" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Deletion Timestamp (if tombstoned)</label>
+              <input id="form-omd-variability-deleted" type="text" placeholder="null" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900">
+            </div>
+          </div>
+        </div>
+
+        <!-- TIER 3: RMD OBJECT (Relationship & Interaction Attributes) -->
+        <div id="group-edge-props" class="hidden space-y-3">
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="text-[11px] text-slate-600 flex items-center justify-between border-b border-slate-100 pb-1">
+              <span>Connection Kind:</span>
+              <span id="form-edge-kind" class="font-bold text-sky-600">RelatesTo</span>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Relationship Type</label>
+              <select id="form-edge-type-select" onchange="handleEdgeKindChange()" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                <option value="RelatesTo">RelatesTo (Referential / Join Edge)</option>
+                <option value="InteractsWith">InteractsWith (Stakeholder & TVulnerability)</option>
                 <option value="AssemblyOf">AssemblyOf (Parent Composition)</option>
                 <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage Pipeline)</option>
                 <option value="GeneralizationOf">GeneralizationOf (ISA Archetype)</option>
-                <option value="RelatesTo">RelatesTo (Referential / Join Edge)</option>
               </select>
             </div>
+
             <!-- Candidate Suggestion Approval Box -->
-            <div id="form-edge-suggestion-box" class="hidden bg-amber-950/60 border border-amber-600/80 rounded-lg p-3 space-y-2">
-              <div class="flex items-center justify-between text-amber-300 font-bold text-xs">
+            <div id="form-edge-suggestion-box" class="hidden bg-amber-50 border border-amber-300 rounded-lg p-3 space-y-2">
+              <div class="flex items-center justify-between text-amber-900 font-bold text-xs">
                 <span class="flex items-center space-x-1.5">
-                  <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                  <i class="fa-solid fa-lightbulb text-amber-600"></i>
                   <span>Suggested Candidate Join</span>
                 </span>
-                <span id="form-edge-confidence-badge" class="px-1.5 py-0.5 rounded bg-amber-900 text-amber-200 text-[10px] font-mono">95% Conf</span>
+                <span id="form-edge-confidence-badge" class="px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-mono">95% Conf</span>
               </div>
-              <p class="text-[11px] text-slate-400">
+              <p class="text-[11px] text-slate-600">
                 Inferred from common key tokens. Review and approve to commit into the DLD topology.
               </p>
               <div class="flex space-x-2 pt-1">
-                <button type="button" onclick="approveCandidateEdge()" class="flex-1 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center justify-center space-x-1.5 shadow">
+                <button type="button" onclick="approveCandidateEdge()" class="flex-1 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center justify-center space-x-1.5 shadow">
                   <i class="fa-solid fa-check"></i>
                   <span>Approve Candidate [✓]</span>
                 </button>
-                <button type="button" onclick="dismissCandidateEdge()" class="flex-1 py-1.5 rounded bg-rose-900/70 hover:bg-rose-800 text-rose-200 font-medium text-xs flex items-center justify-center space-x-1.5 border border-rose-700">
+                <button type="button" onclick="dismissCandidateEdge()" class="flex-1 py-1.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-800 font-medium text-xs flex items-center justify-center space-x-1.5 border border-rose-300">
                   <i class="fa-solid fa-xmark"></i>
                   <span>Dismiss [✗]</span>
                 </button>
               </div>
             </div>
 
-            <div id="form-edge-join-group" class="space-y-2 pt-2 border-t border-slate-800">
-              <label class="block text-[10px] uppercase font-semibold text-slate-400">Join Keys / Mapping</label>
-              <input id="form-edge-keys" type="text" placeholder="e.g. hadm_id = hadm_id" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-              <label class="block text-[10px] uppercase font-semibold text-slate-400">Cardinality</label>
-              <select id="form-edge-cardinality" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white">
-                <option value="1:N">1:N (One to Many)</option>
-                <option value="1:1">1:1 (One to One)</option>
-                <option value="M:N">M:N (Many to Many)</option>
-              </select>
+            <!-- RelatesTo Specific Panel -->
+            <div id="form-edge-relates-panel" class="space-y-2 pt-2 border-t border-slate-100">
+              <div class="flex items-center space-x-2 text-sky-700 font-semibold text-xs pb-1">
+                <i class="fa-solid fa-link text-sky-600"></i>
+                <span>RelatesTo Attributes</span>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Relationship Nature</label>
+                <select id="form-rmd-relates-nature" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="Referential">Referential (Join Keys)</option>
+                  <option value="Temporal">Temporal (Event Ordering)</option>
+                  <option value="Provenance / Semantic">Provenance / Semantic Mapping</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Referential Join Keys</label>
+                <input id="form-rmd-relates-keys" type="text" placeholder="e.g. Hospital.hadm_id = ICU.hadm_id" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Temporal Sequence (Time Columns)</label>
+                <input id="form-rmd-relates-temporal" type="text" placeholder="e.g. Hospital.admittime -> ICU.intime" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Provenance / Semantic Derivation</label>
+                <input id="form-rmd-relates-provenance" type="text" placeholder="e.g. ETL_Core_Staging" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Cardinality</label>
+                <select id="form-edge-cardinality" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="1:1">1:1 (One-to-One)</option>
+                  <option value="1:N">1:N (One-to-Many)</option>
+                  <option value="N:1">N:1 (Many-to-One)</option>
+                  <option value="M:N">M:N (Many-to-Many)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- InteractsWith (TVulnerability) Panel -->
+            <div id="form-edge-interacts-panel" class="hidden space-y-2 pt-2 border-t border-slate-100">
+              <div class="flex items-center space-x-2 text-rose-700 font-semibold text-xs pb-1">
+                <i class="fa-solid fa-shield-virus text-rose-600"></i>
+                <span>TVulnerability Attributes</span>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Stakeholder ID</label>
+                <input id="form-rmd-vuln-stk-id" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-slate-700" readonly>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Stakeholder Role</label>
+                <input id="form-rmd-vuln-stk-role" type="text" placeholder="e.g. Lead Clinical Data Steward" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500">Data Protection Method</label>
+                <select id="form-rmd-vuln-protection" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                  <option value="De-identified">De-identified</option>
+                  <option value="Masked">Masked</option>
+                  <option value="Encrypted AES-256">Encrypted AES-256</option>
+                  <option value="Tokenized">Tokenized</option>
+                  <option value="None / Raw">None / Raw</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">Auth Required</label>
+                  <select id="form-rmd-vuln-auth" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">Authorization Level</label>
+                  <select id="form-rmd-vuln-level" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+                    <option value="Credentialed">Credentialed</option>
+                    <option value="Physician">Physician</option>
+                    <option value="Data Scientist">Data Scientist</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Public">Public Access</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] text-slate-500">Access Start Time</label>
+                  <input id="form-rmd-vuln-start" type="text" placeholder="2026-01-01T00:00:00Z" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-mono text-slate-900">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-500">Access End Time</label>
+                  <input id="form-rmd-vuln-end" type="text" placeholder="2026-12-31T23:59:59Z" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-mono text-slate-900">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400">Timestamp</label>
+                <input id="form-rmd-vuln-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Save & Delete Action Buttons -->
-        <div class="pt-3 border-t border-slate-800 flex items-center space-x-2">
-          <button onclick="saveCurrentEntity()" class="flex-1 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow flex items-center justify-center space-x-1.5 transition">
-            <i class="fa-solid fa-check"></i>
-            <span>Save Element</span>
-          </button>
-          <button onclick="deleteCurrentEntity()" class="px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-200 border border-rose-800 text-xs transition" title="Delete from Canvas">
-            <i class="fa-solid fa-trash-can"></i>
+        <!-- STAKEHOLDER INSPECTOR -->
+        <div id="group-stakeholder-props" class="hidden space-y-3">
+          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+            <div class="flex items-center space-x-2 text-amber-700 font-semibold text-xs border-b border-slate-100 pb-1">
+              <i class="fa-solid fa-circle-user text-amber-600"></i>
+              <span>Stakeholder Persona Details</span>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Role</label>
+              <input id="form-stk-role" type="text" placeholder="e.g. Lead Clinical Data Steward" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Department</label>
+              <input id="form-stk-dept" type="text" placeholder="e.g. Health Informatics" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500">Email Address</label>
+              <input id="form-stk-email" type="email" placeholder="e.g. steward@mimic-lake.org" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 font-mono">
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="pt-2">
+          <button onclick="saveCurrentEntity()" class="w-full py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium text-xs flex items-center justify-center space-x-1.5 shadow transition">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Update Entity on Canvas</span>
           </button>
         </div>
       </div>
     </aside>
-
   </div>
 
-  <!-- CONNECTION MODAL DIALOG -->
-  <div id="connection-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-sky-400">
-            <i class="fa-solid fa-link"></i>
-          </div>
-          <h3 class="font-bold text-sm text-white">Connect Canvas Entities</h3>
-        </div>
-        <button onclick="closeConnectionModal()" class="text-slate-500 hover:text-slate-300">
+  <!-- EDGE KIND POPUP MODAL -->
+  <div id="edge-dialog" class="hidden fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-xl max-w-sm w-full p-5 shadow-2xl space-y-4 text-slate-800">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+        <h3 class="font-bold text-sm text-slate-900">Choose Relationship Kind</h3>
+        <button onclick="closeEdgeDialog()" class="text-slate-400 hover:text-slate-700">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="space-y-3">
-        <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
-          <span id="modal-src-name" class="font-mono text-sky-300">source_node</span>
-          <i class="fa-solid fa-arrow-right text-slate-500"></i>
-          <span id="modal-tgt-name" class="font-mono text-indigo-300">target_node</span>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Relationship Kind</label>
-          <select id="modal-edge-kind" onchange="toggleModalRelFields()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-500">
-            <option value="AssemblyOf">AssemblyOf (Parent contains Sub-Dataset)</option>
-            <option value="ProcessedFrom">ProcessedFrom (Derivation / Lineage Pipeline)</option>
-            <option value="GeneralizationOf">GeneralizationOf (ISA Hierarchical Archetype)</option>
-            <option value="RelatesTo">RelatesTo (Referential Foreign Key / Join)</option>
-          </select>
-        </div>
-
-        <div id="modal-join-fields" class="space-y-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
+      <div class="space-y-2 text-xs">
+        <label class="flex items-center space-x-3 p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 cursor-pointer bg-slate-50">
+          <input type="radio" name="edge-type-radio" value="AssemblyOf" checked class="text-sky-600">
           <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Join Key Mapping (e.g. hadm_id = hadm_id)</label>
-            <input id="modal-join-key" type="text" value="hadm_id = hadm_id" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
+            <div class="font-semibold text-slate-900">AssemblyOf (Composition)</div>
+            <div class="text-[11px] text-slate-500">Parent-child containment hierarchy</div>
           </div>
+        </label>
+        <label class="flex items-center space-x-3 p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 cursor-pointer bg-slate-50">
+          <input type="radio" name="edge-type-radio" value="ProcessedFrom" class="text-sky-600">
           <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Multiplicity / Cardinality</label>
-            <select id="modal-cardinality" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-              <option value="1:N">1:N (One to Many)</option>
-              <option value="1:1">1:1 (One to One)</option>
-              <option value="M:N">M:N (Many to Many)</option>
-            </select>
+            <div class="font-semibold text-slate-900">ProcessedFrom (Derivation)</div>
+            <div class="text-[11px] text-slate-500">ETL transformation / DAG derivation</div>
           </div>
-        </div>
+        </label>
+        <label class="flex items-center space-x-3 p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 cursor-pointer bg-slate-50">
+          <input type="radio" name="edge-type-radio" value="GeneralizationOf" class="text-sky-600">
+          <div>
+            <div class="font-semibold text-slate-900">GeneralizationOf (ISA)</div>
+            <div class="text-[11px] text-slate-500">Specialization / archetype hierarchy</div>
+          </div>
+        </label>
+        <label class="flex items-center space-x-3 p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 cursor-pointer bg-slate-50">
+          <input type="radio" name="edge-type-radio" value="RelatesTo" class="text-sky-600">
+          <div>
+            <div class="font-semibold text-slate-900">RelatesTo (Referential / Join)</div>
+            <div class="text-[11px] text-slate-500">Cross-table join condition (e.g. hadm_id)</div>
+          </div>
+        </label>
+        <label class="flex items-center space-x-3 p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 cursor-pointer bg-slate-50">
+          <input type="radio" name="edge-type-radio" value="InteractsWith" class="text-sky-600">
+          <div>
+            <div class="font-semibold text-slate-900">InteractsWith (Stakeholder & TVulnerability)</div>
+            <div class="text-[11px] text-slate-500">Access control, data protection, and persona interaction</div>
+          </div>
+        </label>
       </div>
 
-      <div class="pt-2 flex items-center justify-end space-x-2">
-        <button onclick="closeConnectionModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
+      <div class="pt-2 flex justify-end space-x-2 border-t border-slate-200">
+        <button onclick="closeEdgeDialog()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">
           Cancel
         </button>
-        <button onclick="confirmEdgeCreation()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow flex items-center space-x-1.5">
-          <i class="fa-solid fa-plus"></i>
-          <span>Create Relationship</span>
+        <button onclick="confirmEdgeCreation()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium text-xs shadow">
+          Create Wire
         </button>
       </div>
     </div>
   </div>
 
   <!-- EXPORT MANIFEST MODAL -->
-  <div id="export-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full p-5 shadow-2xl flex flex-col max-h-[85vh]">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+  <div id="export-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full p-5 shadow-2xl space-y-4 text-slate-800">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-file-code text-sky-400 text-base"></i>
-          <h3 class="font-bold text-sm text-white">Export DLD & MeDOM Manifest</h3>
+          <i class="fa-solid fa-file-export text-sky-600"></i>
+          <h3 class="font-bold text-sm text-slate-900">Export DLD Manifest</h3>
         </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="setExportFormat('yaml')" id="tab-yaml" class="px-2.5 py-1 rounded bg-sky-600 text-white text-xs">YAML</button>
-          <button onclick="setExportFormat('json')" id="tab-json" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs">JSON</button>
-          <button onclick="closeExportModal()" class="text-slate-500 hover:text-slate-300 ml-2">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-700">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
-      <div class="flex-1 my-3 overflow-hidden">
-        <textarea id="export-content" readonly class="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-emerald-400 resize-none focus:outline-none custom-scrollbar"></textarea>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-slate-600">Declarative representation for catalog registration:</span>
+          <div class="flex space-x-1">
+            <button onclick="renderExportContent('yaml')" id="tab-yaml" class="px-2.5 py-1 rounded text-xs font-medium bg-sky-600 text-white">YAML</button>
+            <button onclick="renderExportContent('json')" id="tab-json" class="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700">JSON</button>
+            <button onclick="renderExportContent('3tier')" id="tab-3tier" class="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200">MeDOM 3-Tier JSON</button>
+          </div>
+        </div>
+        <textarea id="export-output" readonly rows="16" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 font-mono text-[11px] text-slate-900 leading-relaxed"></textarea>
       </div>
 
-      <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Compatible with <code class="text-sky-400">quick_register.py</code> & <code class="text-sky-400">DLDManifest</code></span>
+      <div class="pt-2 flex justify-between items-center border-t border-slate-200">
+        <span class="text-[11px] text-slate-500">Directly compatible with IngestionController & quick_register</span>
         <div class="flex space-x-2">
-          <button onclick="copyExportToClipboard()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs flex items-center space-x-1">
+          <button onclick="copyExportText()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center space-x-1.5">
             <i class="fa-solid fa-copy"></i>
-            <span>Copy</span>
+            <span>Copy Text</span>
           </button>
-          <button onclick="downloadExportFile()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs flex items-center space-x-1.5 shadow">
+          <button onclick="downloadExportFile()" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-medium flex items-center space-x-1.5 shadow">
             <i class="fa-solid fa-download"></i>
-            <span>Download</span>
+            <span>Download File</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CYTOSCAPE APP LOGIC & ENGINE INTEGRATION -->
+  <!-- COLD SCAN INGESTION MODAL (Light Theme, Vertically Scrollable & In-Form Error Display) -->
+  <div id="cold-scan-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl text-slate-800 overflow-hidden">
+      <!-- Modal Header (Pinned at top) -->
+      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0 bg-white">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-white font-bold shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-bolt text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-base text-slate-900">Stage A: Automated Cold Scan</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-300">Zero-Copy In-Place</span>
+            </div>
+            <p class="text-xs text-slate-500">Discover entities and candidate joins without transferring raw payload data</p>
+          </div>
+        </div>
+        <button onclick="closeColdScanModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Vertically Scrollable) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+        <!-- IN-FORM ERROR BANNER (Displayed directly inside the modal) -->
+        <div id="cold-scan-modal-error" class="hidden bg-rose-50 border border-rose-300 rounded-xl p-3.5 text-xs text-rose-900 space-y-2.5 shadow-sm">
+          <div class="flex items-start space-x-2.5">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm mt-0.5 shrink-0"></i>
+            <div class="flex-1 space-y-1">
+              <div class="font-bold text-rose-950 flex items-center justify-between">
+                <span>Connection Failed</span>
+                <span class="text-[10px] bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded font-mono font-normal">Auth / Service Error</span>
+              </div>
+              <div id="cold-scan-modal-error-msg" class="text-rose-800 leading-relaxed font-sans"></div>
+            </div>
+          </div>
+          <div id="cold-scan-modal-error-actions" class="pt-2 flex flex-wrap items-center gap-2 border-t border-rose-200">
+            <button type="button" onclick="loadSimulatedBankingDemo()" class="px-3 py-1.5 rounded-md bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[11px] shadow-sm flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-play"></i>
+              <span>⚡ Load Simulated Banking Schema (Demo Mode)</span>
+            </button>
+            <button type="button" onclick="enableDemoModeCheckbox()" class="px-2.5 py-1.5 rounded-md bg-white hover:bg-rose-100 text-rose-800 border border-rose-300 font-medium text-[11px] transition">
+              <span>Check "Demo Mode" & Retry</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Source Type Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Select Ingestion Source Type</label>
+          <select id="cold-scan-type" onchange="toggleColdScanType()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-medium">
+            <option value="mysql">🗄️ MySQL Database / Lakehouse Warehouse (INFORMATION_SCHEMA Catalogs)</option>
+            <option value="parquet">📁 Cloud Storage URI / Local Parquet Path (PyArrow Metadata Footers)</option>
+          </select>
+        </div>
+
+        <!-- MySQL Section -->
+        <div id="cold-scan-mysql-group" class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <!-- Input Mode Switch -->
+          <div class="flex items-center justify-between">
+            <label class="block text-[11px] font-semibold text-slate-700">Connection Mode</label>
+            <div class="flex space-x-1 bg-white p-0.5 rounded border border-slate-200 shadow-2xs">
+              <button id="btn-mysql-mode-form" type="button" onclick="toggleMySQLInputMode('form')" class="px-2.5 py-1 rounded text-[11px] font-medium bg-amber-500 text-white shadow-2xs">Parameters</button>
+              <button id="btn-mysql-mode-uri" type="button" onclick="toggleMySQLInputMode('uri')" class="px-2.5 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Connection URI</button>
+            </div>
+          </div>
+
+          <!-- Mode A: Form Parameters -->
+          <div id="mysql-mode-form" class="space-y-2">
+            <div class="grid grid-cols-3 gap-2">
+              <div class="col-span-2">
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Host</label>
+                <input id="cold-scan-mysql-host" type="text" value="localhost" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Port</label>
+                <input id="cold-scan-mysql-port" type="number" value="3306" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Database Name</label>
+                <input id="cold-scan-mysql-db" type="text" value="banking" placeholder="e.g. banking" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Username</label>
+                <input id="cold-scan-mysql-user" type="text" value="root" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-0.5">
+                <label class="block text-[10px] uppercase font-semibold text-slate-500">Password</label>
+                <button type="button" onclick="testMySQLConnection()" class="text-[10px] font-semibold text-sky-600 hover:text-sky-800 flex items-center space-x-1 cursor-pointer">
+                  <i class="fa-solid fa-plug text-[9px]"></i>
+                  <span id="test-conn-btn-text">Test Connection</span>
+                </button>
+              </div>
+              <input id="cold-scan-mysql-pass" type="password" value="12345" placeholder="Enter your MySQL password (leave empty if none)" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              <div id="mysql-test-conn-status" class="hidden mt-1.5 p-2 rounded-lg text-[11px]"></div>
+            </div>
+          </div>
+
+          <!-- Mode B: Direct URI -->
+          <div id="mysql-mode-uri" class="hidden space-y-2">
+            <div>
+              <div class="flex items-center justify-between mb-0.5">
+                <label class="block text-[10px] uppercase font-semibold text-slate-500">MySQL Connection String / JDBC URI</label>
+                <button type="button" onclick="testMySQLConnection()" class="text-[10px] font-semibold text-sky-600 hover:text-sky-800 flex items-center space-x-1 cursor-pointer">
+                  <i class="fa-solid fa-plug text-[9px]"></i>
+                  <span>Test Connection</span>
+                </button>
+              </div>
+              <input id="cold-scan-mysql-uri-input" type="text" value="mysql://root:12345@localhost:3306/banking" oninput="handleMySQLUriInputChanged()" placeholder="mysql://root:password@localhost:3306/banking" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-amber-500">
+              <span class="text-[10px] text-slate-500">Automatically syncs with Parameters: mysql://, mysql+pymysql://, or jdbc:mysql://</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Root Lakehouse Assembly Name</label>
+            <input id="cold-scan-mysql-root" type="text" value="Banking Financial Lakehouse" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500">
+          </div>
+
+          <!-- Simulated / Demo Checkbox -->
+          <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input id="cold-scan-mysql-mock" type="checkbox" onchange="hideModalError()" class="w-4 h-4 rounded text-amber-600 bg-white border-slate-300 focus:ring-0">
+              <span class="text-xs text-slate-800 font-medium">Use Simulated Schema (Demo Mode - No Server Auth Required)</span>
+            </label>
+            <button type="button" onclick="loadSimulatedBankingDemo()" class="px-2 py-0.5 rounded text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-medium">
+              Load Banking Demo
+            </button>
+          </div>
+
+          <div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200 flex items-start space-x-2">
+            <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+            <span><b>Zero Payload Query:</b> Connects via read-only queries to <code>INFORMATION_SCHEMA.TABLES</code>, <code>COLUMNS</code>, and <code>KEY_COLUMN_USAGE</code> to extract tables, schema definitions, and explicit foreign keys with 0 table records transferred.</span>
+          </div>
+        </div>
+
+        <!-- Parquet / Object Store Section -->
+        <div id="cold-scan-parquet-group" class="hidden space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-medium text-slate-700">Storage URI or Local Partition Path</label>
+              <span class="text-[10px] text-amber-700 font-mono">s3://, gs://, hdfs://, or local</span>
+            </div>
+            <input id="cold-scan-dir" type="text" value="H:\Papers\Metadata Tool\sample_lake" oninput="hideModalError()" placeholder="e.g. s3://my-lake-bucket/mimic4/hosp/ or H:\Papers\Metadata Tool\sample_lake" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-mono focus:border-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-medium text-slate-700 mb-1">Root Lakehouse Assembly Name</label>
+            <input id="cold-scan-root-assembly" type="text" value="Hospital ICU Lakehouse" placeholder="e.g. MIMIC-IV Clinical Lakehouse" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:border-amber-500 focus:outline-none">
+          </div>
+
+          <!-- Quick Presets -->
+          <div>
+            <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1.5">Quick Presets / Test Partitions</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" onclick="setParquetPreset('local')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 text-[11px] flex items-center space-x-1 border border-slate-300 shadow-2xs">
+                <i class="fa-solid fa-folder text-amber-600"></i>
+                <span>Local Sample Lake</span>
+              </button>
+              <button type="button" onclick="setParquetPreset('s3')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 text-[11px] flex items-center space-x-1 border border-slate-300 shadow-2xs">
+                <i class="fa-brands fa-aws text-orange-500"></i>
+                <span>s3://mimic4-lakehouse/hosp/</span>
+              </button>
+              <button type="button" onclick="setParquetPreset('gcs')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 text-[11px] flex items-center space-x-1 border border-slate-300 shadow-2xs">
+                <i class="fa-brands fa-google text-blue-500"></i>
+                <span>gs://lakehouse/iot_stream/</span>
+              </button>
+              <button type="button" onclick="setParquetPreset('hdfs')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 text-[11px] flex items-center space-x-1 border border-slate-300 shadow-2xs">
+                <i class="fa-solid fa-network-wired text-purple-500"></i>
+                <span>hdfs://namenode:8020/raw/</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200 flex items-start space-x-2">
+            <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+            <span><b>Zero-Copy Metadata Seek:</b> The engine reads only the last 4–32 KB footers using PyArrow to extract column schemas, null counts, byte sizes, and timestamps without loading table payload data.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons (Pinned at bottom) -->
+      <div class="px-6 py-3.5 bg-slate-50/70 border-t border-slate-200 shrink-0 flex items-center justify-between">
+        <span class="text-xs text-slate-500 hidden sm:inline">In-place discovery • Zero payload transfer</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="closeColdScanModal()" class="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium transition border border-slate-300">
+            Cancel
+          </button>
+          <button id="btn-execute-cold-scan" onclick="executeColdScan()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md shadow-amber-500/20 flex items-center space-x-2 transition cursor-pointer">
+            <i class="fa-solid fa-play"></i>
+            <span>Scan & Draft Graph</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
     let cy = null;
     let interactionMode = 'select';
     let connectSourceNode = null;
     let selectedElement = null;
-    let currentExportFormat = 'yaml';
-    let nextIdCounter = 1;
+    let pendingEdgeSource = null;
+    let pendingEdgeTarget = null;
+    let nextIdCounter = 100;
 
     const defaultStakeholder = {
-      id: "stk_physionet_curator",
-      name: "Lead Data Steward",
-      role: "Chief Medical Data Steward",
-      email: "steward@lakehouse.org",
-      department: "Data Governance Board"
+      id: "stk_default_steward",
+      name: "Dr. Elena Rostova",
+      role: "Lead Clinical Data Steward",
+      department: "Health Informatics",
+      email: "elena.rostova@mimic-lake.org"
     };
 
     document.addEventListener('DOMContentLoaded', () => {
       initCytoscape();
-      updateCanvasMetrics();
+      loadMimicDemo();
+      syncMySQLParamsToUri();
     });
 
     function initCytoscape() {
@@ -672,14 +1067,18 @@
             selector: 'node',
             style: {
               'label': 'data(name)',
-              'text-valign': 'bottom',
-              'text-margin-y': 6,
-              'color': '#cbd5e1',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'text-wrap': 'wrap',
+              'text-max-width': '100px',
+              'text-overflow-wrap': 'whitespace',
+              'line-height': 1.25,
               'font-size': '11px',
               'font-family': 'Inter, system-ui, sans-serif',
+              'color': '#0f172a',
               'font-weight': 600,
               'text-outline-width': 2,
-              'text-outline-color': '#090d16',
+              'text-outline-color': '#ffffff',
               'transition-property': 'background-color, line-color, target-arrow-color, width, height',
               'transition-duration': '0.15s'
             }
@@ -688,75 +1087,97 @@
             selector: 'node[entityType = "DataSet"][structureType = "Complex"]',
             style: {
               'shape': 'round-rectangle',
-              'width': 140,
-              'height': 48,
-              'background-color': '#312e81',
+              'width': 150,
+              'height': 52,
+              'background-color': '#e0e7ff',
               'border-width': 2,
-              'border-color': '#818cf8',
-              'border-opacity': 0.9,
-              'background-opacity': 0.85
+              'border-color': '#4f46e5',
+              'border-opacity': 1.0,
+              'background-opacity': 0.95,
+              'background-image': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjNDMzOGNhIj48cGF0aCBkPSJNMTAgNEg0Yy0xLjEgMC0xLjk5LjktMS45OSAyTDIgMThjMCAxLjEuOSAyIDIgMmgxNmMxLjEgMCAyLS45IDItMlY4YzAtMS4xLS45LTItMi0yaC04bC0yLTJ6Ii8+PC9zdmc+',
+              'background-fit': 'none',
+              'background-width': '18px',
+              'background-height': '18px',
+              'background-position-x': '14px',
+              'background-position-y': '50%',
+              'background-clip': 'node',
+              'text-margin-x': 10,
+              'text-max-width': '96px'
             }
           },
           {
             selector: 'node[entityType = "DataSet"][structureType = "Simple"]',
             style: {
               'shape': 'round-rectangle',
-              'width': 130,
-              'height': 44,
-              'background-color': '#075985',
+              'width': 145,
+              'height': 50,
+              'background-color': '#e0f2fe',
               'border-width': 2,
-              'border-color': '#38bdf8',
-              'border-opacity': 0.9,
-              'background-opacity': 0.85
+              'border-color': '#0284c7',
+              'border-opacity': 1.0,
+              'background-opacity': 0.95,
+              'background-image': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDI4NGM3Ij48cGF0aCBkPSJNMTQgMkg2Yy0xLjEgMC0xLjk5LjktMS45OSAyTDQgMjBjMCAxLjEuODkgMiAxLjk5IDJIMThjMS4xIDAgMi0uOSAyLTJWOGwtNi02em0yIDE2SDh2LTJoOHYyem0wLTRIOHYtMmg4djJ6bS0zLTVWMy41TDE4LjUgOUgxM3oiLz48L3N2Zz4=',
+              'background-fit': 'none',
+              'background-width': '18px',
+              'background-height': '18px',
+              'background-position-x': '14px',
+              'background-position-y': '50%',
+              'background-clip': 'node',
+              'text-margin-x': 10,
+              'text-max-width': '94px'
             }
           },
           {
             selector: 'node[entityType = "DataSet"][structureType = "Abstract"]',
             style: {
               'shape': 'diamond',
-              'width': 110,
-              'height': 48,
-              'background-color': '#581c87',
+              'width': 125,
+              'height': 54,
+              'background-color': '#f3e8ff',
               'border-width': 2,
-              'border-color': '#c084fc',
-              'border-opacity': 0.9,
-              'background-opacity': 0.85
+              'border-color': '#9333ea',
+              'border-opacity': 1.0,
+              'background-opacity': 0.95,
+              'text-max-width': '85px'
             }
           },
           {
             selector: 'node[entityType = "DataObject"]',
             style: {
-              'shape': 'round-tag',
-              'width': 120,
-              'height': 38,
-              'background-color': '#064e3b',
+              'shape': 'barrel',
+              'width': 140,
+              'height': 50,
+              'background-color': '#d1fae5',
               'border-width': 2,
-              'border-color': '#34d399',
-              'border-opacity': 0.9,
-              'background-opacity': 0.85
+              'border-color': '#059669',
+              'border-opacity': 1.0,
+              'background-opacity': 0.95,
+              'text-max-width': '105px'
             }
           },
           {
             selector: 'node[entityType = "Stakeholder"]',
             style: {
-              'shape': 'hexagon',
-              'width': 110,
-              'height': 44,
-              'background-color': '#78350f',
+              'shape': 'ellipse',
+              'width': 74,
+              'height': 74,
+              'background-color': '#fef3c7',
               'border-width': 2,
-              'border-color': '#fbbf24',
-              'border-opacity': 0.9,
-              'background-opacity': 0.85
+              'border-color': '#d97706',
+              'border-opacity': 1.0,
+              'background-opacity': 0.95,
+              'font-size': '10px',
+              'text-max-width': '64px'
             }
           },
           {
             selector: 'node:selected',
             style: {
-              'border-color': '#ffffff',
+              'border-color': '#0284c7',
               'border-width': 3,
               'shadow-blur': 15,
               'shadow-color': '#38bdf8',
-              'shadow-opacity': 0.8
+              'shadow-opacity': 0.6
             }
           },
           {
@@ -765,15 +1186,16 @@
               'curve-style': 'bezier',
               'font-size': '9px',
               'font-family': 'Inter, system-ui, sans-serif',
-              'color': '#94a3b8',
-              'text-background-color': '#090d16',
-              'text-background-opacity': 0.85,
+              'color': '#1e293b',
+              'text-background-color': '#ffffff',
+              'text-background-opacity': 0.95,
               'text-background-padding': 3,
               'text-background-shape': 'roundrectangle',
-              'text-border-color': '#334155',
+              'text-border-color': '#cbd5e1',
               'text-border-width': 1,
-              'text-border-opacity': 0.8,
-              'arrow-scale': 1.1
+              'text-border-opacity': 0.9,
+              'target-arrow-shape': 'triangle',
+              'arrow-scale': 1.15
             }
           },
           {
@@ -782,7 +1204,7 @@
               'line-color': '#64748b',
               'line-style': 'solid',
               'width': 2.5,
-              'target-arrow-shape': 'square',
+              'target-arrow-shape': 'triangle',
               'target-arrow-color': '#64748b',
               'label': 'AssemblyOf'
             }
@@ -790,65 +1212,66 @@
           {
             selector: 'edge[kind = "ProcessedFrom"]',
             style: {
-              'line-color': '#10b981',
+              'line-color': '#059669',
               'line-style': 'dashed',
               'line-dash-pattern': [6, 3],
               'width': 2.5,
               'target-arrow-shape': 'triangle',
-              'target-arrow-color': '#10b981',
+              'target-arrow-color': '#059669',
               'label': 'ProcessedFrom'
             }
           },
           {
             selector: 'edge[kind = "GeneralizationOf"]',
             style: {
-              'line-color': '#c084fc',
+              'line-color': '#7c3aed',
               'line-style': 'solid',
               'width': 2.5,
-              'target-arrow-shape': 'vee',
-              'target-arrow-color': '#c084fc',
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#7c3aed',
               'label': 'ISA'
             }
           },
           {
             selector: 'edge[status = "Suggested"]',
             style: {
-              'line-color': '#f59e0b',
+              'line-color': '#d97706',
               'line-style': 'dashed',
               'line-dash-pattern': [4, 4],
               'width': 2.5,
-              'target-arrow-shape': 'circle',
-              'target-arrow-color': '#f59e0b',
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#d97706',
               'label': 'data(label)'
             }
           },
-          selector: 'edge[kind = "RelatesTo"]',
+          {
+            selector: 'edge[kind = "RelatesTo"]',
             style: {
-              'line-color': '#38bdf8',
+              'line-color': '#0284c7',
               'line-style': 'dotted',
               'width': 2.5,
-              'target-arrow-shape': 'circle',
-              'target-arrow-color': '#38bdf8',
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#0284c7',
               'label': 'data(label)'
             }
           },
           {
             selector: 'edge[kind = "InteractsWith"]',
             style: {
-              'line-color': '#f59e0b',
+              'line-color': '#e11d48',
               'line-style': 'dashed',
               'line-dash-pattern': [3, 3],
               'width': 1.5,
               'target-arrow-shape': 'triangle',
-              'target-arrow-color': '#f59e0b',
+              'target-arrow-color': '#e11d48',
               'label': 'Governance'
             }
           },
           {
             selector: 'edge:selected',
             style: {
-              'line-color': '#ffffff',
-              'target-arrow-color': '#ffffff',
+              'line-color': '#0f172a',
+              'target-arrow-color': '#0f172a',
               'width': 3.5
             }
           }
@@ -950,9 +1373,9 @@
           id: stkId,
           name: `Steward ${idNum}`,
           entityType: 'Stakeholder',
-          role: 'Data Governance Steward',
-          email: `steward_${idNum}@lakehouse.org`,
-          department: 'Data Operations'
+          role: 'Data Steward',
+          email: `steward${idNum}@lakehouse.org`,
+          department: 'Data Governance'
         };
       }
 
@@ -963,106 +1386,107 @@
       });
 
       updateCanvasMetrics();
-      showToast(`Added ${entityType} '${newNodeData.name}'`, 'success');
       inspectNode(node);
+      showToast(`Created ${entityType} '${newNodeData.name}'`, 'success');
     }
 
     function setInteractionMode(mode) {
       interactionMode = mode;
-      connectSourceNode = null;
-
-      const selBtn = document.getElementById('mode-select-btn');
-      const connBtn = document.getElementById('mode-connect-btn');
+      const selectBtn = document.getElementById('mode-select-btn');
+      const connectBtn = document.getElementById('mode-connect-btn');
       const tip = document.getElementById('connect-mode-tip');
 
-      if (mode === 'select') {
-        selBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
-        connBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white";
-        tip.classList.add('hidden');
-        cy.elements().removeClass('connect-active');
-      } else {
-        connBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
-        selBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-400 hover:text-white";
+      if (mode === 'connect') {
+        selectBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-600 hover:text-slate-900";
+        connectBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
         tip.classList.remove('hidden');
+        connectSourceNode = null;
+      } else {
+        selectBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 bg-sky-600 text-white shadow";
+        connectBtn.className = "px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-2 text-slate-600 hover:text-slate-900";
+        tip.classList.add('hidden');
+        connectSourceNode = null;
       }
     }
 
     function handleConnectNodeClick(node) {
       if (!connectSourceNode) {
         connectSourceNode = node;
-        node.addClass('connect-active');
-        showToast(`Selected source '${node.data('name')}'. Now click target node.`, 'info');
+        node.select();
+        showToast(`Source selected: ${node.data('name')}. Now click target node.`, 'info');
       } else {
         if (connectSourceNode.id() === node.id()) {
           showToast('Cannot connect a node to itself', 'warning');
+          connectSourceNode.unselect();
+          connectSourceNode = null;
           return;
         }
-        const source = connectSourceNode;
-        const target = node;
-        connectSourceNode.removeClass('connect-active');
-        connectSourceNode = null;
-
-        openEdgeModal(source, target);
+        pendingEdgeSource = connectSourceNode;
+        pendingEdgeTarget = node;
+        openEdgeDialog();
       }
     }
 
-    let pendingEdgeSource = null;
-    let pendingEdgeTarget = null;
-
-    function openEdgeModal(source, target) {
-      pendingEdgeSource = source;
-      pendingEdgeTarget = target;
-
-      document.getElementById('modal-src-name').innerText = source.data('name') || source.id();
-      document.getElementById('modal-tgt-name').innerText = target.data('name') || target.id();
-
-      const defaultType = document.getElementById('default-edge-type').value;
-      document.getElementById('modal-edge-kind').value = defaultType;
-      toggleModalRelFields();
-
-      document.getElementById('connection-modal').classList.remove('hidden');
+    function openEdgeDialog() {
+      document.getElementById('edge-dialog').classList.remove('hidden');
     }
 
-    function closeConnectionModal() {
-      document.getElementById('connection-modal').classList.add('hidden');
+    function closeEdgeDialog() {
+      document.getElementById('edge-dialog').classList.add('hidden');
+      if (connectSourceNode) connectSourceNode.unselect();
+      connectSourceNode = null;
       pendingEdgeSource = null;
       pendingEdgeTarget = null;
     }
 
-    function toggleModalRelFields() {
-      const kind = document.getElementById('modal-edge-kind').value;
-      const joinFields = document.getElementById('modal-join-fields');
-      if (kind === 'RelatesTo') {
-        joinFields.classList.remove('hidden');
+    function confirmEdgeCreation() {
+      const selectedRadio = document.querySelector('input[name="edge-type-radio"]:checked');
+      const kind = selectedRadio ? selectedRadio.value : 'AssemblyOf';
+
+      if (pendingEdgeSource && pendingEdgeTarget) {
+        const edgeId = `edge_${pendingEdgeSource.id()}_${pendingEdgeTarget.id()}_${nextIdCounter++}`;
+        cy.add({
+          group: 'edges',
+          data: {
+            id: edgeId,
+            source: pendingEdgeSource.id(),
+            target: pendingEdgeTarget.id(),
+            kind: kind,
+            label: kind
+          }
+        });
+        showToast(`Connected ${pendingEdgeSource.data('name')} -> ${pendingEdgeTarget.data('name')} (${kind})`, 'success');
+        updateCanvasMetrics();
+      }
+      closeEdgeDialog();
+      setInteractionMode('select');
+    }
+
+    function handleLifecycleChange() {
+      const stage = document.getElementById('form-lifecycle-stage').value;
+      const valueSec = document.getElementById('form-tmd-value-section');
+      if (stage === 'Processed') {
+        valueSec.classList.remove('hidden');
       } else {
-        joinFields.classList.add('hidden');
+        valueSec.classList.add('hidden');
       }
     }
 
-    function confirmEdgeCreation() {
-      if (!pendingEdgeSource || !pendingEdgeTarget) return;
-
-      const kind = document.getElementById('modal-edge-kind').value;
-      const joinKey = document.getElementById('modal-join-key').value;
-      const cardinality = document.getElementById('modal-cardinality').value;
-
-      let edgeData = {
-        id: `rel_${pendingEdgeSource.id()}_to_${pendingEdgeTarget.id()}_${Date.now()}`,
-        source: pendingEdgeSource.id(),
-        target: pendingEdgeTarget.id(),
-        kind: kind,
-        label: kind === 'RelatesTo' ? `${joinKey}` : kind
-      };
-
+    function handleEdgeKindChange() {
+      const kind = document.getElementById('form-edge-type-select').value;
+      document.getElementById('form-edge-kind').innerText = kind;
+      const relatesPanel = document.getElementById('form-edge-relates-panel');
+      const interactsPanel = document.getElementById('form-edge-interacts-panel');
       if (kind === 'RelatesTo') {
-        edgeData.join_key = joinKey;
-        edgeData.cardinality = cardinality;
+        relatesPanel.classList.remove('hidden');
+        interactsPanel.classList.add('hidden');
+      } else if (kind === 'InteractsWith') {
+        relatesPanel.classList.add('hidden');
+        interactsPanel.classList.remove('hidden');
+      } else {
+        relatesPanel.classList.remove('hidden');
+        interactsPanel.classList.add('hidden');
       }
-
-      cy.add({ group: 'edges', data: edgeData });
-      closeConnectionModal();
-      updateCanvasMetrics();
-      showToast(`Linked ${pendingEdgeSource.data('name')} ➔ ${pendingEdgeTarget.data('name')} (${kind})`, 'success');
     }
 
     function inspectNode(node) {
@@ -1073,50 +1497,110 @@
       document.getElementById('inspector-empty').classList.add('hidden');
       document.getElementById('inspector-form').classList.remove('hidden');
 
-      const data = node.data();
-      const entityType = data.entityType || 'DataSet';
-
-      document.getElementById('inspector-title').innerText = `${entityType} Inspector`;
+      const entityType = node.data('entityType');
       document.getElementById('form-entity-type').innerText = entityType;
-      document.getElementById('form-entity-id').innerText = data.id;
-      document.getElementById('form-name').value = data.name || data.id;
-      document.getElementById('form-desc').value = data.description || '';
+      document.getElementById('form-entity-id').innerText = node.id();
+      document.getElementById('form-name').value = node.data('name') || '';
+      document.getElementById('form-desc-group').classList.remove('hidden');
+      document.getElementById('form-desc').value = node.data('description') || '';
 
       const badge = document.getElementById('inspector-badge');
       const dsProps = document.getElementById('group-dataset-props');
       const objProps = document.getElementById('group-object-props');
       const edgeProps = document.getElementById('group-edge-props');
-
+      const stkProps = document.getElementById('group-stakeholder-props');
       edgeProps.classList.add('hidden');
 
       if (entityType === 'DataSet') {
-        badge.className = "w-3 h-3 rounded-full bg-sky-500 shadow-lg shadow-sky-500/50";
+        badge.className = "w-2.5 h-2.5 rounded-full bg-sky-500";
+        document.getElementById('inspector-title').innerText = "TMD Inspector (Dataset Tier)";
         dsProps.classList.remove('hidden');
         objProps.classList.add('hidden');
+        stkProps.classList.add('hidden');
 
-        document.getElementById('form-structure-type').value = data.structureType || 'Simple';
-        document.getElementById('form-lifecycle-stage').value = data.lifecycleStage || 'Processed';
+        // Structure & Lifecycle
+        document.getElementById('form-structure-type').value = node.data('structureType') || 'Simple';
+        const lifecycle = node.data('lifecycleStage') || 'Raw';
+        document.getElementById('form-lifecycle-stage').value = lifecycle;
+        handleLifecycleChange();
 
-        document.getElementById('form-volume-rows').value = data.volume_records || 0;
-        document.getElementById('form-volume-bytes').value = data.volume_bytes || 0;
-        document.getElementById('form-veracity-completeness').value = data.veracity_completeness || 1.0;
-        document.getElementById('form-vulnerability-class').value = data.vulnerability_tier || 'Confidential_HIPAA';
-        document.getElementById('form-variety-cols').value = data.variety_cols || 0;
-        document.getElementById('form-variety-format').value = data.variety_format || 'Parquet';
-        document.getElementById('form-value-criticality').value = data.value_criticality || 'High';
+        // TVolume
+        document.getElementById('form-tmd-volume-rows').value = node.data('tmd_volume_rows') !== undefined ? node.data('tmd_volume_rows') : (node.data('volume_records') || 50000);
+        document.getElementById('form-tmd-volume-bytes').value = node.data('tmd_volume_bytes') !== undefined ? node.data('tmd_volume_bytes') : (node.data('volume_bytes') || 5242880);
+        document.getElementById('form-tmd-volume-compressed').value = node.data('tmd_volume_compressed') !== undefined ? node.data('tmd_volume_compressed') : 1048576;
+        document.getElementById('form-tmd-volume-algo').value = node.data('tmd_volume_algo') || 'Snappy';
+        document.getElementById('form-tmd-volume-ts').value = node.data('tmd_volume_ts') || new Date().toISOString();
+
+        // TVelocity
+        document.getElementById('form-tmd-velocity-speed').value = node.data('tmd_velocity_speed') || 'Fixed';
+        document.getElementById('form-tmd-velocity-ts').value = node.data('tmd_velocity_ts') || new Date().toISOString();
+
+        // TVariety
+        document.getElementById('form-tmd-variety-nature').value = node.data('tmd_variety_nature') || 'Structured';
+        document.getElementById('form-tmd-variety-rep').value = node.data('tmd_variety_rep') || (node.data('variety_format') || 'Parquet');
+        document.getElementById('form-tmd-variety-ttl').value = node.data('tmd_variety_ttl') || 'Forever';
+        document.getElementById('form-tmd-variety-ts').value = node.data('tmd_variety_ts') || new Date().toISOString();
+
+        // TVeracity
+        document.getElementById('form-tmd-veracity-source').value = node.data('tmd_veracity_source') || 'Hospital Enterprise EHR';
+        document.getElementById('form-tmd-veracity-device').value = node.data('tmd_veracity_device') || 'EHR Database Server';
+        document.getElementById('form-tmd-veracity-accuracy').value = node.data('tmd_veracity_accuracy') !== undefined ? node.data('tmd_veracity_accuracy') : 0.99;
+        document.getElementById('form-tmd-veracity-precision').value = node.data('tmd_veracity_precision') !== undefined ? node.data('tmd_veracity_precision') : 0.98;
+        document.getElementById('form-tmd-veracity-ts').value = node.data('tmd_veracity_ts') || new Date().toISOString();
+
+        // TValue (Processed only)
+        document.getElementById('form-tmd-value-origin').value = node.data('tmd_value_origin') || (node.data('processed_from') && node.data('processed_from').length ? node.data('processed_from').join(', ') : 'ds_admissions');
+        document.getElementById('form-tmd-value-dest').value = node.data('tmd_value_dest') || 'ds_icu_summary';
+        document.getElementById('form-tmd-value-transformation').value = node.data('tmd_value_transformation') || 'Aggregate vitals and compute SOFA scores';
+        document.getElementById('form-tmd-value-ts').value = node.data('tmd_value_ts') || new Date().toISOString();
 
       } else if (entityType === 'DataObject') {
-        badge.className = "w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50";
+        badge.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+        document.getElementById('inspector-title').innerText = "OMD Inspector (Object Tier)";
         dsProps.classList.add('hidden');
         objProps.classList.remove('hidden');
+        stkProps.classList.add('hidden');
 
-        document.getElementById('form-obj-type').value = data.physicalType || 'Parquet';
-        document.getElementById('auto-profile-path').value = data.file_path || '';
+        document.getElementById('form-obj-filepath').value = node.data('storage_path') || '';
 
-      } else if (entityType === 'Stakeholder') {
-        badge.className = "w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50";
+        // OVolume
+        document.getElementById('form-omd-volume-bytes').value = node.data('omd_volume_bytes') !== undefined ? node.data('omd_volume_bytes') : (node.data('volume_bytes') || 2621440);
+        document.getElementById('form-omd-volume-rows').value = node.data('omd_volume_rows') !== undefined ? node.data('omd_volume_rows') : (node.data('volume_records') || 25000);
+        document.getElementById('form-omd-volume-cols').value = node.data('omd_volume_cols') !== undefined ? node.data('omd_volume_cols') : (node.data('variety_cols') || 8);
+        document.getElementById('form-omd-volume-nulls').value = node.data('omd_volume_nulls') || 0;
+        document.getElementById('form-omd-volume-inapplicable').value = node.data('omd_volume_inapplicable') || 0;
+        document.getElementById('form-omd-volume-ts').value = node.data('omd_volume_ts') || new Date().toISOString();
+
+        // OVariety
+        document.getElementById('form-omd-variety-format').value = node.data('omd_variety_format') || (node.data('physicalType') || 'Parquet');
+        let schemaStr = node.data('omd_variety_schema');
+        if (!schemaStr) {
+          schemaStr = JSON.stringify({
+            "subject_id": "INTEGER",
+            "hadm_id": "INTEGER",
+            "charttime": "TIMESTAMP",
+            "valuenum": "FLOAT"
+          }, null, 2);
+        } else if (typeof schemaStr !== 'string') {
+          schemaStr = JSON.stringify(schemaStr, null, 2);
+        }
+        document.getElementById('form-omd-variety-schema').value = schemaStr;
+        document.getElementById('form-omd-variety-ts').value = node.data('omd_variety_ts') || new Date().toISOString();
+
+        // OVariability
+        document.getElementById('form-omd-variability-modified').value = node.data('omd_variability_modified') || new Date().toISOString();
+        document.getElementById('form-omd-variability-deleted').value = node.data('omd_variability_deleted') || 'null';
+
+      } else {
+        badge.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+        document.getElementById('inspector-title').innerText = "Stakeholder Persona";
         dsProps.classList.add('hidden');
         objProps.classList.add('hidden');
+        stkProps.classList.remove('hidden');
+
+        document.getElementById('form-stk-role').value = node.data('role') || 'Clinical Data Steward';
+        document.getElementById('form-stk-dept').value = node.data('department') || 'Health Informatics';
+        document.getElementById('form-stk-email').value = node.data('email') || 'steward@mimic-lake.org';
       }
     }
 
@@ -1128,21 +1612,48 @@
       document.getElementById('inspector-empty').classList.add('hidden');
       document.getElementById('inspector-form').classList.remove('hidden');
 
-      document.getElementById('inspector-badge').className = "w-3 h-3 rounded-full bg-indigo-500";
-      document.getElementById('inspector-title').innerText = "Edge Inspector";
-      document.getElementById('form-entity-type').innerText = "Relationship";
+      document.getElementById('inspector-badge').className = "w-2.5 h-2.5 rounded-full bg-indigo-500";
+      document.getElementById('inspector-title').innerText = "RMD Inspector (Edge Tier)";
+      document.getElementById('form-entity-type').innerText = "Relationship (RMD)";
       document.getElementById('form-entity-id').innerText = edge.id();
       document.getElementById('form-name').value = edge.data('label') || edge.data('kind');
       document.getElementById('form-desc-group').classList.add('hidden');
 
       document.getElementById('group-dataset-props').classList.add('hidden');
       document.getElementById('group-object-props').classList.add('hidden');
+      document.getElementById('group-stakeholder-props').classList.add('hidden');
       document.getElementById('group-edge-props').classList.remove('hidden');
 
-      document.getElementById('form-edge-kind').innerText = edge.data('kind');
-      document.getElementById('form-edge-type-select').value = edge.data('kind');
-      document.getElementById('form-edge-keys').value = edge.data('join_key') || '';
+      const kind = edge.data('kind') || 'RelatesTo';
+      document.getElementById('form-edge-kind').innerText = kind;
+      document.getElementById('form-edge-type-select').value = kind;
+      handleEdgeKindChange();
+
+      // RelatesTo Fields
+      document.getElementById('form-rmd-relates-nature').value = edge.data('rmd_relates_nature') || 'Referential';
+      document.getElementById('form-rmd-relates-keys').value = edge.data('rmd_relates_keys') || (edge.data('join_key') || 'Hospital.hadm_id = ICU.hadm_id');
+      document.getElementById('form-rmd-relates-temporal').value = edge.data('rmd_relates_temporal') || 'Hospital.admittime -> ICU.intime';
+      document.getElementById('form-rmd-relates-provenance').value = edge.data('rmd_relates_provenance') || (edge.data('provenance') || 'ETL_Direct_Lineage');
       document.getElementById('form-edge-cardinality').value = edge.data('cardinality') || '1:N';
+
+      // InteractsWith Fields
+      const stkNode = edge.source().data('entityType') === 'Stakeholder' ? edge.source() : (edge.target().data('entityType') === 'Stakeholder' ? edge.target() : null);
+      document.getElementById('form-rmd-vuln-stk-id').value = edge.data('rmd_vuln_stk_id') || (stkNode ? stkNode.id() : 'stk_default');
+      document.getElementById('form-rmd-vuln-stk-role').value = edge.data('rmd_vuln_stk_role') || (stkNode ? stkNode.data('role') : 'Data Steward');
+      document.getElementById('form-rmd-vuln-protection').value = edge.data('rmd_vuln_protection') || 'De-identified';
+      document.getElementById('form-rmd-vuln-auth').value = edge.data('rmd_vuln_auth') !== undefined ? String(edge.data('rmd_vuln_auth')) : 'true';
+      document.getElementById('form-rmd-vuln-level').value = edge.data('rmd_vuln_level') || 'Credentialed';
+      document.getElementById('form-rmd-vuln-start').value = edge.data('rmd_vuln_start') || '2026-01-01T00:00:00Z';
+      document.getElementById('form-rmd-vuln-end').value = edge.data('rmd_vuln_end') || '2026-12-31T23:59:59Z';
+      document.getElementById('form-rmd-vuln-ts').value = edge.data('rmd_vuln_ts') || new Date().toISOString();
+
+      if (edge.data('status') === 'Suggested') {
+        document.getElementById('form-edge-suggestion-box').classList.remove('hidden');
+        const confPct = Math.round((edge.data('confidence') !== undefined ? edge.data('confidence') : 0.95) * 100);
+        document.getElementById('form-edge-confidence-badge').innerText = `${confPct}% Conf`;
+      } else {
+        document.getElementById('form-edge-suggestion-box').classList.add('hidden');
+      }
     }
 
     function clearSelection() {
@@ -1164,92 +1675,166 @@
 
         if (entityType === 'DataSet') {
           selectedElement.data('structureType', document.getElementById('form-structure-type').value);
-          selectedElement.data('lifecycleStage', document.getElementById('form-lifecycle-stage').value);
+          const stage = document.getElementById('form-lifecycle-stage').value;
+          selectedElement.data('lifecycleStage', stage);
 
-          selectedElement.data('volume_records', parseInt(document.getElementById('form-volume-rows').value) || 0);
-          selectedElement.data('volume_bytes', parseInt(document.getElementById('form-volume-bytes').value) || 0);
-          selectedElement.data('veracity_completeness', parseFloat(document.getElementById('form-veracity-completeness').value) || 1.0);
-          selectedElement.data('vulnerability_tier', document.getElementById('form-vulnerability-class').value);
-          selectedElement.data('variety_cols', parseInt(document.getElementById('form-variety-cols').value) || 0);
-          selectedElement.data('variety_format', document.getElementById('form-variety-format').value);
-          selectedElement.data('value_criticality', document.getElementById('form-value-criticality').value);
+          // TVolume
+          const volRows = parseInt(document.getElementById('form-tmd-volume-rows').value) || 0;
+          const volBytes = parseInt(document.getElementById('form-tmd-volume-bytes').value) || 0;
+          const volComp = parseInt(document.getElementById('form-tmd-volume-compressed').value) || 0;
+          const volAlgo = document.getElementById('form-tmd-volume-algo').value;
+          selectedElement.data('tmd_volume_rows', volRows);
+          selectedElement.data('tmd_volume_bytes', volBytes);
+          selectedElement.data('tmd_volume_compressed', volComp);
+          selectedElement.data('tmd_volume_algo', volAlgo);
+          selectedElement.data('volume_records', volRows);
+          selectedElement.data('volume_bytes', volBytes);
+
+          // TVelocity
+          selectedElement.data('tmd_velocity_speed', document.getElementById('form-tmd-velocity-speed').value);
+
+          // TVariety
+          selectedElement.data('tmd_variety_nature', document.getElementById('form-tmd-variety-nature').value);
+          const rep = document.getElementById('form-tmd-variety-rep').value;
+          selectedElement.data('tmd_variety_rep', rep);
+          selectedElement.data('variety_format', rep);
+          selectedElement.data('tmd_variety_ttl', document.getElementById('form-tmd-variety-ttl').value);
+
+          // TVeracity
+          selectedElement.data('tmd_veracity_source', document.getElementById('form-tmd-veracity-source').value);
+          selectedElement.data('tmd_veracity_device', document.getElementById('form-tmd-veracity-device').value);
+          selectedElement.data('tmd_veracity_accuracy', parseFloat(document.getElementById('form-tmd-veracity-accuracy').value) || 0.99);
+          selectedElement.data('tmd_veracity_precision', parseFloat(document.getElementById('form-tmd-veracity-precision').value) || 0.98);
+
+          // TValue (if Processed)
+          if (stage === 'Processed') {
+            selectedElement.data('tmd_value_origin', document.getElementById('form-tmd-value-origin').value);
+            selectedElement.data('tmd_value_dest', document.getElementById('form-tmd-value-dest').value);
+            selectedElement.data('tmd_value_transformation', document.getElementById('form-tmd-value-transformation').value);
+          }
+
         } else if (entityType === 'DataObject') {
-          selectedElement.data('physicalType', document.getElementById('form-obj-type').value);
-          selectedElement.data('file_path', document.getElementById('auto-profile-path').value);
+          selectedElement.data('storage_path', document.getElementById('form-obj-filepath').value);
+
+          // OVolume
+          const oBytes = parseInt(document.getElementById('form-omd-volume-bytes').value) || 0;
+          const oRows = parseInt(document.getElementById('form-omd-volume-rows').value) || 0;
+          const oCols = parseInt(document.getElementById('form-omd-volume-cols').value) || 0;
+          selectedElement.data('omd_volume_bytes', oBytes);
+          selectedElement.data('omd_volume_rows', oRows);
+          selectedElement.data('omd_volume_cols', oCols);
+          selectedElement.data('omd_volume_nulls', parseInt(document.getElementById('form-omd-volume-nulls').value) || 0);
+          selectedElement.data('omd_volume_inapplicable', parseInt(document.getElementById('form-omd-volume-inapplicable').value) || 0);
+          selectedElement.data('volume_bytes', oBytes);
+          selectedElement.data('volume_records', oRows);
+          selectedElement.data('variety_cols', oCols);
+
+          // OVariety
+          selectedElement.data('omd_variety_format', document.getElementById('form-omd-variety-format').value);
+          selectedElement.data('variety_format', document.getElementById('form-omd-variety-format').value);
+          try {
+            selectedElement.data('omd_variety_schema', JSON.parse(document.getElementById('form-omd-variety-schema').value));
+          } catch(e) {
+            selectedElement.data('omd_variety_schema', document.getElementById('form-omd-variety-schema').value);
+          }
+
+          // OVariability
+          selectedElement.data('omd_variability_modified', document.getElementById('form-omd-variability-modified').value);
+          selectedElement.data('omd_variability_deleted', document.getElementById('form-omd-variability-deleted').value === 'null' ? null : document.getElementById('form-omd-variability-deleted').value);
+
+        } else if (entityType === 'Stakeholder') {
+          selectedElement.data('role', document.getElementById('form-stk-role').value);
+          selectedElement.data('department', document.getElementById('form-stk-dept').value);
+          selectedElement.data('email', document.getElementById('form-stk-email').value);
         }
+
       } else if (selectedElement.isEdge()) {
         const kind = document.getElementById('form-edge-type-select').value;
-        const joinKey = document.getElementById('form-edge-keys').value;
-        const cardinality = document.getElementById('form-edge-cardinality').value;
-
         selectedElement.data('kind', kind);
-        selectedElement.data('join_key', joinKey);
-        selectedElement.data('cardinality', cardinality);
-        selectedElement.data('label', kind === 'RelatesTo' ? joinKey : kind);
+
+        if (kind === 'RelatesTo') {
+          const nature = document.getElementById('form-rmd-relates-nature').value;
+          const keys = document.getElementById('form-rmd-relates-keys').value;
+          const temporal = document.getElementById('form-rmd-relates-temporal').value;
+          const prov = document.getElementById('form-rmd-relates-provenance').value;
+          const card = document.getElementById('form-edge-cardinality').value;
+
+          selectedElement.data('rmd_relates_nature', nature);
+          selectedElement.data('rmd_relates_keys', keys);
+          selectedElement.data('join_key', keys);
+          selectedElement.data('rmd_relates_temporal', temporal);
+          selectedElement.data('rmd_relates_provenance', prov);
+          selectedElement.data('cardinality', card);
+          selectedElement.data('label', keys || kind);
+        } else if (kind === 'InteractsWith') {
+          selectedElement.data('rmd_vuln_stk_id', document.getElementById('form-rmd-vuln-stk-id').value);
+          selectedElement.data('rmd_vuln_stk_role', document.getElementById('form-rmd-vuln-stk-role').value);
+          selectedElement.data('rmd_vuln_protection', document.getElementById('form-rmd-vuln-protection').value);
+          selectedElement.data('rmd_vuln_auth', document.getElementById('form-rmd-vuln-auth').value === 'true');
+          selectedElement.data('rmd_vuln_level', document.getElementById('form-rmd-vuln-level').value);
+          selectedElement.data('rmd_vuln_start', document.getElementById('form-rmd-vuln-start').value);
+          selectedElement.data('rmd_vuln_end', document.getElementById('form-rmd-vuln-end').value);
+          selectedElement.data('label', 'Governance');
+        } else {
+          selectedElement.data('label', kind);
+        }
       }
 
-      showToast('Saved attributes to entity', 'success');
-      updateCanvasMetrics();
-    }
-
-    function deleteCurrentEntity() {
-      if (!selectedElement) return;
-      const name = selectedElement.data('name') || selectedElement.id();
-      cy.remove(selectedElement);
-      clearSelection();
-      updateCanvasMetrics();
-      showToast(`Removed '${name}' from canvas`, 'info');
+      showToast('Entity attributes updated successfully', 'success');
     }
 
     async function runAutoProfileOnFile() {
-      const path = document.getElementById('auto-profile-path').value.trim();
-      if (!path) {
-        showToast('Please enter a valid file path', 'warning');
+      const pathInput = document.getElementById('form-obj-filepath').value.trim();
+      if (!pathInput) {
+        showToast('Please enter a valid file path first', 'warning');
         return;
       }
 
-      showToast('Inspecting file metadata via PyArrow...', 'info');
+      showToast(`Profiling ${pathInput}...`, 'info');
       try {
-        const response = await fetch('/pilot/profile-file', {
+        const resp = await fetch('/pilot/profile-file', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filepath: path })
+          body: JSON.stringify({ filepath: pathInput })
         });
 
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.detail || 'Profiling failed');
+        if (!resp.ok) {
+          const err = await resp.json();
+          showToast(`Profile error: ${err.detail || 'File not found'}`, 'error');
+          return;
         }
 
-        const data = await response.json();
+        const data = await resp.json();
         const stats = data.stats;
 
         if (selectedElement && selectedElement.isNode()) {
-          selectedElement.data('volume_bytes', stats.byte_size || 0);
+          selectedElement.data('volume_bytes', stats.file_size_bytes);
           selectedElement.data('volume_records', stats.record_count || 0);
           selectedElement.data('variety_cols', stats.column_count || 0);
           selectedElement.data('variety_format', stats.file_format || 'Parquet');
-          selectedElement.data('name', path.split(/[\/\\]/).pop());
+          selectedElement.data('storage_path', pathInput);
+
+          showToast(`Successfully profiled: ${stats.record_count || 'N/A'} rows, ${stats.column_count} cols`, 'success');
           inspectNode(selectedElement);
         }
-
-        showToast(`Auto-profiled: ${stats.record_count || 0} rows, ${(stats.byte_size / (1024*1024)).toFixed(2)} MB`, 'success');
-      } catch (err) {
-        showToast(`Profiling error: ${err.message}`, 'error');
+      } catch (e) {
+        showToast(`Error connecting to profiler: ${e.message}`, 'error');
       }
     }
 
     async function loadMimicDemo() {
-      showToast('Loading MIMIC Multimodal Lakehouse manifest...', 'info');
+      showToast('Loading MIMIC-IV Clinical Lakehouse topology...', 'info');
       try {
-        const res = await fetch('/pilot/sample/mimic');
-        if (!res.ok) throw new Error('Failed to fetch MIMIC sample manifest');
-        const manifest = await res.json();
+        const resp = await fetch('/pilot/sample/mimic');
+        if (!resp.ok) throw new Error('Failed to load MIMIC manifest');
+        const manifest = await resp.json();
 
         cy.elements().remove();
+        const elementsToAdd = [];
 
+        // Stakeholders
         (manifest.stakeholders || []).forEach(stk => {
-          cy.add({
+          elementsToAdd.push({
             group: 'nodes',
             data: {
               id: stk.id,
@@ -1262,8 +1847,9 @@
           });
         });
 
+        // DataSets
         (manifest.datasets || []).forEach(ds => {
-          cy.add({
+          elementsToAdd.push({
             group: 'nodes',
             data: {
               id: ds.id,
@@ -1274,46 +1860,42 @@
               description: ds.description || '',
               tags: ds.tags || [],
               interacts_with: ds.interacts_with || [],
-              volume_records: 1000000,
-              volume_bytes: 1073741824,
-              veracity_completeness: 0.99,
+              // TMD Tier Attributes
+              tmd_volume_rows: ds.structure_type === 'Complex' ? 1000000 : 50000,
+              tmd_volume_bytes: ds.structure_type === 'Complex' ? 104857600 : 5242880,
+              tmd_volume_compressed: ds.structure_type === 'Complex' ? 26214400 : 1048576,
+              tmd_volume_algo: 'Snappy',
+              tmd_volume_ts: new Date().toISOString(),
+              tmd_velocity_speed: 'Fixed',
+              tmd_velocity_ts: new Date().toISOString(),
+              tmd_variety_nature: ds.structure_type === 'Complex' ? 'Multimodal' : 'Structured',
+              tmd_variety_rep: ds.structure_type === 'Complex' ? 'Parquet / Multimodal' : 'Parquet',
+              tmd_variety_ttl: 'Forever',
+              tmd_variety_ts: new Date().toISOString(),
+              tmd_veracity_source: ds.name.includes('ICU') ? 'MetaVision CIS' : 'Hospital Enterprise EHR',
+              tmd_veracity_device: 'EHR Database Server',
+              tmd_veracity_accuracy: 0.99,
+              tmd_veracity_precision: 0.98,
+              tmd_veracity_ts: new Date().toISOString(),
+              tmd_value_origin: ds.processed_from && ds.processed_from.length ? ds.processed_from.join(', ') : 'ds_admissions',
+              tmd_value_dest: 'ds_icu_summary',
+              tmd_value_transformation: 'Aggregate hourly telemetry vitals & compute SOFA score',
+              tmd_value_ts: new Date().toISOString(),
+              volume_records: ds.structure_type === 'Complex' ? 1000000 : 50000,
+              volume_bytes: ds.structure_type === 'Complex' ? 104857600 : 5242880,
+              veracity_completeness: 0.98,
               vulnerability_tier: 'Confidential_HIPAA',
-              variety_format: 'Parquet',
-              variety_cols: 25,
-              value_criticality: ds.structure_type === 'Complex' ? 'Critical' : 'High'
+              variety_format: ds.structure_type === 'Complex' ? 'Multimodal' : 'Parquet',
+              variety_cols: 14,
+              value_criticality: 'High'
             }
           });
 
-          (ds.data_objects || []).forEach(obj => {
-            cy.add({
-              group: 'nodes',
-              data: {
-                id: obj.id,
-                name: obj.name,
-                entityType: 'DataObject',
-                physicalType: obj.physical_type,
-                dataset_id: ds.id,
-                volume_bytes: 104857600
-              }
-            });
-
-            cy.add({
-              group: 'edges',
-              data: {
-                id: `obj_rel_${ds.id}_${obj.id}`,
-                source: ds.id,
-                target: obj.id,
-                kind: 'AssemblyOf',
-                label: 'Contains'
-              }
-            });
-          });
-
           (ds.assembly_children || []).forEach(childId => {
-            cy.add({
+            elementsToAdd.push({
               group: 'edges',
               data: {
-                id: `asm_${ds.id}_${childId}`,
+                id: `${ds.id}_ASSEMBLY_${childId}`,
                 source: ds.id,
                 target: childId,
                 kind: 'AssemblyOf',
@@ -1322,277 +1904,462 @@
             });
           });
 
-          (ds.generalization_children || []).forEach(genId => {
-            cy.add({
+          (ds.processed_from || []).forEach(srcId => {
+            elementsToAdd.push({
               group: 'edges',
               data: {
-                id: `gen_${ds.id}_${genId}`,
-                source: ds.id,
-                target: genId,
-                kind: 'GeneralizationOf',
-                label: 'ISA'
-              }
-            });
-          });
-
-          (ds.processed_from || []).forEach(parentId => {
-            cy.add({
-              group: 'edges',
-              data: {
-                id: `proc_${parentId}_${ds.id}`,
-                source: parentId,
+                id: `${ds.id}_PROCESSED_${srcId}`,
+                source: srcId,
                 target: ds.id,
                 kind: 'ProcessedFrom',
                 label: 'ProcessedFrom'
               }
             });
           });
+
+          (ds.generalization_children || []).forEach(childId => {
+            elementsToAdd.push({
+              group: 'edges',
+              data: {
+                id: `${ds.id}_GEN_${childId}`,
+                source: ds.id,
+                target: childId,
+                kind: 'GeneralizationOf',
+                label: 'ISA'
+              }
+            });
+          });
+
+          (ds.interacts_with || []).forEach(stkId => {
+            elementsToAdd.push({
+              group: 'edges',
+              data: {
+                id: `${stkId}_INTERACTS_${ds.id}`,
+                source: stkId,
+                target: ds.id,
+                kind: 'InteractsWith',
+                label: 'Governance',
+                rmd_vuln_stk_id: stkId,
+                rmd_vuln_stk_role: 'Lead Clinical Data Steward',
+                rmd_vuln_protection: 'De-identified',
+                rmd_vuln_auth: true,
+                rmd_vuln_level: 'Credentialed',
+                rmd_vuln_start: '2026-01-01T00:00:00Z',
+                rmd_vuln_end: '2026-12-31T23:59:59Z',
+                rmd_vuln_ts: new Date().toISOString()
+              }
+            });
+          });
         });
 
+        // DataObjects
+        (manifest.data_objects || []).forEach(obj => {
+          elementsToAdd.push({
+            group: 'nodes',
+            data: {
+              id: obj.id,
+              name: obj.name,
+              entityType: 'DataObject',
+              physicalType: obj.physical_type,
+              datasetId: obj.dataset_id,
+              description: obj.storage_path,
+              storage_path: obj.storage_path,
+              // OMD Tier Attributes
+              omd_volume_bytes: 2621440,
+              omd_volume_rows: 25000,
+              omd_volume_cols: 8,
+              omd_volume_nulls: 0,
+              omd_volume_inapplicable: 0,
+              omd_volume_ts: new Date().toISOString(),
+              omd_variety_format: obj.physical_type,
+              omd_variety_schema: JSON.stringify({
+                "subject_id": "INTEGER",
+                "hadm_id": "INTEGER",
+                "charttime": "TIMESTAMP",
+                "valuenum": "FLOAT",
+                "valueuom": "VARCHAR(20)"
+              }, null, 2),
+              omd_variety_ts: new Date().toISOString(),
+              omd_variability_modified: new Date().toISOString(),
+              omd_variability_deleted: null,
+              volume_records: 25000,
+              volume_bytes: 2621440,
+              variety_cols: 8,
+              variety_format: obj.physical_type
+            }
+          });
+
+          if (obj.dataset_id) {
+            elementsToAdd.push({
+              group: 'edges',
+              data: {
+                id: `${obj.dataset_id}_CONTAINS_${obj.id}`,
+                source: obj.dataset_id,
+                target: obj.id,
+                kind: 'AssemblyOf',
+                label: 'AssemblyOf'
+              }
+            });
+          }
+        });
+
+        // Relationships
         (manifest.relationships || []).forEach((rel, idx) => {
-          const keys = rel.attributes && rel.attributes.join_keys ? rel.attributes.join_keys.join(', ') : 'Join';
-          cy.add({
+          const joinKey = (rel.attributes && rel.attributes.join_keys) ? rel.attributes.join_keys.join(', ') : 'Hospital.hadm_id = ICU.hadm_id';
+          elementsToAdd.push({
             group: 'edges',
             data: {
               id: `rel_${rel.source_dataset_id}_${rel.target_dataset_id}_${idx}`,
               source: rel.source_dataset_id,
               target: rel.target_dataset_id,
               kind: 'RelatesTo',
-              label: `${keys}`
+              status: rel.status || 'Confirmed',
+              confidence: rel.confidence !== undefined ? rel.confidence : 1.0,
+              provenance: rel.provenance || 'explicit',
+              join_key: joinKey,
+              cardinality: (rel.attributes && rel.attributes.cardinality) ? rel.attributes.cardinality : '1:N',
+              label: joinKey,
+              // RMD Tier Attributes
+              rmd_relates_nature: 'Referential',
+              rmd_relates_keys: joinKey,
+              rmd_relates_temporal: 'Hospital.admittime -> ICU.intime',
+              rmd_relates_provenance: rel.provenance || 'MIMIC_Clinical_Pipeline'
             }
           });
         });
 
+        cy.add(elementsToAdd);
         runAutoLayout();
         updateCanvasMetrics();
-        showToast('MIMIC Lakehouse Loaded (15 DataSets, Multi-modal Links)', 'success');
+        showToast('MIMIC Lakehouse loaded successfully!', 'success');
       } catch (err) {
-        showToast(`Failed to load demo: ${err.message}`, 'error');
+        showToast(`Failed to load MIMIC: ${err.message}`, 'error');
       }
     }
 
     function runAutoLayout() {
-      if (!cy || cy.nodes().length === 0) return;
-      try {
-        const layout = cy.layout({
-          name: 'dagre',
-          rankDir: 'TB',
-          nodeSep: 60,
-          rankSep: 80,
-          edgeSep: 30,
-          animate: true,
-          animationDuration: 400
-        });
-        layout.run();
-      } catch (e) {
-        const fallback = cy.layout({
-          name: 'breadthfirst',
-          directed: true,
-          padding: 30,
-          animate: true
-        });
-        fallback.run();
-      }
+      if (!cy) return;
+      const layout = cy.layout({
+        name: 'dagre',
+        rankDir: 'TB',
+        nodeSep: 50,
+        rankSep: 70,
+        padding: 40,
+        animate: true,
+        animationDuration: 400
+      });
+      layout.run();
     }
 
-    function zoomIn() { cy.zoom(cy.zoom() * 1.2); }
-    function zoomOut() { cy.zoom(cy.zoom() / 1.2); }
-    function fitView() { cy.fit(null, 40); }
-
-    async function validateCanvasStageA() {
-      const manifest = compileCanvasManifest();
-      if (manifest.datasets.length === 0) {
-        showToast('Canvas is empty. Add datasets first or Load Demo.', 'warning');
-        return;
-      }
-
-      showToast('Running Stage A DAG topological & cycle validation...', 'info');
-
-      try {
-        const res = await fetch('/pilot/canvas/validate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(manifest)
-        });
-
-        const data = await res.json();
-        if (data.valid) {
-          showToast(`Stage A PASSED: ${data.status}`, 'success');
-        } else {
-          showToast(`Stage A Cycle/Topology Alert: ${data.status}`, 'error');
-        }
-      } catch (err) {
-        showToast(`Validation request failed: ${err.message}`, 'error');
-      }
-    }
-
-    async function commitCanvasToCatalog() {
-      const manifest = compileCanvasManifest();
-      if (manifest.datasets.length === 0) {
-        showToast('Canvas is empty. Cannot commit empty catalog.', 'warning');
-        return;
-      }
-
-      showToast('Executing Stage C: Flattening and Registering catalog...', 'info');
-
-      try {
-        const res = await fetch('/pilot/canvas/commit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(manifest)
-        });
-
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || 'Catalog commit failed');
-        }
-
-        const data = await res.json();
-        showToast(`Stage C SUCCESS: Catalog Persisted! (${manifest.datasets.length} DataSets)`, 'success');
-      } catch (err) {
-        showToast(`Commit failed: ${err.message}`, 'error');
-      }
-    }
-
-    function compileCanvasManifest() {
+    function serializeCanvasManifest() {
       const datasets = [];
-      const stakeholders = [defaultStakeholder];
+      const dataObjects = [];
       const relationships = [];
+      const stakeholders = [];
 
-      cy.nodes('[entityType = "Stakeholder"]').forEach(n => {
-        const d = n.data();
-        if (d.id !== defaultStakeholder.id) {
+      cy.nodes().forEach(node => {
+        const d = node.data();
+        if (d.entityType === 'DataSet') {
+          const assemblyChildren = [];
+          const procFrom = [];
+          const genChildren = [];
+          const interactsWith = [];
+
+          node.outgoers('edge').forEach(edge => {
+            const ed = edge.data();
+            const targetNode = edge.target();
+            if (ed.kind === 'AssemblyOf' && targetNode.data('entityType') === 'DataSet') {
+              assemblyChildren.push(targetNode.id());
+            } else if (ed.kind === 'GeneralizationOf') {
+              genChildren.push(targetNode.id());
+            }
+          });
+
+          node.incomers('edge').forEach(edge => {
+            const ed = edge.data();
+            const srcNode = edge.source();
+            if (ed.kind === 'ProcessedFrom') {
+              procFrom.push(srcNode.id());
+            } else if (ed.kind === 'InteractsWith') {
+              interactsWith.push(srcNode.id());
+            }
+          });
+
+          datasets.push({
+            id: d.id,
+            name: d.name,
+            description: d.description || '',
+            structure_type: d.structureType || 'Simple',
+            lifecycle_stage: d.lifecycleStage || 'Raw',
+            tags: d.tags || ['canvas_dld'],
+            interacts_with: interactsWith.length ? interactsWith : (d.interacts_with || [defaultStakeholder.id]),
+            assembly_children: assemblyChildren,
+            generalization_children: genChildren,
+            processed_from: procFrom,
+            volume_records: d.volume_records || 50000,
+            volume_bytes: d.volume_bytes || 5242880
+          });
+        } else if (d.entityType === 'DataObject') {
+          let parentDsId = d.datasetId || null;
+          if (!parentDsId) {
+            const inc = node.incomers('edge[kind = "AssemblyOf"]');
+            if (inc.length > 0) {
+              parentDsId = inc[0].source().id();
+            }
+          }
+
+          dataObjects.push({
+            id: d.id,
+            name: d.name,
+            physical_type: d.physicalType || 'Parquet',
+            storage_path: d.description || `s3://mimic4/${d.name}`,
+            dataset_id: parentDsId
+          });
+        } else if (d.entityType === 'Stakeholder') {
           stakeholders.push({
             id: d.id,
             name: d.name,
-            role: d.role || 'Steward',
-            email: d.email || `${d.id}@org.com`,
-            department: d.department || 'Data'
+            role: d.role || 'Data Steward',
+            department: d.department || 'Data Governance',
+            email: d.email || 'steward@lakehouse.org'
           });
         }
       });
 
-      cy.nodes('[entityType = "DataSet"]').forEach(n => {
-        const d = n.data();
-        const dsId = d.id;
-
-        const assemblyChildren = [];
-        cy.edges(`[source = "${dsId}"][kind = "AssemblyOf"]`).forEach(e => {
-          const tgt = cy.getElementById(e.data('target'));
-          if (tgt.data('entityType') === 'DataSet') {
-            assemblyChildren.push(tgt.id());
-          }
-        });
-
-        const genChildren = [];
-        cy.edges(`[source = "${dsId}"][kind = "GeneralizationOf"]`).forEach(e => {
-          const tgt = cy.getElementById(e.data('target'));
-          if (tgt.data('entityType') === 'DataSet') {
-            genChildren.push(tgt.id());
-          }
-        });
-
-        const processedFrom = [];
-        cy.edges(`[target = "${dsId}"][kind = "ProcessedFrom"]`).forEach(e => {
-          const src = cy.getElementById(e.data('source'));
-          if (src.data('entityType') === 'DataSet') {
-            processedFrom.push(src.id());
-          }
-        });
-
-        const dataObjects = [];
-        cy.edges(`[source = "${dsId}"][kind = "AssemblyOf"]`).forEach(e => {
-          const tgt = cy.getElementById(e.data('target'));
-          if (tgt.data('entityType') === 'DataObject') {
-            dataObjects.push({
-              id: tgt.id(),
-              name: tgt.data('name'),
-              physical_type: tgt.data('physicalType') || 'Parquet'
-            });
-          }
-        });
-
-        datasets.push({
-          id: dsId,
-          name: d.name || dsId,
-          structure_type: d.structureType || 'Simple',
-          lifecycle_stage: d.lifecycleStage || 'Processed',
-          description: d.description || '',
-          tags: d.tags || ['lakehouse'],
-          interacts_with: d.interacts_with && d.interacts_with.length > 0 ? d.interacts_with : [defaultStakeholder.id],
-          assembly_children: assemblyChildren,
-          generalization_children: genChildren,
-          processed_from: processedFrom,
-          data_objects: dataObjects
-        });
+      cy.edges().forEach(edge => {
+        const d = edge.data();
+        if (d.kind === 'RelatesTo') {
+          relationships.push({
+            relationship_type: 'Referential',
+            source_dataset_id: edge.source().id(),
+            target_dataset_id: edge.target().id(),
+            status: d.status || 'Confirmed',
+            confidence: d.confidence !== undefined ? d.confidence : 1.0,
+            provenance: d.provenance || 'canvas',
+            attributes: {
+              join_keys: d.join_key ? [d.join_key] : ['hadm_id'],
+              cardinality: d.cardinality || '1:N'
+            }
+          });
+        }
       });
 
-      cy.edges('[kind = "RelatesTo"]').forEach(e => {
-        relationships.push({
-          relationship_type: 'Referential',
-          source_dataset_id: e.data('source'),
-          target_dataset_id: e.data('target'),
-          attributes: {
-            join_keys: [e.data('join_key') || 'hadm_id'],
-            cardinality: e.data('cardinality') || '1:N'
-          }
-        });
-      });
+      if (stakeholders.length === 0) {
+        stakeholders.push(defaultStakeholder);
+      }
 
       return {
-        stakeholders: stakeholders,
         datasets: datasets,
-        relationships: relationships
+        data_objects: dataObjects,
+        relationships: relationships,
+        stakeholders: stakeholders
       };
     }
 
-    function openExportModal() {
-      const manifest = compileCanvasManifest();
-      const contentArea = document.getElementById('export-content');
+    async function validateCanvasStageA() {
+      const manifest = serializeCanvasManifest();
+      showToast('Validating DAG topologies and relationship constraints...', 'info');
 
-      if (currentExportFormat === 'yaml') {
-        contentArea.value = jsyaml.dump(manifest);
-      } else {
-        contentArea.value = JSON.stringify(manifest, null, 2);
+      try {
+        const resp = await fetch('/pilot/canvas/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(manifest)
+        });
+
+        const res = await resp.json();
+        if (res.valid) {
+          showToast(`✓ Stage A Valid: ${res.status}`, 'success');
+        } else {
+          showToast(`Cycle Violation: ${res.detail}`, 'error');
+        }
+      } catch (err) {
+        showToast(`Validation error: ${err.message}`, 'error');
       }
+    }
 
+    async function commitCanvasToCatalog() {
+      const manifest = serializeCanvasManifest();
+      showToast('Executing Stage A Ingestion -> Stage B Indicators -> Stage C Commit...', 'info');
+
+      try {
+        const resp = await fetch('/pilot/canvas/commit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(manifest)
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          showToast(`Commit rejected: ${err.detail}`, 'error');
+          return;
+        }
+
+        const res = await resp.json();
+        showToast(`✓ Stage C Complete: ${res.catalog_result.status}!`, 'success');
+      } catch (err) {
+        showToast(`Commit request failed: ${err.message}`, 'error');
+      }
+    }
+
+    function openExportModal() {
       document.getElementById('export-modal').classList.remove('hidden');
+      renderExportContent('yaml');
     }
 
     function closeExportModal() {
       document.getElementById('export-modal').classList.add('hidden');
     }
 
-    function setExportFormat(fmt) {
-      currentExportFormat = fmt;
-      const yamlBtn = document.getElementById('tab-yaml');
-      const jsonBtn = document.getElementById('tab-json');
+    function serializeCanvasMeDOM3Tier() {
+      const datasets = cy.nodes('[entityType = "DataSet"]');
+      const primaryDs = (selectedElement && selectedElement.isNode() && selectedElement.data('entityType') === 'DataSet')
+        ? selectedElement
+        : (datasets.length > 0 ? datasets[0] : null);
 
-      if (fmt === 'yaml') {
-        yamlBtn.className = "px-2.5 py-1 rounded bg-sky-600 text-white text-xs";
-        jsonBtn.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs";
-      } else {
-        jsonBtn.className = "px-2.5 py-1 rounded bg-sky-600 text-white text-xs";
-        yamlBtn.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 text-xs";
+      let tmd_obj = null;
+      if (primaryDs) {
+        const d = primaryDs.data();
+        tmd_obj = {
+          target_dataset: d.id,
+          attributes: {
+            TVolume_physical_bytes: d.tmd_volume_bytes !== undefined ? d.tmd_volume_bytes : (d.volume_bytes || 48318382080),
+            TVolume_logical_records: d.tmd_volume_rows !== undefined ? d.tmd_volume_rows : (d.volume_records || 380000),
+            TVolume_compressed_bytes: d.tmd_volume_compressed !== undefined ? d.tmd_volume_compressed : 12582912,
+            TVolume_compression_algo: d.tmd_volume_algo || "Snappy",
+            TVelocity_speed: d.tmd_velocity_speed || "Fixed",
+            TVariety_nature: d.tmd_variety_nature || "Structured",
+            TVariety_physical_rep: d.tmd_variety_rep || (d.variety_format || "Parquet"),
+            TVariety_ttl: d.tmd_variety_ttl || "Forever",
+            TVeracity_source: d.tmd_veracity_source || "Hospital Enterprise EHR",
+            TVeracity_device: d.tmd_veracity_device || "EHR Database Server",
+            TVeracity_accuracy: d.tmd_veracity_accuracy !== undefined ? d.tmd_veracity_accuracy : (d.veracity_completeness || 0.99),
+            TVeracity_precision: d.tmd_veracity_precision !== undefined ? d.tmd_veracity_precision : 0.98,
+            timestamp: d.tmd_volume_ts || new Date().toISOString()
+          }
+        };
+        if (d.lifecycleStage === 'Processed') {
+          tmd_obj.attributes.TValue_origin = d.tmd_value_origin || (d.processed_from && d.processed_from.length ? d.processed_from.join(', ') : "ds_admissions");
+          tmd_obj.attributes.TValue_destination = d.tmd_value_dest || "ds_icu_summary";
+          tmd_obj.attributes.TValue_transformation = d.tmd_value_transformation || "Aggregate hourly vitals and compute SOFA scores";
+        }
       }
 
-      openExportModal();
+      const omd_objects = [];
+      cy.nodes('[entityType = "DataObject"]').forEach(node => {
+        const d = node.data();
+        let schema = {};
+        try {
+          schema = typeof d.omd_variety_schema === 'string' ? JSON.parse(d.omd_variety_schema) : (d.omd_variety_schema || { "subject_id": "INTEGER", "hadm_id": "INTEGER", "charttime": "TIMESTAMP" });
+        } catch(e) {
+          schema = { "subject_id": "INTEGER", "hadm_id": "INTEGER" };
+        }
+        omd_objects.push({
+          target_data_object: d.id,
+          attributes: {
+            OVolume_byte_size: d.omd_volume_bytes !== undefined ? d.omd_volume_bytes : (d.volume_bytes || 25165824),
+            OVolume_row_count: d.omd_volume_rows !== undefined ? d.omd_volume_rows : (d.volume_records || 50000),
+            OVolume_column_count: d.omd_volume_cols !== undefined ? d.omd_volume_cols : (d.variety_cols || 15),
+            OVolume_null_columns: d.omd_volume_nulls !== undefined ? d.omd_volume_nulls : 0,
+            OVolume_inapplicable_columns: d.omd_volume_inapplicable !== undefined ? d.omd_volume_inapplicable : 0,
+            OVariety_physical_rep: d.omd_variety_format || (d.physicalType || "Parquet"),
+            OVariety_schema: schema,
+            OVariability_last_modified: d.omd_variability_modified || new Date().toISOString(),
+            OVariability_deletion_timestamp: d.omd_variability_deleted || null,
+            timestamp: d.omd_volume_ts || new Date().toISOString()
+          }
+        });
+      });
+
+      const rmd_objects = [];
+      cy.edges().forEach(edge => {
+        const d = edge.data();
+        if (d.kind === 'RelatesTo') {
+          rmd_objects.push({
+            edge_type: "Relates_to",
+            source_dataset: edge.source().id(),
+            target_dataset: edge.target().id(),
+            attributes: {
+              relationship_nature: d.rmd_relates_nature || "Referential",
+              join_key: d.rmd_relates_keys || (d.join_key || "Hospital.hadm_id = ICU.hadm_id"),
+              temporal_sequence: d.rmd_relates_temporal || "Hospital.admittime -> ICU.intime",
+              provenance_mapping: d.rmd_relates_provenance || "ETL_Core_Staging"
+            }
+          });
+        } else if (d.kind === 'InteractsWith' || edge.source().data('entityType') === 'Stakeholder' || edge.target().data('entityType') === 'Stakeholder') {
+          const stkNode = edge.source().data('entityType') === 'Stakeholder' ? edge.source() : edge.target();
+          const dsNode = edge.source().data('entityType') === 'DataSet' ? edge.source() : edge.target();
+          rmd_objects.push({
+            edge_type: "Interacts_with",
+            stakeholder: stkNode.id(),
+            target: dsNode.id(),
+            attributes: {
+              TVulnerability_protection: d.rmd_vuln_protection || "De-identified",
+              TVulnerability_auth_required: d.rmd_vuln_auth !== undefined ? d.rmd_vuln_auth : true,
+              TVulnerability_access_level: d.rmd_vuln_level || "Credentialed",
+              stakeholder_role: stkNode.data('role') || d.rmd_vuln_stk_role || "Lead Clinical Data Steward",
+              access_start_time: d.rmd_vuln_start || "2026-01-01T00:00:00Z",
+              access_end_time: d.rmd_vuln_end || "2026-12-31T23:59:59Z",
+              timestamp: d.rmd_vuln_ts || new Date().toISOString()
+            }
+          });
+        }
+      });
+
+      return {
+        tmd_object: tmd_obj,
+        omd_objects: omd_objects,
+        rmd_objects: rmd_objects
+      };
     }
 
-    function copyExportToClipboard() {
-      const text = document.getElementById('export-content').value;
-      navigator.clipboard.writeText(text);
+    function renderExportContent(format) {
+      const output = document.getElementById('export-output');
+      const tabYaml = document.getElementById('tab-yaml');
+      const tabJson = document.getElementById('tab-json');
+      const tab3tier = document.getElementById('tab-3tier');
+
+      if (format === 'yaml') {
+        const manifest = serializeCanvasManifest();
+        output.value = jsyaml.dump(manifest);
+        tabYaml.className = "px-2.5 py-1 rounded text-xs font-medium bg-sky-600 text-white";
+        tabJson.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+        if (tab3tier) tab3tier.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+      } else if (format === 'json') {
+        const manifest = serializeCanvasManifest();
+        output.value = JSON.stringify(manifest, null, 2);
+        tabJson.className = "px-2.5 py-1 rounded text-xs font-medium bg-sky-600 text-white";
+        tabYaml.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+        if (tab3tier) tab3tier.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+      } else if (format === '3tier') {
+        const medom3 = serializeCanvasMeDOM3Tier();
+        output.value = JSON.stringify(medom3, null, 2);
+        if (tab3tier) tab3tier.className = "px-2.5 py-1 rounded text-xs font-medium bg-sky-600 text-white";
+        tabYaml.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+        tabJson.className = "px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700";
+      }
+    }
+
+    function copyExportText() {
+      const output = document.getElementById('export-output');
+      navigator.clipboard.writeText(output.value);
       showToast('Copied manifest to clipboard!', 'success');
     }
 
     function downloadExportFile() {
-      const text = document.getElementById('export-content').value;
-      const ext = currentExportFormat === 'yaml' ? 'yaml' : 'json';
-      const blob = new Blob([text], { type: 'text/plain' });
+      const content = document.getElementById('export-output').value;
+      const tab3tier = document.getElementById('tab-3tier');
+      let filename = 'medom_canvas_manifest.json';
+      if (document.getElementById('tab-yaml').classList.contains('bg-sky-600')) {
+        filename = 'medom_canvas_manifest.yaml';
+      } else if (tab3tier && tab3tier.classList.contains('bg-sky-600')) {
+        filename = 'medom_3tier_manifest.json';
+      }
+      const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `dld_manifest_${Date.now()}.${ext}`;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -1623,17 +2390,17 @@
       banner.className = "absolute top-3 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium shadow-xl border flex items-center space-x-2 transition-all duration-300 ";
 
       if (type === 'success') {
-        banner.classList.add('bg-emerald-950/90', 'border-emerald-600', 'text-emerald-200');
-        icon.className = "fa-solid fa-circle-check text-emerald-400";
+        banner.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+        icon.className = "fa-solid fa-circle-check text-emerald-600";
       } else if (type === 'error') {
-        banner.classList.add('bg-rose-950/90', 'border-rose-600', 'text-rose-200');
-        icon.className = "fa-solid fa-triangle-exclamation text-rose-400";
+        banner.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+        icon.className = "fa-solid fa-triangle-exclamation text-rose-600";
       } else if (type === 'warning') {
-        banner.classList.add('bg-amber-950/90', 'border-amber-600', 'text-amber-200');
-        icon.className = "fa-solid fa-circle-exclamation text-amber-400";
+        banner.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-900');
+        icon.className = "fa-solid fa-circle-exclamation text-amber-600";
       } else {
-        banner.classList.add('bg-sky-950/90', 'border-sky-600', 'text-sky-200');
-        icon.className = "fa-solid fa-circle-info text-sky-400";
+        banner.classList.add('bg-sky-50', 'border-sky-300', 'text-sky-900');
+        icon.className = "fa-solid fa-circle-info text-sky-600";
       }
 
       banner.classList.remove('hidden');
@@ -1641,90 +2408,500 @@
         banner.classList.add('hidden');
       }, 4000);
     }
+
+    // -----------------------------------------------------------------
+    // Automated Cold Scan & Real-Time Sync Controllers
+    // -----------------------------------------------------------------
+    function openColdScanModal() {
+      const modal = document.getElementById('cold-scan-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        hideModalError();
+      }
+    }
+
+    function closeColdScanModal() {
+      const modal = document.getElementById('cold-scan-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        hideModalError();
+      }
+    }
+
+    function hideModalError() {
+      const errBox = document.getElementById('cold-scan-modal-error');
+      if (errBox) errBox.classList.add('hidden');
+    }
+
+    function showModalError(msg, isDemoFallback = true) {
+      const errBox = document.getElementById('cold-scan-modal-error');
+      const errMsg = document.getElementById('cold-scan-modal-error-msg');
+      const errActions = document.getElementById('cold-scan-modal-error-actions');
+      if (errBox && errMsg) {
+        errMsg.innerText = msg;
+        errBox.classList.remove('hidden');
+        if (isDemoFallback) {
+          errActions.classList.remove('hidden');
+        } else {
+          errActions.classList.add('hidden');
+        }
+      }
+    }
+
+    function toggleColdScanType() {
+      hideModalError();
+      const type = document.getElementById('cold-scan-type').value;
+      const parquetGroup = document.getElementById('cold-scan-parquet-group');
+      const mysqlGroup = document.getElementById('cold-scan-mysql-group');
+      if (type === 'parquet') {
+        parquetGroup.classList.remove('hidden');
+        mysqlGroup.classList.add('hidden');
+      } else {
+        parquetGroup.classList.add('hidden');
+        mysqlGroup.classList.remove('hidden');
+      }
+    }
+
+    function toggleMySQLInputMode(mode) {
+      hideModalError();
+      const formDiv = document.getElementById('mysql-mode-form');
+      const uriDiv = document.getElementById('mysql-mode-uri');
+      const btnForm = document.getElementById('btn-mysql-mode-form');
+      const btnUri = document.getElementById('btn-mysql-mode-uri');
+      if (mode === 'uri') {
+        formDiv.classList.add('hidden');
+        uriDiv.classList.remove('hidden');
+        btnUri.className = "px-2.5 py-1 rounded text-[11px] font-medium bg-amber-500 text-white shadow-2xs";
+        btnForm.className = "px-2.5 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700";
+      } else {
+        formDiv.classList.remove('hidden');
+        uriDiv.classList.add('hidden');
+        btnForm.className = "px-2.5 py-1 rounded text-[11px] font-medium bg-amber-500 text-white shadow-2xs";
+        btnUri.className = "px-2.5 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700";
+      }
+    }
+
+    // Two-Way Sync: Parameters -> Connection URI
+    function syncMySQLParamsToUri() {
+      const host = document.getElementById('cold-scan-mysql-host').value.trim() || 'localhost';
+      const port = document.getElementById('cold-scan-mysql-port').value.trim() || '3306';
+      const db = document.getElementById('cold-scan-mysql-db').value.trim();
+      const user = document.getElementById('cold-scan-mysql-user').value.trim() || 'root';
+      const pass = document.getElementById('cold-scan-mysql-pass').value;
+
+      let auth = encodeURIComponent(user);
+      if (pass) {
+        auth += `:${encodeURIComponent(pass)}`;
+      }
+      const uri = `mysql://${auth}@${host}:${port}/${db ? encodeURIComponent(db) : ''}`;
+      document.getElementById('cold-scan-mysql-uri-input').value = uri;
+    }
+
+    // Two-Way Sync: Connection URI -> Parameters
+    function syncMySQLUriToParams() {
+      const uriStr = document.getElementById('cold-scan-mysql-uri-input').value.trim();
+      if (!uriStr) return;
+      try {
+        let clean = uriStr;
+        if (clean.startsWith('jdbc:mysql://')) clean = clean.substring('jdbc:mysql://'.length);
+        else if (clean.startsWith('mysql+pymysql://')) clean = clean.substring('mysql+pymysql://'.length);
+        else if (clean.startsWith('mysql://')) clean = clean.substring('mysql://'.length);
+
+        const atIdx = clean.indexOf('@');
+        if (atIdx !== -1) {
+          const userPass = clean.substring(0, atIdx);
+          const hostPortDb = clean.substring(atIdx + 1);
+
+          const colonIdx = userPass.indexOf(':');
+          if (colonIdx !== -1) {
+            document.getElementById('cold-scan-mysql-user').value = decodeURIComponent(userPass.substring(0, colonIdx));
+            document.getElementById('cold-scan-mysql-pass').value = decodeURIComponent(userPass.substring(colonIdx + 1));
+          } else {
+            document.getElementById('cold-scan-mysql-user').value = decodeURIComponent(userPass);
+          }
+
+          const slashIdx = hostPortDb.indexOf('/');
+          let hostPort = hostPortDb;
+          let dbName = '';
+          if (slashIdx !== -1) {
+            hostPort = hostPortDb.substring(0, slashIdx);
+            dbName = hostPortDb.substring(slashIdx + 1).split('?')[0];
+          }
+          const hostColon = hostPort.indexOf(':');
+          if (hostColon !== -1) {
+            document.getElementById('cold-scan-mysql-host').value = hostPort.substring(0, hostColon);
+            document.getElementById('cold-scan-mysql-port').value = hostPort.substring(hostColon + 1);
+          } else {
+            document.getElementById('cold-scan-mysql-host').value = hostPort;
+          }
+          if (dbName) {
+            document.getElementById('cold-scan-mysql-db').value = decodeURIComponent(dbName);
+          }
+        }
+      } catch (e) {
+        console.warn('URI sync parsing:', e);
+      }
+    }
+
+    function handleMySQLInputChanged() {
+      hideModalError();
+      syncMySQLParamsToUri();
+    }
+
+    function handleMySQLUriInputChanged() {
+      hideModalError();
+      syncMySQLUriToParams();
+    }
+
+    function setParquetPreset(preset) {
+      hideModalError();
+      if (preset === 'local') {
+        document.getElementById('cold-scan-dir').value = "H:/Papers/Metadata Tool/sample_lake";
+        document.getElementById('cold-scan-root-assembly').value = "Hospital ICU Lakehouse";
+      } else if (preset === 's3') {
+        document.getElementById('cold-scan-dir').value = "s3://mimic4-lakehouse/hosp/";
+        document.getElementById('cold-scan-root-assembly').value = "Cloud S3 Lakehouse";
+      } else if (preset === 'gcs') {
+        document.getElementById('cold-scan-dir').value = "gs://lakehouse/iot_stream/";
+        document.getElementById('cold-scan-root-assembly').value = "GCS Telemetry Lakehouse";
+      } else if (preset === 'hdfs') {
+        document.getElementById('cold-scan-dir').value = "hdfs://namenode:8020/data/raw/";
+        document.getElementById('cold-scan-root-assembly').value = "HDFS Raw Zone";
+      }
+    }
+
+    function loadSimulatedBankingDemo() {
+      document.getElementById('cold-scan-type').value = 'mysql';
+      toggleColdScanType();
+      document.getElementById('cold-scan-mysql-db').value = 'banking';
+      document.getElementById('cold-scan-mysql-root').value = 'Banking Financial Lakehouse';
+      document.getElementById('cold-scan-mysql-mock').checked = true;
+      syncMySQLParamsToUri();
+      hideModalError();
+      const statusBox = document.getElementById('mysql-test-conn-status');
+      if (statusBox) statusBox.classList.add('hidden');
+      executeColdScan();
+    }
+
+    function enableDemoModeCheckbox() {
+      document.getElementById('cold-scan-mysql-mock').checked = true;
+      hideModalError();
+      const statusBox = document.getElementById('mysql-test-conn-status');
+      if (statusBox) statusBox.classList.add('hidden');
+      executeColdScan();
+    }
+
+    async function testMySQLConnection() {
+      const btn = document.getElementById('test-conn-btn-text');
+      const statusBox = document.getElementById('mysql-test-conn-status');
+      const originalText = btn ? btn.innerText : 'Test Connection';
+      if (btn) btn.innerText = 'Testing...';
+      if (statusBox) {
+        statusBox.className = 'mt-1.5 p-2 rounded-lg text-[11px] bg-slate-100 text-slate-700 flex items-center space-x-2';
+        statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Testing connection to MySQL server...</span>';
+        statusBox.classList.remove('hidden');
+      }
+
+      const isUriMode = !document.getElementById('mysql-mode-uri').classList.contains('hidden');
+      const useMock = document.getElementById('cold-scan-mysql-mock').checked;
+      let payload = {};
+
+      if (isUriMode) {
+        payload = {
+          connection_uri: document.getElementById('cold-scan-mysql-uri-input').value.trim(),
+          use_mock: useMock
+        };
+      } else {
+        payload = {
+          host: document.getElementById('cold-scan-mysql-host').value.trim() || 'localhost',
+          port: parseInt(document.getElementById('cold-scan-mysql-port').value) || 3306,
+          database: document.getElementById('cold-scan-mysql-db').value.trim() || 'banking',
+          user: document.getElementById('cold-scan-mysql-user').value.trim() || 'root',
+          password: document.getElementById('cold-scan-mysql-pass').value || '',
+          use_mock: useMock
+        };
+      }
+
+      try {
+        const resp = await fetch('/pilot/cold-scan/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({ detail: 'Connection test failed' }));
+          if (statusBox) {
+            statusBox.className = 'mt-1.5 p-2 rounded-lg text-[11px] bg-rose-50 border border-rose-200 text-rose-800 space-y-1';
+            statusBox.innerHTML = `<div class="font-bold flex items-center space-x-1.5"><i class="fa-solid fa-circle-xmark text-rose-600"></i><span>Connection Failed</span></div><div class="text-[10px] leading-relaxed">${err.detail || 'Access denied.'}</div>`;
+          }
+        } else {
+          const data = await resp.json();
+          if (statusBox) {
+            statusBox.className = 'mt-1.5 p-2 rounded-lg text-[11px] bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center space-x-2';
+            statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>${data.message || 'Connection successful!'}</span>`;
+          }
+        }
+      } catch (e) {
+        if (statusBox) {
+          statusBox.className = 'mt-1.5 p-2 rounded-lg text-[11px] bg-rose-50 border border-rose-200 text-rose-800';
+          statusBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> Failed: ${e.message}`;
+        }
+      } finally {
+        if (btn) btn.innerText = originalText;
+      }
+    }
+
+    async function executeColdScan() {
+      hideModalError();
+      const type = document.getElementById('cold-scan-type').value;
+      const scanBtn = document.getElementById('btn-execute-cold-scan');
+      const originalText = scanBtn.innerHTML;
+      scanBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Scanning...</span>';
+      scanBtn.disabled = true;
+
+      try {
+        let endpoint = '';
+        let payload = {};
+
+        if (type === 'parquet') {
+          const dirPath = document.getElementById('cold-scan-dir').value.trim();
+          const rootName = document.getElementById('cold-scan-root-assembly').value.trim() || undefined;
+          if (!dirPath) {
+            showModalError('Please enter a Storage URI or local path.');
+            return;
+          }
+          endpoint = '/pilot/cold-scan/parquet';
+          payload = { directory_path: dirPath, root_assembly_name: rootName };
+        } else {
+          endpoint = '/pilot/cold-scan/mysql';
+          const isUriMode = !document.getElementById('mysql-mode-uri').classList.contains('hidden');
+          const rootName = document.getElementById('cold-scan-mysql-root').value.trim() || undefined;
+          const useMock = document.getElementById('cold-scan-mysql-mock').checked;
+
+          if (isUriMode) {
+            const uriStr = document.getElementById('cold-scan-mysql-uri-input').value.trim();
+            if (!uriStr && !useMock) {
+              showModalError('Please enter a valid MySQL Connection URI.');
+              return;
+            }
+            payload = { connection_uri: uriStr, use_mock: useMock, root_assembly_name: rootName };
+          } else {
+            payload = {
+              host: document.getElementById('cold-scan-mysql-host').value.trim() || 'localhost',
+              port: parseInt(document.getElementById('cold-scan-mysql-port').value) || 3306,
+              database: document.getElementById('cold-scan-mysql-db').value.trim() || 'banking',
+              user: document.getElementById('cold-scan-mysql-user').value.trim() || 'root',
+              password: document.getElementById('cold-scan-mysql-pass').value || '',
+              use_mock: useMock,
+              root_assembly_name: rootName
+            };
+          }
+        }
+
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({ detail: 'Cold scan request failed.' }));
+          const errMsg = errData.detail || 'Cold scan failed.';
+          showModalError(errMsg, true);
+          return;
+        }
+
+        const data = await resp.json();
+        loadCandidateGraphToCanvas(data);
+        closeColdScanModal();
+        showToast('⚡ Cold Scan complete! Candidate DLD graph drafted.', 'success');
+      } catch (err) {
+        showModalError(`Scan error: ${err.message}`, true);
+      } finally {
+        scanBtn.innerHTML = originalText;
+        scanBtn.disabled = false;
+      }
+    }
+
+    function loadCandidateGraphToCanvas(candidateData) {
+      if (!candidateData || !candidateData.manifest) return;
+      const manifest = candidateData.manifest;
+
+      cy.elements().remove();
+      const elementsToAdd = [];
+
+      // Add Stakeholders
+      (manifest.stakeholders || []).forEach(stk => {
+        elementsToAdd.push({
+          group: 'nodes',
+          data: {
+            id: stk.id,
+            name: stk.name,
+            entityType: 'Stakeholder',
+            role: stk.role,
+            email: stk.email,
+            department: stk.department
+          }
+        });
+      });
+
+      // Add DataSets
+      (manifest.datasets || []).forEach(ds => {
+        elementsToAdd.push({
+          group: 'nodes',
+          data: {
+            id: ds.id,
+            name: ds.name,
+            entityType: 'DataSet',
+            structureType: ds.structure_type,
+            lifecycleStage: ds.lifecycle_stage,
+            description: ds.description || '',
+            tags: ds.tags || [],
+            interacts_with: ds.interacts_with || [],
+            volume_records: ds.volume_records || 50000,
+            volume_bytes: ds.volume_bytes || 5242880,
+            veracity_completeness: 0.98,
+            vulnerability_tier: 'Confidential_HIPAA',
+            variety_format: ds.structure_type === 'Complex' ? 'Assembly' : 'Parquet/Relational',
+            variety_cols: 10,
+            value_criticality: 'High'
+          }
+        });
+
+        // Add AssemblyOf edges from root to children
+        (ds.assembly_children || []).forEach(childId => {
+          elementsToAdd.push({
+            group: 'edges',
+            data: {
+              id: `${ds.id}_ASSEMBLY_${childId}`,
+              source: ds.id,
+              target: childId,
+              kind: 'AssemblyOf',
+              label: 'AssemblyOf'
+            }
+          });
+        });
+      });
+
+      // Add DataObjects
+      (manifest.data_objects || []).forEach(obj => {
+        elementsToAdd.push({
+          group: 'nodes',
+          data: {
+            id: obj.id,
+            name: obj.name,
+            entityType: 'DataObject',
+            physicalType: obj.physical_type,
+            datasetId: obj.dataset_id,
+            description: obj.storage_path || '',
+            volume_records: obj.OVolume ? obj.OVolume.logical_record_count : 50000,
+            volume_bytes: obj.OVolume ? obj.OVolume.physical_size_bytes : 5242880,
+            variety_cols: obj.OVariety ? (obj.OVariety.columns ? Object.keys(obj.OVariety.columns).length : 5) : 5,
+            variety_format: obj.physical_type
+          }
+        });
+
+        // Connect DataObject to its dataset
+        if (obj.dataset_id) {
+          elementsToAdd.push({
+            group: 'edges',
+            data: {
+              id: `${obj.dataset_id}_CONTAINS_${obj.id}`,
+              source: obj.dataset_id,
+              target: obj.id,
+              kind: 'AssemblyOf',
+              label: 'AssemblyOf'
+            }
+          });
+        }
+      });
+
+      // Add Candidate & Explicit Relationships
+      (manifest.relationships || []).forEach((rel, idx) => {
+        const isSuggested = rel.status === 'Suggested';
+        const labelText = isSuggested 
+          ? `? ${rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : 'join_key'}`
+          : (rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : rel.relationship_type);
+
+        elementsToAdd.push({
+          group: 'edges',
+          data: {
+            id: `rel_${rel.source_dataset_id}_${rel.target_dataset_id}_${idx}`,
+            source: rel.source_dataset_id,
+            target: rel.target_dataset_id,
+            kind: 'RelatesTo',
+            status: rel.status || (isSuggested ? 'Suggested' : 'Confirmed'),
+            confidence: rel.confidence !== undefined ? rel.confidence : 0.95,
+            provenance: rel.provenance || 'auto_scan',
+            join_key: rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : '',
+            cardinality: rel.attributes && rel.attributes.cardinality ? rel.attributes.cardinality : '1:N',
+            label: labelText
+          }
+        });
+      });
+
+      cy.add(elementsToAdd);
+      runAutoLayout();
+      updateCanvasMetrics();
+    }
+
+    async function approveCandidateEdge() {
+      if (!selectedElement || !selectedElement.isEdge()) return;
+      const edge = selectedElement;
+      edge.data('status', 'Confirmed');
+      const joinKey = edge.data('join_key') || edge.data('kind');
+      edge.data('label', joinKey);
+
+      edge.style({
+        'line-color': '#0284c7',
+        'line-style': 'dotted',
+        'target-arrow-shape': 'triangle',
+        'target-arrow-color': '#0284c7'
+      });
+
+      document.getElementById('form-edge-suggestion-box').classList.add('hidden');
+      showToast('Candidate relationship approved & confirmed into DLD topology!', 'success');
+
+      try {
+        await fetch('/pilot/candidate/confirm-edge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_dataset_id: edge.source().id(),
+            target_dataset_id: edge.target().id(),
+            action: 'approve'
+          })
+        });
+      } catch (err) {
+        console.warn('Backend confirmation sync:', err);
+      }
+    }
+
+    async function dismissCandidateEdge() {
+      if (!selectedElement || !selectedElement.isEdge()) return;
+      const edge = selectedElement;
+      const srcId = edge.source().id();
+      const tgtId = edge.target().id();
+      cy.remove(edge);
+      clearSelection();
+      updateCanvasMetrics();
+      showToast('Candidate relationship dismissed and removed from canvas.', 'info');
+
+      try {
+        await fetch('/pilot/candidate/confirm-edge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_dataset_id: srcId,
+            target_dataset_id: tgtId,
+            action: 'reject'
+          })
+        });
+      } catch (err) {
+        console.warn('Backend rejection sync:', err);
+      }
+    }
   </script>
-
-  <!-- COLD SCAN INGESTION MODAL -->
-  <div id="cold-scan-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full p-5 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
-            <i class="fa-solid fa-bolt-lightning"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-sm text-white">Automated Cold Scan (Stage A)</h3>
-            <p class="text-[11px] text-slate-400">Lightweight in-place discovery without moving payload data</p>
-          </div>
-        </div>
-        <button onclick="closeColdScanModal()" class="text-slate-500 hover:text-slate-300">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Storage / Data Source Type</label>
-          <select id="cold-scan-type" onchange="toggleColdScanType()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500">
-            <option value="parquet">Local / Shared Parquet Directory (PyArrow Footers)</option>
-            <option value="mysql">MySQL Database (INFORMATION_SCHEMA Catalogs)</option>
-          </select>
-        </div>
-
-        <!-- Parquet Source Fields -->
-        <div id="cold-scan-parquet-group" class="space-y-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Parquet Storage Directory / Prefix</label>
-            <input id="cold-scan-dir" type="text" placeholder="e.g. H:\Papers\Metadata Tool" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-mono">
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Root Lakehouse Assembly Name (Optional)</label>
-            <input id="cold-scan-root-assembly" type="text" placeholder="e.g. Clinical Health Lakehouse" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-          </div>
-        </div>
-
-        <!-- MySQL Source Fields -->
-        <div id="cold-scan-mysql-group" class="hidden space-y-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
-          <div class="grid grid-cols-3 gap-2">
-            <div class="col-span-2">
-              <label class="block text-[11px] text-slate-400 mb-1">Host</label>
-              <input id="cold-scan-mysql-host" type="text" value="localhost" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Port</label>
-              <input id="cold-scan-mysql-port" type="number" value="3306" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Database / Schema Name</label>
-              <input id="cold-scan-mysql-db" type="text" placeholder="e.g. mimic_clinical" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Username</label>
-              <input id="cold-scan-mysql-user" type="text" value="root" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-            </div>
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Password</label>
-            <input id="cold-scan-mysql-pass" type="password" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white">
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-2 flex items-center justify-between border-t border-slate-800">
-        <span class="text-[11px] text-slate-400">Zero data downloaded • Instant schema extraction</span>
-        <div class="flex space-x-2">
-          <button onclick="closeColdScanModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
-            Cancel
-          </button>
-          <button onclick="executeColdScan()" class="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs shadow flex items-center space-x-1.5">
-            <i class="fa-solid fa-play"></i>
-            <span>Scan & Draft Graph</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>

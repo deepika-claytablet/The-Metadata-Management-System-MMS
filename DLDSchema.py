@@ -143,13 +143,21 @@ class VolumeIndicator(BaseIndicator):
     byte_size: int = Field(..., ge=0, description="Size in bytes")
     record_count: Optional[int] = Field(default=None, ge=0, description="Number of rows/records")
     partition_count: Optional[int] = Field(default=1, ge=1, description="Number of partitions/files")
+    # Extended TMD & OMD fields
+    logical_record_count: Optional[int] = Field(default=None, ge=0)
+    physical_byte_size: Optional[int] = Field(default=None, ge=0)
+    compressed_byte_size: Optional[int] = Field(default=None, ge=0)
+    compression_algorithm: Optional[str] = None
+    null_column_count: Optional[int] = Field(default=0, ge=0)
+    inapplicable_column_count: Optional[int] = Field(default=0, ge=0)
 
 
 class VelocityIndicator(BaseIndicator):
     """V-Word 2: Velocity (TV-Velocity)"""
     ingestion_mode: str = Field(default="Batch", description="Batch, Micro-batch, Stream")
+    speed: str = Field(default="Fixed", description="Fixed, On arrival, or dynamic arrival rates")
     expected_refresh_interval_sec: int = Field(
-        ..., ge=0, description="Expected refresh frequency / TTL in seconds"
+        default=86400, ge=0, description="Expected refresh frequency / TTL in seconds"
     )
     last_refreshed_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -160,6 +168,9 @@ class VelocityIndicator(BaseIndicator):
 
 class VarietyIndicator(BaseIndicator):
     """V-Word 3: Variety (TV-Variety / OVariety)"""
+    nature: str = Field(default="Structured", description="Structured, Semi-structured, Unstructured")
+    physical_representation: Optional[str] = Field(default=None, description="CSV, Parquet, MySQL InnoDB, etc.")
+    ttl: str = Field(default="Forever", description="Forever, Current")
     schema_definition: Dict[str, str] = Field(
         default_factory=dict,
         description="Mapping of column/field names to data types"
@@ -173,6 +184,10 @@ class VarietyIndicator(BaseIndicator):
 class VeracityIndicator(BaseIndicator):
     """V-Word 4: Veracity (TV-Veracity)"""
     source_origin: str = Field(..., min_length=1, description="Source provenance or system origin")
+    source_system_name: Optional[str] = Field(default=None, description="e.g. Hospital Enterprise EHR, MetaVision CIS")
+    device_type: Optional[str] = Field(default=None, description="Hardware / device provenance")
+    accuracy: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    precision: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     quality_score: float = Field(
         default=1.0, ge=0.0, le=1.0, description="Overall quality index between 0.0 and 1.0"
     )
@@ -188,6 +203,8 @@ class VariabilityIndicator(BaseIndicator):
     schema_drift_detected: bool = Field(default=False)
     rate_of_change_records_per_day: Optional[float] = Field(default=None, ge=0.0)
     volatility_score: Optional[float] = Field(default=0.0, ge=0.0, le=1.0)
+    last_modified_timestamp: Optional[datetime] = None
+    deletion_timestamp: Optional[datetime] = None
     change_history: List[Dict[str, Any]] = Field(
         default_factory=list,
         description="Historical log of schema and data volume evolutions"
@@ -197,6 +214,9 @@ class VariabilityIndicator(BaseIndicator):
 class ValueIndicator(BaseIndicator):
     """V-Word 6: Value (TV-Value - Mandatory for Processed Datasets)"""
     business_criticality: BusinessCriticality = Field(default=BusinessCriticality.TIER_2)
+    origin_dataset: Optional[str] = Field(default=None, description="Parent lineage dataset")
+    destination_dataset: Optional[str] = Field(default=None, description="Downstream analytical target")
+    transformation_action: Optional[str] = Field(default=None, description="e.g. impute_missing, aggregate")
     cost_per_query: Optional[float] = Field(default=None, ge=0.0)
     roi_score: Optional[float] = Field(default=None, ge=0.0, le=10.0)
     sla_tier: str = Field(default="Standard", description="SLA Level e.g. Gold, Silver, Bronze")
@@ -205,6 +225,11 @@ class ValueIndicator(BaseIndicator):
 class VulnerabilityIndicator(BaseIndicator):
     """V-Word 7: Vulnerability (RV-Vulnerability / TV-Vulnerability)"""
     classification: VulnerabilityClassification = Field(default=VulnerabilityClassification.INTERNAL)
+    data_protection_method: str = Field(default="De-identified", description="De-identified, Masked, Encrypted")
+    authorization_level: str = Field(default="Credentialed", description="Open, Credentialed, Role-Based")
+    authentication_required: bool = Field(default=True)
+    access_start_time: Optional[datetime] = None
+    access_end_time: Optional[datetime] = None
     encryption_at_rest: bool = Field(default=True)
     encryption_in_transit: bool = Field(default=True)
     access_control_policy: str = Field(
@@ -243,6 +268,16 @@ class RMDObject(BaseModel):
     target_id: str
     vulnerability: Optional[VulnerabilityIndicator] = None
     attributes: Dict[str, Any] = Field(default_factory=dict)
+    # Explicit RMD tier attributes
+    relationship_nature: Optional[str] = None  # Referential, Temporal, Provenance, Semantic
+    join_key: Optional[str] = None
+    temporal_order: Optional[str] = None
+    time_columns: Optional[List[str]] = None
+    data_protection_method: Optional[str] = None
+    authentication_required: Optional[bool] = None
+    authorization_level: Optional[str] = None
+    access_start_time: Optional[datetime] = None
+    access_end_time: Optional[datetime] = None
 
 
 class TMDObject(BaseModel):

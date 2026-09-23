@@ -154,3 +154,78 @@ def test_canvas_validate_and_commit():
     cyc_data = cyc_res.json()
     assert cyc_data["valid"] is False
     assert "Cycle detected" in cyc_data["error"]
+
+
+def test_medom_3tier_manifest_endpoint():
+    """
+    Verifies that the /pilot/medom/3tier-manifest endpoint returns the exact 3-tier MeDOM
+    representation: TMD Object (Dataset TV-words), OMD Objects (OV-words), and RMD Objects (RV-words).
+    """
+    res = client.get("/pilot/medom/3tier-manifest")
+    assert res.status_code == 200
+    data = res.json()
+
+    # Tier 1: TMD Object
+    assert "tmd_object" in data
+    tmd = data["tmd_object"]
+    assert "target_dataset" in tmd
+    assert "attributes" in tmd
+    attrs = tmd["attributes"]
+    assert "TVolume_physical_bytes" in attrs
+    assert "TVolume_logical_records" in attrs
+    assert "TVelocity_speed" in attrs
+    assert "TVariety_nature" in attrs
+    assert "TVariety_ttl" in attrs
+    assert "TVeracity_source" in attrs
+    assert "timestamp" in attrs
+
+    # Tier 2: OMD Objects
+    assert "omd_objects" in data
+    assert isinstance(data["omd_objects"], list)
+    if data["omd_objects"]:
+        omd = data["omd_objects"][0]
+        assert "target_data_object" in omd
+        assert "attributes" in omd
+        omd_attrs = omd["attributes"]
+        assert "OVolume_byte_size" in omd_attrs
+        assert "OVolume_row_count" in omd_attrs
+        assert "OVariety_physical_rep" in omd_attrs
+        assert "OVariety_schema" in omd_attrs
+        assert "OVariability_last_modified" in omd_attrs
+
+    # Tier 3: RMD Objects
+    assert "rmd_objects" in data
+    assert isinstance(data["rmd_objects"], list)
+    if data["rmd_objects"]:
+        rmd = data["rmd_objects"][0]
+        assert "edge_type" in rmd
+        assert "attributes" in rmd
+
+
+def test_flattened_catalog_records_endpoint():
+    """
+    Verifies that the /catalog/flattened-records endpoint returns catalog entities
+    flattened into the properties dictionary format for persistent database/index storage.
+    """
+    res = client.get("/catalog/flattened-records")
+    assert res.status_code == 200
+    data = res.json()
+    assert "datasets" in data
+    assert "data_objects" in data
+    assert "relationships" in data
+
+    if data["datasets"]:
+        ds = data["datasets"][0]
+        assert "properties" in ds
+        assert isinstance(ds["properties"], dict)
+
+    if data["data_objects"]:
+        obj = data["data_objects"][0]
+        assert "properties" in obj
+        assert isinstance(obj["properties"], dict)
+
+    if data["relationships"]:
+        rel = data["relationships"][0]
+        assert "properties" in rel
+        assert isinstance(rel["properties"], dict)
+

@@ -1,8 +1,11 @@
 import os
+import logging
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
+
+logger = logging.getLogger("medom.service")
 
 from DLDSchema import (
     DLDManifest,
@@ -25,7 +28,14 @@ from MetadataServices import (
 )
 from ExtractionHelpers import profile_parquet_file, profile_csv_file, profile_os_file
 from mimic_case_study import get_mimic_dld_manifest
-from ColdScanEngine import ParquetColdScanner, MySQLColdScanner, CandidateGraphBuilder
+from ColdScanEngine import (
+    ParquetColdScanner,
+    MySQLColdScanner,
+    CandidateGraphBuilder,
+    DEFAULT_MOCK_HOSPITAL_SCHEMA,
+    DEFAULT_MOCK_BANKING_SCHEMA,
+    parse_mysql_uri,
+)
 
 app = FastAPI(
     title="MeDOM & DLD Metadata Management Service",
@@ -82,11 +92,13 @@ class ColdScanParquetRequest(BaseModel):
 
 
 class ColdScanMySQLRequest(BaseModel):
-    host: str = "localhost"
-    port: int = 3306
-    user: str = "root"
-    password: str = ""
-    database: str
+    host: Optional[str] = "localhost"
+    port: Optional[int] = 3306
+    user: Optional[str] = "root"
+    password: Optional[str] = ""
+    database: Optional[str] = "mimic_clinical"
+    connection_uri: Optional[str] = None
+    use_mock: Optional[bool] = False
     mock_schema: Optional[Dict[str, Any]] = None
     root_assembly_name: Optional[str] = None
 
@@ -437,12 +449,16 @@ def commit_canvas_to_catalog(manifest: DLDManifest) -> Dict[str, Any]:
 @app.post("/pilot/cold-scan/parquet", tags=["Automated Cold Scan"])
 def cold_scan_parquet_endpoint(req: ColdScanParquetRequest) -> Dict[str, Any]:
     """
-    Executes an automated, in-place cold scan over a Parquet directory.
+    Executes an automated, in-place cold scan over a Parquet directory or Object Store URI (s3://, gs://, hdfs://).
     Reads only metadata footers via PyArrow, infers Simple Datasets and Assembly containment,
     and runs heuristic relationship discovery to output a Candidate DLD Graph.
     """
-    if not os.path.exists(req.directory_path):
-        raise HTTPException(status_code=404, detail=f"Directory or file not found: {req.directory_path}")
+    is_cloud = req.directory_path.startswith(("s3://", "gs://", "hdfs://"))
+    if not is_cloud and not os.path.exists(req.directory_path):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Directory or file not found: {req.directory_path}. Please provide a valid local folder path or Object Store URI (s3://, gs://, hdfs://)."
+        )
 
     try:
         scanner = ParquetColdScanner(root_dir=req.directory_path)
@@ -464,14 +480,35 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
     Extracts table volumes, column varieties, and 100% confidence foreign key joins
     with zero table payload scans.
     """
+    host = req.host or "localhost"
+    port = req.port or 3306
+    user = req.user or "root"
+    password = req.password or ""
+    database = req.database or "mimic_clinical"
+
+    if req.connection_uri:
+        parsed = parse_mysql_uri(req.connection_uri)
+        host = parsed.get("host") or host
+        port = parsed.get("port") or port
+        user = parsed.get("user") or user
+        password = parsed.get("password") or password
+        database = parsed.get("database") or database
+
+    mock_schema = req.mock_schema
+    if req.use_mock and not mock_schema:
+        if database and "bank" in database.lower():
+            mock_schema = DEFAULT_MOCK_BANKING_SCHEMA
+        else:
+            mock_schema = DEFAULT_MOCK_HOSPITAL_SCHEMA
+
     try:
         scanner = MySQLColdScanner(
-            host=req.host,
-            port=req.port,
-            user=req.user,
-            password=req.password,
-            database=req.database,
-            mock_schema=req.mock_schema,
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            mock_schema=mock_schema,
         )
         scan_res = scanner.scan()
         builder = CandidateGraphBuilder()
@@ -482,7 +519,93 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
         )
         return candidate_graph
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"MySQL cold scan failed: {str(e)}")
+        err_msg = str(e)
+        logger.warning(f"[ColdScan MySQL] Connection attempt failed for user '{user}'@'{host}:{port}' db '{database}': {err_msg}")
+        if "1045" in err_msg or "Access denied" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"MySQL Access Denied (Error 1045): Authentication failed for user '{user}'@'{host}' with provided password. Please check your MySQL credentials, or check 'Use Simulated Banking Schema (Demo Mode)' to test immediately without server credentials."
+            )
+        elif "1049" in err_msg or "Unknown database" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"MySQL Database Not Found (Error 1049): Database '{database}' does not exist on MySQL server at {host}:{port}."
+            )
+        elif "Can't connect to MySQL server" in err_msg or "2003" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot connect to MySQL server at {host}:{port} (Error 2003). Ensure the MySQL service (e.g. MySQL80) is running."
+            )
+        raise HTTPException(status_code=400, detail=f"MySQL cold scan failed: {err_msg}")
+
+
+@app.post("/pilot/cold-scan/test-connection", tags=["Automated Cold Scan"])
+def test_mysql_connection_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
+    """
+    Lightweight endpoint to ping and test MySQL connection credentials with a fast timeout.
+    """
+    host = req.host or "localhost"
+    port = req.port or 3306
+    user = req.user or "root"
+    password = req.password or ""
+    database = req.database or "banking"
+
+    if req.connection_uri:
+        parsed = parse_mysql_uri(req.connection_uri)
+        host = parsed.get("host") or host
+        port = parsed.get("port") or port
+        user = parsed.get("user") or user
+        password = parsed.get("password") or password
+        database = parsed.get("database") or database
+
+    if req.use_mock:
+        return {
+            "status": "success",
+            "message": "Demo Mode enabled. Simulated banking schema is ready for instant cold scan.",
+            "database": database,
+            "mock": True
+        }
+
+    try:
+        import pymysql
+        conn = pymysql.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            connect_timeout=3,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn.cursor() as cur:
+            cur.execute("SELECT DATABASE() AS db, VERSION() AS ver;")
+            row = cur.fetchone() or {}
+        conn.close()
+        return {
+            "status": "success",
+            "message": f"Successfully connected to MySQL {row.get('ver', '')} (Database: '{row.get('db', database)}')!",
+            "database": row.get('db', database),
+            "version": row.get('ver', '')
+        }
+    except Exception as e:
+        err_msg = str(e)
+        logger.warning(f"[ColdScan MySQL] Connection test failed for user '{user}'@'{host}:{port}' db '{database}': {err_msg}")
+        if "1045" in err_msg or "Access denied" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"MySQL Access Denied (Error 1045): Authentication failed for user '{user}'@'{host}' with provided password. Please check your MySQL password, or check 'Use Simulated Banking Schema (Demo Mode)' to test immediately without server credentials."
+            )
+        elif "1049" in err_msg or "Unknown database" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"MySQL Database Not Found (Error 1049): Database '{database}' does not exist on MySQL server at {host}:{port}."
+            )
+        elif "Can't connect to MySQL server" in err_msg or "2003" in err_msg:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot connect to MySQL server at {host}:{port} (Error 2003). Ensure the MySQL service (e.g. MySQL80) is running."
+            )
+        raise HTTPException(status_code=400, detail=f"MySQL connection test failed: {err_msg}")
 
 
 @app.post("/pilot/candidate/confirm-edge", tags=["Automated Cold Scan"])
@@ -504,4 +627,40 @@ def confirm_candidate_edge(req: ConfirmEdgeRequest) -> Dict[str, Any]:
             "status": status_str,
         },
     }
+
+
+# =====================================================================
+# MeDOM & DLD 3-Tier Architecture Endpoints
+# =====================================================================
+
+def _ensure_catalog_seeded():
+    if not repository.datasets:
+        manifest_data = get_mimic_dld_manifest()
+        manifest_obj = DLDManifest(**manifest_data) if isinstance(manifest_data, dict) else manifest_data
+        commit_canvas_to_catalog(manifest_obj)
+
+
+@app.get("/pilot/medom/3tier-manifest", tags=["Metadata Pilot"])
+def get_medom_3tier_manifest(dataset_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Returns the MeDOM & DLD 3-Tier representation:
+    - TMD Object (Dataset-level TV-words: Volume, Velocity, Variety, Veracity, Value)
+    - OMD Objects (Data Object-level OV-words: OVolume, OVariety, OVariability)
+    - RMD Objects (Relationship & Interaction attributes: RelatesTo joins & InteractsWith TVulnerability)
+    """
+    _ensure_catalog_seeded()
+    return repository.to_medom_3tier_dict(target_dataset_id=dataset_id)
+
+
+@app.get("/catalog/flattened-records", tags=["Catalog"])
+def get_flattened_catalog_records() -> Dict[str, Any]:
+    """
+    Returns the catalog entities flattened into the properties dictionary format
+    for persistent database storage and search indexing.
+    """
+    _ensure_catalog_seeded()
+    return repository.to_flattened_catalog_records()
+
+
+
 
