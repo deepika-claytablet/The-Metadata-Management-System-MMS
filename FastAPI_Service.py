@@ -34,6 +34,8 @@ from ColdScanEngine import (
     CandidateGraphBuilder,
     DEFAULT_MOCK_HOSPITAL_SCHEMA,
     DEFAULT_MOCK_BANKING_SCHEMA,
+    DEFAULT_MOCK_MULTI_DB_SCHEMA,
+    list_mysql_databases,
     parse_mysql_uri,
 )
 
@@ -96,11 +98,14 @@ class ColdScanMySQLRequest(BaseModel):
     port: Optional[int] = 3306
     user: Optional[str] = "root"
     password: Optional[str] = ""
-    database: Optional[str] = "mimic_clinical"
+    database: Optional[str] = "banking"
+    databases: Optional[List[str]] = None
+    all_user_databases: Optional[bool] = False
     connection_uri: Optional[str] = None
     use_mock: Optional[bool] = False
     mock_schema: Optional[Dict[str, Any]] = None
     root_assembly_name: Optional[str] = None
+    merge_mode: Optional[bool] = False
 
 
 class ConfirmEdgeRequest(BaseModel):
@@ -473,10 +478,35 @@ def cold_scan_parquet_endpoint(req: ColdScanParquetRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=f"Parquet cold scan failed: {str(e)}")
 
 
+@app.get("/pilot/cold-scan/mysql/databases", tags=["Automated Cold Scan"])
+def get_mysql_databases_endpoint(
+    host: str = "localhost",
+    port: int = 3306,
+    user: str = "root",
+    password: str = "",
+    connection_uri: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Discovers all non-system databases available on the MySQL server.
+    """
+    if connection_uri:
+        parsed = parse_mysql_uri(connection_uri)
+        host = parsed.get("host") or host
+        port = parsed.get("port") or port
+        user = parsed.get("user") or user
+        password = parsed.get("password") or password
+
+    try:
+        dbs = list_mysql_databases(host=host, port=port, user=user, password=password)
+        return {"databases": dbs, "count": len(dbs)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to list databases: {str(e)}")
+
+
 @app.post("/pilot/cold-scan/mysql", tags=["Automated Cold Scan"])
 def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
     """
-    Executes an automated cold scan over a MySQL database schema via INFORMATION_SCHEMA.
+    Executes an automated cold scan over one or multiple MySQL database schemas via INFORMATION_SCHEMA.
     Extracts table volumes, column varieties, and 100% confidence foreign key joins
     with zero table payload scans.
     """
@@ -484,7 +514,7 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
     port = req.port or 3306
     user = req.user or "root"
     password = req.password or ""
-    database = req.database or "mimic_clinical"
+    database = req.database or "banking"
 
     if req.connection_uri:
         parsed = parse_mysql_uri(req.connection_uri)
@@ -494,9 +524,18 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
         password = parsed.get("password") or password
         database = parsed.get("database") or database
 
+    target_dbs = req.databases or []
+    if not target_dbs and database:
+        if "," in database:
+            target_dbs = [d.strip() for d in database.split(",") if d.strip()]
+        else:
+            target_dbs = [database]
+
     mock_schema = req.mock_schema
     if req.use_mock and not mock_schema:
-        if database and "bank" in database.lower():
+        if req.all_user_databases or len(target_dbs) > 1:
+            mock_schema = DEFAULT_MOCK_MULTI_DB_SCHEMA
+        elif target_dbs and "bank" in target_dbs[0].lower():
             mock_schema = DEFAULT_MOCK_BANKING_SCHEMA
         else:
             mock_schema = DEFAULT_MOCK_HOSPITAL_SCHEMA
@@ -508,6 +547,8 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
             user=user,
             password=password,
             database=database,
+            databases=target_dbs if target_dbs else None,
+            all_user_databases=req.all_user_databases,
             mock_schema=mock_schema,
         )
         scan_res = scanner.scan()
@@ -517,6 +558,7 @@ def cold_scan_mysql_endpoint(req: ColdScanMySQLRequest) -> Dict[str, Any]:
             explicit_relationships=scan_res.get("relationships", []),
             root_assembly_name=req.root_assembly_name,
         )
+        candidate_graph["merge_mode"] = req.merge_mode or False
         return candidate_graph
     except Exception as e:
         err_msg = str(e)

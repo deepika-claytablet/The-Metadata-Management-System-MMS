@@ -912,14 +912,29 @@
                 <input id="cold-scan-mysql-port" type="number" value="3306" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Database Name</label>
-                <input id="cold-scan-mysql-db" type="text" value="banking" placeholder="e.g. banking" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+            <div class="space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <div class="flex items-center justify-between mb-0.5">
+                    <label class="block text-[10px] uppercase font-semibold text-slate-500">Database(s)</label>
+                    <button type="button" onclick="fetchServerDatabases()" class="text-[10px] font-semibold text-sky-600 hover:text-sky-800 flex items-center space-x-1 cursor-pointer">
+                      <i class="fa-solid fa-database text-[9px]"></i>
+                      <span id="fetch-db-btn-text">Fetch Databases</span>
+                    </button>
+                  </div>
+                  <input id="cold-scan-mysql-db" type="text" value="banking" placeholder="e.g. banking, sale, finance" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+                </div>
+                <div>
+                  <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Username</label>
+                  <input id="cold-scan-mysql-user" type="text" value="root" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+                </div>
               </div>
-              <div>
-                <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-0.5">Username</label>
-                <input id="cold-scan-mysql-user" type="text" value="root" oninput="handleMySQLInputChanged()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-mono">
+              <div id="mysql-db-selection-chips" class="hidden p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                <div class="text-[10px] text-slate-500 font-medium flex items-center justify-between">
+                  <span>Available Server Databases (click to toggle):</span>
+                  <button type="button" onclick="selectAllDiscoveredDbs()" class="text-sky-600 hover:underline">Select All</button>
+                </div>
+                <div id="mysql-chips-container" class="flex flex-wrap gap-1.5 pt-1"></div>
               </div>
             </div>
             <div>
@@ -947,6 +962,30 @@
               </div>
               <input id="cold-scan-mysql-uri-input" type="text" value="mysql://root:12345@localhost:3306/banking" oninput="handleMySQLUriInputChanged()" placeholder="mysql://root:password@localhost:3306/banking" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-amber-500">
               <span class="text-[10px] text-slate-500">Automatically syncs with Parameters: mysql://, mysql+pymysql://, or jdbc:mysql://</span>
+            </div>
+          </div>
+
+          <!-- Canvas Ingestion Mode Toggle -->
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+            <div class="text-[10px] uppercase font-semibold text-slate-600 mb-1.5 flex items-center justify-between">
+              <span>Canvas Ingestion Mode</span>
+              <span class="text-[10px] text-slate-400 font-normal">Controls how topology is placed on canvas</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="flex items-center space-x-2 bg-white p-2 rounded border border-slate-200 cursor-pointer hover:border-slate-300">
+                <input type="radio" name="cold-scan-merge-mode" value="replace" checked class="text-sky-600">
+                <div>
+                  <div class="font-medium text-slate-800">Fresh / Replace</div>
+                  <div class="text-[10px] text-slate-500">Clears current canvas</div>
+                </div>
+              </label>
+              <label class="flex items-center space-x-2 bg-white p-2 rounded border border-slate-200 cursor-pointer hover:border-slate-300">
+                <input type="radio" name="cold-scan-merge-mode" value="merge" class="text-sky-600">
+                <div>
+                  <div class="font-medium text-slate-800">Merge / Append</div>
+                  <div class="text-[10px] text-slate-500">Add to existing canvas</div>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -2553,6 +2592,89 @@
       syncMySQLUriToParams();
     }
 
+    let serverDiscoveredDatabases = [];
+
+    async function fetchServerDatabases() {
+      const btnText = document.getElementById('fetch-db-btn-text');
+      const originalText = btnText ? btnText.innerHTML : 'Fetch Databases';
+      if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fetching...';
+
+      const host = document.getElementById('cold-scan-mysql-host').value.trim() || 'localhost';
+      const port = parseInt(document.getElementById('cold-scan-mysql-port').value) || 3306;
+      const user = document.getElementById('cold-scan-mysql-user').value.trim() || 'root';
+      const password = document.getElementById('cold-scan-mysql-pass').value || '';
+
+      try {
+        const queryParams = new URLSearchParams({ host, port, user, password });
+        const resp = await fetch(`/pilot/cold-scan/mysql/databases?${queryParams.toString()}`);
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({ detail: 'Failed to fetch databases' }));
+          showModalError(err.detail || 'Failed to fetch databases from MySQL server.');
+          return;
+        }
+        const data = await resp.json();
+        serverDiscoveredDatabases = data.databases || [];
+        renderDatabaseChips();
+        showToast(`Discovered ${serverDiscoveredDatabases.length} databases on MySQL server.`, 'info');
+      } catch (err) {
+        showModalError(`Error fetching databases: ${err.message}`);
+      } finally {
+        if (btnText) btnText.innerHTML = originalText;
+      }
+    }
+
+    function renderDatabaseChips() {
+      const box = document.getElementById('mysql-db-selection-chips');
+      const container = document.getElementById('mysql-chips-container');
+      if (!box || !container) return;
+
+      if (!serverDiscoveredDatabases.length) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.classList.remove('hidden');
+      const currentInput = document.getElementById('cold-scan-mysql-db').value;
+      const selectedSet = new Set(currentInput.split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
+
+      container.innerHTML = '';
+      serverDiscoveredDatabases.forEach(db => {
+        const isSelected = selectedSet.has(db.toLowerCase());
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.onclick = () => toggleDatabaseChip(db);
+        chip.className = isSelected
+          ? 'px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-amber-500 text-white shadow-sm flex items-center space-x-1 cursor-pointer transition'
+          : 'px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-white text-slate-700 border border-slate-300 hover:border-amber-400 flex items-center space-x-1 cursor-pointer transition';
+        chip.innerHTML = `${isSelected ? '<i class="fa-solid fa-check text-[9px]"></i> ' : ''}<span>${db}</span>`;
+        container.appendChild(chip);
+      });
+    }
+
+    function toggleDatabaseChip(dbName) {
+      const input = document.getElementById('cold-scan-mysql-db');
+      let currentDbs = input.value.split(',').map(s => s.trim()).filter(Boolean);
+      const lowerDbs = currentDbs.map(d => d.toLowerCase());
+      const idx = lowerDbs.indexOf(dbName.toLowerCase());
+
+      if (idx !== -1) {
+        currentDbs.splice(idx, 1);
+      } else {
+        currentDbs.push(dbName);
+      }
+
+      input.value = currentDbs.join(', ');
+      handleMySQLInputChanged();
+      renderDatabaseChips();
+    }
+
+    function selectAllDiscoveredDbs() {
+      const input = document.getElementById('cold-scan-mysql-db');
+      input.value = serverDiscoveredDatabases.join(', ');
+      handleMySQLInputChanged();
+      renderDatabaseChips();
+    }
+
     function setParquetPreset(preset) {
       hideModalError();
       if (preset === 'local') {
@@ -2699,6 +2821,10 @@
           }
         }
 
+        const mergeModeRadio = document.querySelector('input[name="cold-scan-merge-mode"]:checked');
+        const isMergeMode = mergeModeRadio ? (mergeModeRadio.value === 'merge') : false;
+        payload.merge_mode = isMergeMode;
+
         const resp = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2715,7 +2841,7 @@
         const data = await resp.json();
         loadCandidateGraphToCanvas(data);
         closeColdScanModal();
-        showToast('⚡ Cold Scan complete! Candidate DLD graph drafted.', 'success');
+        showToast(isMergeMode ? '⚡ Cold Scan complete! Merged into existing canvas.' : '⚡ Cold Scan complete! Candidate DLD graph drafted.', 'success');
       } catch (err) {
         showModalError(`Scan error: ${err.message}`, true);
       } finally {
@@ -2727,121 +2853,142 @@
     function loadCandidateGraphToCanvas(candidateData) {
       if (!candidateData || !candidateData.manifest) return;
       const manifest = candidateData.manifest;
+      const isMerge = candidateData.merge_mode || false;
 
-      cy.elements().remove();
+      if (!isMerge) {
+        cy.elements().remove();
+      }
       const elementsToAdd = [];
 
       // Add Stakeholders
       (manifest.stakeholders || []).forEach(stk => {
-        elementsToAdd.push({
-          group: 'nodes',
-          data: {
-            id: stk.id,
-            name: stk.name,
-            entityType: 'Stakeholder',
-            role: stk.role,
-            email: stk.email,
-            department: stk.department
-          }
-        });
+        if (!cy.getElementById(stk.id).length) {
+          elementsToAdd.push({
+            group: 'nodes',
+            data: {
+              id: stk.id,
+              name: stk.name,
+              entityType: 'Stakeholder',
+              role: stk.role,
+              email: stk.email,
+              department: stk.department
+            }
+          });
+        }
       });
 
       // Add DataSets
       (manifest.datasets || []).forEach(ds => {
-        elementsToAdd.push({
-          group: 'nodes',
-          data: {
-            id: ds.id,
-            name: ds.name,
-            entityType: 'DataSet',
-            structureType: ds.structure_type,
-            lifecycleStage: ds.lifecycle_stage,
-            description: ds.description || '',
-            tags: ds.tags || [],
-            interacts_with: ds.interacts_with || [],
-            volume_records: ds.volume_records || 50000,
-            volume_bytes: ds.volume_bytes || 5242880,
-            veracity_completeness: 0.98,
-            vulnerability_tier: 'Confidential_HIPAA',
-            variety_format: ds.structure_type === 'Complex' ? 'Assembly' : 'Parquet/Relational',
-            variety_cols: 10,
-            value_criticality: 'High'
-          }
-        });
-
-        // Add AssemblyOf edges from root to children
-        (ds.assembly_children || []).forEach(childId => {
+        if (!cy.getElementById(ds.id).length) {
           elementsToAdd.push({
-            group: 'edges',
+            group: 'nodes',
             data: {
-              id: `${ds.id}_ASSEMBLY_${childId}`,
-              source: ds.id,
-              target: childId,
-              kind: 'AssemblyOf',
-              label: 'AssemblyOf'
+              id: ds.id,
+              name: ds.name,
+              entityType: 'DataSet',
+              structureType: ds.structure_type,
+              lifecycleStage: ds.lifecycle_stage,
+              description: ds.description || '',
+              tags: ds.tags || [],
+              interacts_with: ds.interacts_with || [],
+              volume_records: ds.volume_records || 50000,
+              volume_bytes: ds.volume_bytes || 5242880,
+              veracity_completeness: 0.98,
+              vulnerability_tier: 'Confidential_HIPAA',
+              variety_format: ds.structure_type === 'Complex' ? 'Assembly' : 'Parquet/Relational',
+              variety_cols: 10,
+              value_criticality: 'High'
             }
           });
+        }
+
+        // Add AssemblyOf edges from container to children
+        (ds.assembly_children || []).forEach(childId => {
+          const edgeId = `${ds.id}_ASSEMBLY_${childId}`;
+          if (!cy.getElementById(edgeId).length) {
+            elementsToAdd.push({
+              group: 'edges',
+              data: {
+                id: edgeId,
+                source: ds.id,
+                target: childId,
+                kind: 'AssemblyOf',
+                label: 'AssemblyOf'
+              }
+            });
+          }
         });
       });
 
       // Add DataObjects
       (manifest.data_objects || []).forEach(obj => {
-        elementsToAdd.push({
-          group: 'nodes',
-          data: {
-            id: obj.id,
-            name: obj.name,
-            entityType: 'DataObject',
-            physicalType: obj.physical_type,
-            datasetId: obj.dataset_id,
-            description: obj.storage_path || '',
-            volume_records: obj.OVolume ? obj.OVolume.logical_record_count : 50000,
-            volume_bytes: obj.OVolume ? obj.OVolume.physical_size_bytes : 5242880,
-            variety_cols: obj.OVariety ? (obj.OVariety.columns ? Object.keys(obj.OVariety.columns).length : 5) : 5,
-            variety_format: obj.physical_type
-          }
-        });
+        if (!cy.getElementById(obj.id).length) {
+          elementsToAdd.push({
+            group: 'nodes',
+            data: {
+              id: obj.id,
+              name: obj.name,
+              entityType: 'DataObject',
+              physicalType: obj.physical_type,
+              datasetId: obj.dataset_id,
+              description: obj.storage_path || '',
+              volume_records: obj.OVolume ? obj.OVolume.logical_record_count : 50000,
+              volume_bytes: obj.OVolume ? obj.OVolume.physical_size_bytes : 5242880,
+              variety_cols: obj.OVariety ? (obj.OVariety.columns ? Object.keys(obj.OVariety.columns).length : 5) : 5,
+              variety_format: obj.physical_type
+            }
+          });
+        }
 
         // Connect DataObject to its dataset
         if (obj.dataset_id) {
-          elementsToAdd.push({
-            group: 'edges',
-            data: {
-              id: `${obj.dataset_id}_CONTAINS_${obj.id}`,
-              source: obj.dataset_id,
-              target: obj.id,
-              kind: 'AssemblyOf',
-              label: 'AssemblyOf'
-            }
-          });
+          const objEdgeId = `${obj.dataset_id}_CONTAINS_${obj.id}`;
+          if (!cy.getElementById(objEdgeId).length) {
+            elementsToAdd.push({
+              group: 'edges',
+              data: {
+                id: objEdgeId,
+                source: obj.dataset_id,
+                target: obj.id,
+                kind: 'AssemblyOf',
+                label: 'AssemblyOf'
+              }
+            });
+          }
         }
       });
 
       // Add Candidate & Explicit Relationships
       (manifest.relationships || []).forEach((rel, idx) => {
         const isSuggested = rel.status === 'Suggested';
+        const edgeKind = rel.relationship_type || 'RelatesTo';
         const labelText = isSuggested 
-          ? `? ${rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : 'join_key'}`
-          : (rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : rel.relationship_type);
+          ? `? ${rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : (rel.attributes && rel.attributes.lineage_rule ? rel.attributes.lineage_rule : edgeKind)}`
+          : (rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : edgeKind);
 
-        elementsToAdd.push({
-          group: 'edges',
-          data: {
-            id: `rel_${rel.source_dataset_id}_${rel.target_dataset_id}_${idx}`,
-            source: rel.source_dataset_id,
-            target: rel.target_dataset_id,
-            kind: 'RelatesTo',
-            status: rel.status || (isSuggested ? 'Suggested' : 'Confirmed'),
-            confidence: rel.confidence !== undefined ? rel.confidence : 0.95,
-            provenance: rel.provenance || 'auto_scan',
-            join_key: rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : '',
-            cardinality: rel.attributes && rel.attributes.cardinality ? rel.attributes.cardinality : '1:N',
-            label: labelText
-          }
-        });
+        const edgeId = `rel_${rel.source_dataset_id}_${rel.target_dataset_id}_${edgeKind.toLowerCase()}_${idx}`;
+        if (!cy.getElementById(edgeId).length) {
+          elementsToAdd.push({
+            group: 'edges',
+            data: {
+              id: edgeId,
+              source: rel.source_dataset_id,
+              target: rel.target_dataset_id,
+              kind: edgeKind,
+              status: rel.status || (isSuggested ? 'Suggested' : 'Confirmed'),
+              confidence: rel.confidence !== undefined ? rel.confidence : 0.95,
+              provenance: rel.provenance || 'auto_scan',
+              join_key: rel.attributes && rel.attributes.join_condition ? rel.attributes.join_condition : '',
+              cardinality: rel.attributes && rel.attributes.cardinality ? rel.attributes.cardinality : '1:N',
+              label: labelText
+            }
+          });
+        }
       });
 
-      cy.add(elementsToAdd);
+      if (elementsToAdd.length > 0) {
+        cy.add(elementsToAdd);
+      }
       runAutoLayout();
       updateCanvasMetrics();
     }

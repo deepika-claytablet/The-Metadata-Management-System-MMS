@@ -1,10 +1,13 @@
 import os
 import glob
 import time
+import logging
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 import pyarrow.parquet as pq
+
+logger = logging.getLogger("cold_scan")
 
 try:
     import pymysql
@@ -126,6 +129,98 @@ DEFAULT_MOCK_BANKING_SCHEMA: Dict[str, Any] = {
         }
     ]
 }
+
+DEFAULT_MOCK_MULTI_DB_SCHEMA: Dict[str, Any] = {
+    "databases": ["banking", "sale"],
+    "tables": [
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "customers", "TABLE_ROWS": 45000, "DATA_LENGTH": 3145728, "INDEX_LENGTH": 1048576},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "accounts", "TABLE_ROWS": 95000, "DATA_LENGTH": 6291456, "INDEX_LENGTH": 2097152},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "transactions", "TABLE_ROWS": 850000, "DATA_LENGTH": 33554432, "INDEX_LENGTH": 8388608},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "loans", "TABLE_ROWS": 18000, "DATA_LENGTH": 1572864, "INDEX_LENGTH": 524288},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "dim_product", "TABLE_ROWS": 1500, "DATA_LENGTH": 131072, "INDEX_LENGTH": 32768},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "sale", "TABLE_ROWS": 450000, "DATA_LENGTH": 33554432, "INDEX_LENGTH": 8388608},
+    ],
+    "columns": [
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "customers", "COLUMN_NAME": "customer_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "customers", "COLUMN_NAME": "customer_name", "DATA_TYPE": "varchar"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "customers", "COLUMN_NAME": "email", "DATA_TYPE": "varchar"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "accounts", "COLUMN_NAME": "account_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "accounts", "COLUMN_NAME": "customer_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "accounts", "COLUMN_NAME": "balance", "DATA_TYPE": "decimal"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "transactions", "COLUMN_NAME": "transaction_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "transactions", "COLUMN_NAME": "account_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "transactions", "COLUMN_NAME": "amount", "DATA_TYPE": "decimal"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "loans", "COLUMN_NAME": "loan_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "banking", "TABLE_NAME": "loans", "COLUMN_NAME": "customer_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "dim_product", "COLUMN_NAME": "Product_SK", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "dim_product", "COLUMN_NAME": "product_name", "DATA_TYPE": "varchar"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "sale", "COLUMN_NAME": "sale_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "sale", "COLUMN_NAME": "Product_SK", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "sale", "COLUMN_NAME": "customer_id", "DATA_TYPE": "int"},
+        {"TABLE_SCHEMA": "sale", "TABLE_NAME": "sale", "COLUMN_NAME": "amount", "DATA_TYPE": "decimal"},
+    ],
+    "foreign_keys": [
+        {
+            "TABLE_SCHEMA": "banking",
+            "TABLE_NAME": "accounts",
+            "COLUMN_NAME": "customer_id",
+            "REFERENCED_TABLE_SCHEMA": "banking",
+            "REFERENCED_TABLE_NAME": "customers",
+            "REFERENCED_COLUMN_NAME": "customer_id",
+        },
+        {
+            "TABLE_SCHEMA": "sale",
+            "TABLE_NAME": "sale",
+            "COLUMN_NAME": "Product_SK",
+            "REFERENCED_TABLE_SCHEMA": "sale",
+            "REFERENCED_TABLE_NAME": "dim_product",
+            "REFERENCED_COLUMN_NAME": "Product_SK",
+        },
+        {
+            "TABLE_SCHEMA": "sale",
+            "TABLE_NAME": "sale",
+            "COLUMN_NAME": "customer_id",
+            "REFERENCED_TABLE_SCHEMA": "banking",
+            "REFERENCED_TABLE_NAME": "customers",
+            "REFERENCED_COLUMN_NAME": "customer_id",
+        }
+    ]
+}
+
+
+def list_mysql_databases(
+    host: str = "localhost",
+    port: int = 3306,
+    user: str = "root",
+    password: str = "",
+) -> List[str]:
+    """Returns list of non-system database schemas available on the MySQL server."""
+    if not HAS_PYMYSQL:
+        return ["airline", "banking", "finance", "hr", "sale"]
+    try:
+        conn = pymysql.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            cursorclass=pymysql.cursors.DictCursor,
+            connect_timeout=3,
+        )
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
+                    WHERE SCHEMA_NAME NOT IN ('information_schema', 'mysql', 'performance_schema', 'sys')
+                    ORDER BY SCHEMA_NAME
+                """)
+                rows = cur.fetchall()
+                return [r["SCHEMA_NAME"] for r in rows]
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.warning(f"Failed to fetch databases from MySQL: {e}")
+        return ["airline", "banking", "finance", "hr", "sale"]
+
 
 
 
@@ -396,6 +491,7 @@ class MySQLColdScanner:
     """
     Extracts table schemas, row count estimates, and explicit foreign key relationships
     by querying MySQL INFORMATION_SCHEMA catalogs with zero table payload scans.
+    Supports single-schema as well as cross-database multi-schema scans.
     """
     def __init__(
         self,
@@ -403,15 +499,34 @@ class MySQLColdScanner:
         port: int = 3306,
         user: str = "root",
         password: str = "",
-        database: str = "mimic_clinical",
+        database: Optional[str] = "banking",
+        databases: Optional[List[str]] = None,
+        all_user_databases: bool = False,
+        namespace_ids: Optional[bool] = None,
         mock_schema: Optional[Dict[str, Any]] = None,
     ):
         self.host = host
         self.port = port
         self.user = user
         self.password = password
-        self.database = database
+        self.all_user_databases = all_user_databases
         self.mock_schema = mock_schema
+
+        # Parse target databases
+        if databases and isinstance(databases, list) and len(databases) > 0:
+            self.databases = [str(d).strip() for d in databases if str(d).strip()]
+        elif database:
+            self.databases = [d.strip() for d in str(database).split(",") if d.strip()]
+        else:
+            self.databases = []
+
+        self.database = self.databases[0] if self.databases else "banking"
+        self.is_multi_db = (len(self.databases) > 1) or self.all_user_databases
+
+        if namespace_ids is not None:
+            self.namespace_ids = namespace_ids
+        else:
+            self.namespace_ids = self.is_multi_db
 
     def scan(self) -> Dict[str, Any]:
         if self.mock_schema:
@@ -425,52 +540,73 @@ class MySQLColdScanner:
             port=self.port,
             user=self.user,
             password=self.password,
-            database=self.database,
+            database=self.database if self.database and not self.all_user_databases and len(self.databases) == 1 else None,
             cursorclass=pymysql.cursors.DictCursor,
+            connect_timeout=5,
         )
 
         try:
             with conn.cursor() as cursor:
-                # 1. Query Tables
+                # 0. Discover databases if all_user_databases or none provided
+                if self.all_user_databases or not self.databases:
+                    cursor.execute("""
+                        SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
+                        WHERE SCHEMA_NAME NOT IN ('information_schema', 'mysql', 'performance_schema', 'sys')
+                        ORDER BY SCHEMA_NAME
+                    """)
+                    self.databases = [r["SCHEMA_NAME"] for r in cursor.fetchall()]
+                    self.is_multi_db = len(self.databases) > 1
+                    if self.is_multi_db:
+                        self.namespace_ids = True
+
+                if not self.databases:
+                    raise ValueError("No valid database schemas found on MySQL server to scan.")
+
+                placeholders = ", ".join(["%s"] * len(self.databases))
+
+                # 1. Query Tables across all selected databases
                 cursor.execute(
-                    """
-                    SELECT TABLE_NAME, TABLE_ROWS, DATA_LENGTH, INDEX_LENGTH, CREATE_TIME, UPDATE_TIME
+                    f"""
+                    SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_ROWS, DATA_LENGTH, INDEX_LENGTH, CREATE_TIME, UPDATE_TIME
                     FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_SCHEMA = %s AND TABLE_TYPE = 'BASE TABLE'
+                    WHERE TABLE_SCHEMA IN ({placeholders}) AND TABLE_TYPE = 'BASE TABLE'
+                    ORDER BY TABLE_SCHEMA, TABLE_NAME
                     """,
-                    (self.database,),
+                    tuple(self.databases),
                 )
                 tables_raw = cursor.fetchall()
 
-                # 2. Query Columns
+                # 2. Query Columns across all selected databases
                 cursor.execute(
-                    """
-                    SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY
+                    f"""
+                    SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY
                     FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_SCHEMA = %s
-                    ORDER BY TABLE_NAME, ORDINAL_POSITION
+                    WHERE TABLE_SCHEMA IN ({placeholders})
+                    ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION
                     """,
-                    (self.database,),
+                    tuple(self.databases),
                 )
                 columns_raw = cursor.fetchall()
 
-                # 3. Query Explicit Foreign Keys
+                # 3. Query Explicit Foreign Keys (including cross-database FKs)
                 cursor.execute(
-                    """
+                    f"""
                     SELECT 
+                        k.TABLE_SCHEMA,
                         k.TABLE_NAME, 
                         k.COLUMN_NAME, 
+                        COALESCE(k.REFERENCED_TABLE_SCHEMA, k.TABLE_SCHEMA) AS REFERENCED_TABLE_SCHEMA,
                         k.REFERENCED_TABLE_NAME, 
                         k.REFERENCED_COLUMN_NAME
                     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
                     JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS c 
                       ON k.CONSTRAINT_NAME = c.CONSTRAINT_NAME 
                      AND k.TABLE_SCHEMA = c.TABLE_SCHEMA
-                    WHERE k.TABLE_SCHEMA = %s 
+                    WHERE k.TABLE_SCHEMA IN ({placeholders}) 
                       AND c.CONSTRAINT_TYPE = 'FOREIGN KEY'
                       AND k.REFERENCED_TABLE_NAME IS NOT NULL
                     """,
-                    (self.database,),
+                    tuple(self.databases),
                 )
                 fks_raw = cursor.fetchall()
 
@@ -484,65 +620,123 @@ class MySQLColdScanner:
         columns: List[Dict[str, Any]],
         fks: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
-        table_cols: Dict[str, Dict[str, str]] = {}
+        default_db = self.databases[0] if self.databases else (self.database or "default")
+
+        table_cols: Dict[str, Dict[str, Dict[str, str]]] = {}
         for col in columns:
+            s_name = col.get("TABLE_SCHEMA") or default_db
             t_name = col["TABLE_NAME"]
-            if t_name not in table_cols:
-                table_cols[t_name] = {}
-            table_cols[t_name][col["COLUMN_NAME"]] = col["DATA_TYPE"]
+            if s_name not in table_cols:
+                table_cols[s_name] = {}
+            if t_name not in table_cols[s_name]:
+                table_cols[s_name][t_name] = {}
+            table_cols[s_name][t_name][col["COLUMN_NAME"]] = col["DATA_TYPE"]
+
+        # Group tables by database schema
+        db_tables: Dict[str, List[Dict[str, Any]]] = {}
+        for t in tables:
+            s_name = t.get("TABLE_SCHEMA") or default_db
+            if s_name not in db_tables:
+                db_tables[s_name] = []
+            db_tables[s_name].append(t)
 
         datasets_list = []
         now_iso = datetime.now(timezone.utc).isoformat()
 
-        for t in tables:
-            t_name = t["TABLE_NAME"]
-            rows = t.get("TABLE_ROWS") or 0
-            size_bytes = (t.get("DATA_LENGTH") or 0) + (t.get("INDEX_LENGTH") or 0)
-            ds_id = f"ds_{t_name.lower()}"
-            cols = table_cols.get(t_name, {})
+        for s_name, t_list in db_tables.items():
+            child_dataset_ids = []
+            for t in t_list:
+                t_name = t["TABLE_NAME"]
+                rows = t.get("TABLE_ROWS") or 0
+                size_bytes = (t.get("DATA_LENGTH") or 0) + (t.get("INDEX_LENGTH") or 0)
 
-            obj_dict = {
-                "id": f"obj_{t_name.lower()}",
-                "name": t_name,
-                "physical_type": "Relational Table",
-                "dataset_id": ds_id,
-                "OVolume": {
-                    "logical_record_count": rows,
-                    "column_count": len(cols),
-                    "physical_size_bytes": size_bytes,
-                    "partition_count": 1,
-                    "timestamp": now_iso,
-                },
-                "OVariety": {
-                    "nature": "Structured",
-                    "physical_rep": "MySQL Table",
-                    "schema_definition": cols,
-                    "columns": cols,
-                    "timestamp": now_iso,
-                },
-                "OVariability": {
-                    "schema_version": "v1.0",
-                    "timestamp": now_iso,
-                },
-            }
+                if self.namespace_ids:
+                    ds_id = f"ds_{s_name.lower()}_{t_name.lower()}"
+                    obj_id = f"obj_{s_name.lower()}_{t_name.lower()}"
+                    display_desc = f"MySQL Table `{s_name}`.`{t_name}`"
+                    obj_display_name = f"{s_name}.{t_name}"
+                else:
+                    ds_id = f"ds_{t_name.lower()}"
+                    obj_id = f"obj_{t_name.lower()}"
+                    display_desc = f"MySQL Table `{self.database}`.`{t_name}`"
+                    obj_display_name = t_name
 
-            datasets_list.append({
-                "id": ds_id,
-                "name": t_name.replace("_", " ").title(),
-                "description": f"MySQL Table `{self.database}`.`{t_name}`",
-                "structure_type": "Simple",
-                "lifecycle_stage": "Raw",
-                "tags": ["mysql", "relational", "schema_only", self.database],
-                "data_objects": [obj_dict],
-                "assembly_children": [],
-                "generalization_children": [],
-                "processed_from": [],
-            })
+                cols = table_cols.get(s_name, {}).get(t_name, {})
+                child_dataset_ids.append(ds_id)
 
+                obj_dict = {
+                    "id": obj_id,
+                    "name": obj_display_name,
+                    "physical_type": "Relational Table",
+                    "dataset_id": ds_id,
+                    "OVolume": {
+                        "logical_record_count": rows,
+                        "column_count": len(cols),
+                        "physical_size_bytes": size_bytes,
+                        "partition_count": 1,
+                        "timestamp": now_iso,
+                    },
+                    "OVariety": {
+                        "nature": "Structured",
+                        "physical_rep": "MySQL Table",
+                        "schema_definition": cols,
+                        "columns": cols,
+                        "timestamp": now_iso,
+                    },
+                    "OVariability": {
+                        "schema_version": "v1.0",
+                        "timestamp": now_iso,
+                    },
+                }
+
+                # Infer lifecycle stage: if table name has 'dim_', 'fact_', 'summary', 'agg_', or schema is dw/analytics
+                is_processed = any(k in t_name.lower() for k in ["dim_", "fact_", "summary", "agg_", "mart"]) or s_name.lower() in ["dw", "analytics", "mart", "reporting"]
+                stage = "Processed" if is_processed else "Raw"
+
+                datasets_list.append({
+                    "id": ds_id,
+                    "name": t_name.replace("_", " ").title(),
+                    "description": display_desc,
+                    "structure_type": "Simple",
+                    "lifecycle_stage": stage,
+                    "tags": ["mysql", "relational", "schema_only", s_name],
+                    "data_objects": [obj_dict],
+                    "assembly_children": [],
+                    "generalization_children": [],
+                    "processed_from": [],
+                })
+
+            # In multi-database mode, create a Complex Dataset container for each database
+            if self.is_multi_db:
+                db_complex_id = f"ds_db_{s_name.lower()}"
+                datasets_list.append({
+                    "id": db_complex_id,
+                    "name": f"Database: {s_name.title()}",
+                    "description": f"MySQL Schema `{s_name}` assembly containing {len(child_dataset_ids)} tables.",
+                    "structure_type": "Complex",
+                    "lifecycle_stage": "Raw",
+                    "tags": ["mysql", "database_schema", s_name],
+                    "data_objects": [],
+                    "assembly_children": child_dataset_ids,
+                    "generalization_children": [],
+                    "processed_from": [],
+                })
+
+        # Explicit Foreign Keys (including cross-database FKs)
         explicit_relationships = []
         for fk in fks:
-            src_id = f"ds_{fk['TABLE_NAME'].lower()}"
-            tgt_id = f"ds_{fk['REFERENCED_TABLE_NAME'].lower()}"
+            src_db = fk.get("TABLE_SCHEMA") or default_db
+            ref_db = fk.get("REFERENCED_TABLE_SCHEMA") or src_db
+
+            if self.namespace_ids:
+                src_id = f"ds_{src_db.lower()}_{fk['TABLE_NAME'].lower()}"
+                tgt_id = f"ds_{ref_db.lower()}_{fk['REFERENCED_TABLE_NAME'].lower()}"
+                join_str = f"{src_db}.{fk['TABLE_NAME']}.{fk['COLUMN_NAME']} = {ref_db}.{fk['REFERENCED_TABLE_NAME']}.{fk['REFERENCED_COLUMN_NAME']}"
+            else:
+                src_id = f"ds_{fk['TABLE_NAME'].lower()}"
+                tgt_id = f"ds_{fk['REFERENCED_TABLE_NAME'].lower()}"
+                join_str = f"{fk['TABLE_NAME']}.{fk['COLUMN_NAME']} = {fk['REFERENCED_TABLE_NAME']}.{fk['REFERENCED_COLUMN_NAME']}"
+
             col = fk["COLUMN_NAME"]
             ref_col = fk["REFERENCED_COLUMN_NAME"]
 
@@ -557,7 +751,7 @@ class MySQLColdScanner:
                     "join_keys": [col],
                     "referenced_column": ref_col,
                     "cardinality": "N:1",
-                    "join_condition": f"{fk['TABLE_NAME']}.{col} = {fk['REFERENCED_TABLE_NAME']}.{ref_col}",
+                    "join_condition": join_str,
                 },
             })
 
@@ -567,6 +761,18 @@ class MySQLColdScanner:
         }
 
     def _parse_mock_schema(self, mock: Dict[str, Any]) -> Dict[str, Any]:
+        # Detect if mock is multi-database
+        if "databases" in mock and len(mock["databases"]) > 1:
+            self.databases = mock["databases"]
+            self.is_multi_db = True
+            self.namespace_ids = True
+        elif any(t.get("TABLE_SCHEMA") for t in mock.get("tables", [])):
+            schemas = list({t.get("TABLE_SCHEMA") for t in mock.get("tables", []) if t.get("TABLE_SCHEMA")})
+            if len(schemas) > 1:
+                self.databases = schemas
+                self.is_multi_db = True
+                self.namespace_ids = True
+
         return self._assemble_mysql_results(
             mock.get("tables", []),
             mock.get("columns", []),
@@ -601,17 +807,27 @@ class CandidateGraphBuilder:
 
         # Merge relationships: explicit FKs take precedence over suggested heuristics
         merged_rels: List[Dict[str, Any]] = list(explicit_rels)
-        existing_pairs = {
-            (r["source_dataset_id"], r["target_dataset_id"]) for r in explicit_rels
+        existing_typed_pairs = {
+            (r.get("relationship_type", "Referential"), r["source_dataset_id"], r["target_dataset_id"])
+            for r in explicit_rels
         }
         for s_rel in suggested_rels:
-            pair = (s_rel["source_dataset_id"], s_rel["target_dataset_id"])
-            rev_pair = (s_rel["target_dataset_id"], s_rel["source_dataset_id"])
-            if pair not in existing_pairs and rev_pair not in existing_pairs:
+            rel_type = s_rel.get("relationship_type", "Referential")
+            pair = (rel_type, s_rel["source_dataset_id"], s_rel["target_dataset_id"])
+            rev_pair = (rel_type, s_rel["target_dataset_id"], s_rel["source_dataset_id"])
+            if pair not in existing_typed_pairs and (rel_type != "Referential" or rev_pair not in existing_typed_pairs):
                 merged_rels.append(s_rel)
-                existing_pairs.add(pair)
+                existing_typed_pairs.add(pair)
 
         # 2. Build root lakehouse complex dataset container
+        # If there are intermediate Complex Datasets (e.g. database schema assemblies ds_db_*),
+        # the root assembly assembles them. Otherwise it assembles all base datasets.
+        complex_children = [d["id"] for d in datasets if d.get("structure_type") == "Complex"]
+        if complex_children:
+            root_children = complex_children
+        else:
+            root_children = [d["id"] for d in datasets]
+
         root_name = root_assembly_name or "Discovered Lakehouse"
         clean_name = root_name.replace(' ', '_').lower()
         if not clean_name.endswith("_root"):
@@ -622,12 +838,12 @@ class CandidateGraphBuilder:
         root_dataset = {
             "id": root_id,
             "name": root_name,
-            "description": f"Automated root lakehouse assembly containing {len(datasets)} base datasets.",
+            "description": f"Automated root lakehouse assembly containing {len(root_children)} child assemblies/datasets.",
             "structure_type": "Complex",
             "lifecycle_stage": "Raw",
             "tags": ["lakehouse_root", "cold_scan"],
             "interacts_with": [self.default_stakeholder.id],
-            "assembly_children": [d["id"] for d in datasets],
+            "assembly_children": root_children,
             "generalization_children": [],
             "processed_from": [],
             "data_objects": [],

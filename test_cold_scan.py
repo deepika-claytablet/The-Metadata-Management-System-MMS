@@ -250,3 +250,53 @@ def test_mysql_test_connection_endpoint():
     assert fail_res.status_code == 400
     assert "detail" in fail_res.json()
 
+
+def test_multi_database_cold_scan_and_lineage():
+    """Verify multi-database scanning creates database assemblies and cross-database lineage."""
+    from ColdScanEngine import DEFAULT_MOCK_MULTI_DB_SCHEMA
+
+    scanner = MySQLColdScanner(mock_schema=DEFAULT_MOCK_MULTI_DB_SCHEMA)
+    res = scanner.scan()
+
+    # 6 base tables + 2 database complex containers = 8 datasets
+    assert len(res["datasets"]) == 8
+
+    # Verify database containers exist
+    db_containers = [d for d in res["datasets"] if d["structure_type"] == "Complex"]
+    assert len(db_containers) == 2
+    assert any(d["id"] == "ds_db_banking" for d in db_containers)
+    assert any(d["id"] == "ds_db_sale" for d in db_containers)
+
+    # Verify namespace isolation on table IDs
+    assert any(d["id"] == "ds_banking_customers" for d in res["datasets"])
+    assert any(d["id"] == "ds_sale_dim_product" for d in res["datasets"])
+
+    # Build candidate graph
+    builder = CandidateGraphBuilder()
+    graph = builder.build_candidate_graph(res["datasets"], res["relationships"])
+
+    # Verify root lakehouse assembles the two database containers
+    manifest = graph["manifest"]
+    root = manifest["datasets"][0]
+    assert "ds_db_banking" in root["assembly_children"]
+    assert "ds_db_sale" in root["assembly_children"]
+
+    # Verify explicit cross-database foreign key from sale to banking
+    cross_fk = next(
+        (r for r in manifest["relationships"] if r["source_dataset_id"] == "ds_sale_sale" and r["target_dataset_id"] == "ds_banking_customers"),
+        None
+    )
+    assert cross_fk is not None
+    assert cross_fk["confidence"] == 1.0
+
+
+def test_get_mysql_databases_endpoint():
+    """Verify /pilot/cold-scan/mysql/databases endpoint returns list of schemas."""
+    res = client.get("/pilot/cold-scan/mysql/databases")
+    assert res.status_code == 200
+    data = res.json()
+    assert "databases" in data
+    assert isinstance(data["databases"], list)
+    assert len(data["databases"]) > 0
+
+
