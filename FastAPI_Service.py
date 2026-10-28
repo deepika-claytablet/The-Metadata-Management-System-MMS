@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger("medom.service")
 
@@ -66,6 +66,7 @@ class BindTVWordsRequest(BaseModel):
     variability: VariabilityIndicator
     value: Optional[ValueIndicator] = None
     vulnerability: Optional[VulnerabilityIndicator] = None
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class BindOVWordsRequest(BaseModel):
@@ -74,6 +75,7 @@ class BindOVWordsRequest(BaseModel):
     volume: VolumeIndicator
     variety: VarietyIndicator
     variability: VariabilityIndicator
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class BindVulnerabilityRequest(BaseModel):
@@ -146,6 +148,7 @@ def bind_tv_words(req: BindTVWordsRequest) -> Dict[str, Any]:
             variability=req.variability,
             value=req.value,
             vulnerability=req.vulnerability,
+            dynamic_parameter_tree=req.dynamic_parameter_tree,
         )
         return {"status": "TV-words bound", "tmd_object": tmd.model_dump()}
     except (KeyError, ValueError) as e:
@@ -164,6 +167,7 @@ def bind_ov_words(req: BindOVWordsRequest) -> Dict[str, Any]:
             volume=req.volume,
             variety=req.variety,
             variability=req.variability,
+            dynamic_parameter_tree=req.dynamic_parameter_tree,
         )
         return {"status": "OV-words bound", "omd_object": omd.model_dump()}
     except (KeyError, ValueError) as e:
@@ -410,6 +414,7 @@ def commit_canvas_to_catalog(manifest: DLDManifest) -> Dict[str, Any]:
                         classification=VulnerabilityClassification.CONFIDENTIAL,
                         access_control_policy="Standard Governance Policy",
                     ),
+                    dynamic_parameter_tree=getattr(ds, "dynamic_parameter_tree", {}) or {},
                 )
 
             # Auto-bind DataObjects if any
@@ -421,6 +426,7 @@ def commit_canvas_to_catalog(manifest: DLDManifest) -> Dict[str, Any]:
                         volume=VolumeIndicator(byte_size=524288, record_count=5000),
                         variety=VarietyIndicator(column_count=5, file_format=do.physical_type),
                         variability=VariabilityIndicator(schema_version="v1.0"),
+                        dynamic_parameter_tree=getattr(do, "dynamic_parameter_tree", {}) or {},
                     )
 
             # Auto-bind InteractsWith vulnerabilities

@@ -44,6 +44,32 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px -2px rgba(2, 132, 199, 0.15);
     }
+    /* TIM Visual Tree Hierarchy with Dashed Connecting Lines */
+    .tim-tree-branch {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-left: 0.75rem;
+      border-left: 2px dashed #93c5fd; /* sky-300 */
+    }
+    .tim-tree-node {
+      position: relative;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .tim-tree-node::before {
+      content: "";
+      position: absolute;
+      top: 18px;
+      left: -1.5rem;
+      width: 1.25rem;
+      border-top: 2px dashed #93c5fd; /* sky-300 horizontal connector */
+    }
+    .tim-node-card {
+      transition: all 0.15s ease-in-out;
+    }
+    .tim-node-card:hover {
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.12);
+    }
   </style>
 </head>
 
@@ -287,10 +313,6 @@
             <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Display Name</label>
             <input id="form-name" type="text" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-sky-500">
           </div>
-          <div id="form-desc-group">
-            <label class="block text-[10px] uppercase font-semibold text-slate-500 mb-1">Description</label>
-            <textarea id="form-desc" rows="2" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:border-sky-500"></textarea>
-          </div>
         </div>
 
         <!-- TIER 1: TMD OBJECT (Dataset-Level TV-Words) -->
@@ -320,147 +342,25 @@
             </div>
           </div>
 
-          <!-- TVolume Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-indigo-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-weight-hanging text-indigo-600"></i>
-              <span>TVolume Attributes</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] text-slate-500">Logical Records</label>
-                <input id="form-tmd-volume-rows" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+          <!-- TMD Technical Indicator Model Tree Action (7 V-Words with + Sign) -->
+          <div class="bg-gradient-to-r from-sky-50 via-indigo-50/50 to-blue-50 border-2 border-sky-300 rounded-xl p-3.5 shadow-sm space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 text-sky-950 font-bold text-xs">
+                <i class="fa-solid fa-sitemap text-sky-600 text-sm"></i>
+                <span>TMD Objects (7 V-Words)</span>
               </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Physical Bytes</label>
-                <input id="form-tmd-volume-bytes" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Compressed Bytes</label>
-                <input id="form-tmd-volume-compressed" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Compression Algo</label>
-                <select id="form-tmd-volume-algo" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-                  <option value="Snappy">Snappy</option>
-                  <option value="Gzip">Gzip</option>
-                  <option value="ZSTD">ZSTD</option>
-                  <option value="None">None</option>
-                </select>
-              </div>
+              <button type="button" onclick="openVWordTreeModal('TMD')" id="btn-open-tmd-tree"
+                      class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow hover:shadow-md transition active:scale-95 cursor-pointer">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Configure 7 V-Words</span>
+              </button>
             </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-tmd-volume-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- TVelocity Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-cyan-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-gauge-high text-cyan-600"></i>
-              <span>TVelocity Attributes</span>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500 mb-1">Speed / Arrival Mode</label>
-              <select id="form-tmd-velocity-speed" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-                <option value="Fixed">Fixed (Batch Scheduled)</option>
-                <option value="On arrival">On arrival (Event Triggered)</option>
-                <option value="Dynamic 1000 msg/sec">Dynamic arrival rates</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-tmd-velocity-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- TVariety Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-amber-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-shapes text-amber-600"></i>
-              <span>TVariety Attributes</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] text-slate-500">Nature</label>
-                <select id="form-tmd-variety-nature" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-                  <option value="Structured">Structured</option>
-                  <option value="Semi-structured">Semi-structured</option>
-                  <option value="Unstructured">Unstructured</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Physical Rep</label>
-                <input id="form-tmd-variety-rep" type="text" placeholder="CSV, Parquet, MySQL..." class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">TTL (Retention)</label>
-              <select id="form-tmd-variety-ttl" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-                <option value="Forever">Forever</option>
-                <option value="Current">Current</option>
-                <option value="90 Days">90 Days</option>
-                <option value="365 Days">365 Days</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-tmd-variety-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- TVeracity Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-square-check text-emerald-600"></i>
-              <span>TVeracity Attributes</span>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Source System Name</label>
-              <input id="form-tmd-veracity-source" type="text" placeholder="e.g. MetaVision CIS, Hospital EHR" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Device Type</label>
-              <input id="form-tmd-veracity-device" type="text" placeholder="e.g. EHR Database Server, ICU Telemetry" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] text-slate-500">Accuracy (0 - 1)</label>
-                <input id="form-tmd-veracity-accuracy" type="number" step="0.01" min="0" max="1" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Precision (0 - 1)</label>
-                <input id="form-tmd-veracity-precision" type="number" step="0.01" min="0" max="1" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-tmd-veracity-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- TValue Attributes (Mandatory for Processed Datasets) -->
-          <div id="form-tmd-value-section" class="bg-purple-50 p-3 rounded-lg border border-purple-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-purple-800 font-semibold text-xs border-b border-purple-200 pb-1">
-              <i class="fa-solid fa-diagram-next text-purple-600"></i>
-              <span>TValue Attributes (Processed Dataset)</span>
-            </div>
-            <div>
-              <label class="block text-[10px] text-purple-900 font-medium">Origin Dataset</label>
-              <input id="form-tmd-value-origin" type="text" placeholder="e.g. ds_admissions" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900">
-            </div>
-            <div>
-              <label class="block text-[10px] text-purple-900 font-medium">Destination Dataset</label>
-              <input id="form-tmd-value-dest" type="text" placeholder="e.g. ds_icu_summary" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900">
-            </div>
-            <div>
-              <label class="block text-[10px] text-purple-900 font-medium">Transformation Action</label>
-              <textarea id="form-tmd-value-transformation" rows="2" placeholder="e.g. Aggregate vitals and compute SOFA scores" class="w-full bg-white border border-purple-300 rounded px-2 py-1 text-xs text-slate-900"></textarea>
-            </div>
-            <div>
-              <label class="block text-[10px] text-purple-700">Timestamp</label>
-              <input id="form-tmd-value-ts" type="text" class="w-full bg-purple-100/50 border border-purple-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
+            <p class="text-[11px] text-sky-800 leading-snug">
+              Click <b class="text-sky-900">+</b> to open the scrollable <b>7 V-Words Form</b>. Build extensible parameter trees with visual dashed connectors.
+            </p>
+            <div class="flex items-center justify-between text-[10px] text-sky-700 pt-1.5 border-t border-sky-200">
+              <span id="tmd-tree-summary"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Standard 7 V-Words active</span>
+              <span class="text-sky-600 font-mono text-[9px]">Click + to customize</span>
             </div>
           </div>
         </div>
@@ -483,79 +383,25 @@
             </button>
           </div>
 
-          <!-- OVolume Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-emerald-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-hard-drive text-emerald-600"></i>
-              <span>OVolume Attributes</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] text-slate-500">Physical Size (Bytes)</label>
-                <input id="form-omd-volume-bytes" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
+          <!-- OMD Technical Indicator Model Tree Action (with + Sign) -->
+          <div class="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-green-50 border-2 border-emerald-300 rounded-xl p-3.5 shadow-sm space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 text-emerald-950 font-bold text-xs">
+                <i class="fa-solid fa-database text-emerald-600 text-sm"></i>
+                <span>OMD Objects (Object Tier)</span>
               </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Logical Records</label>
-                <input id="form-omd-volume-rows" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Column Count</label>
-                <input id="form-omd-volume-cols" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-500">Null Columns</label>
-                <input id="form-omd-volume-nulls" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-              </div>
+              <button type="button" onclick="openVWordTreeModal('OMD')" id="btn-open-omd-tree"
+                      class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow hover:shadow-md transition active:scale-95 cursor-pointer">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Configure OMD Objects</span>
+              </button>
             </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Inapplicable Column Count</label>
-              <input id="form-omd-volume-inapplicable" type="number" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-omd-volume-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- OVariety Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-teal-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-code-fork text-teal-600"></i>
-              <span>OVariety Attributes</span>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Physical Format</label>
-              <select id="form-omd-variety-format" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900">
-                <option value="Parquet">Parquet</option>
-                <option value="CSV">CSV</option>
-                <option value="DICOM">DICOM (PACS Archive)</option>
-                <option value="WFDB">WFDB (Waveform DB)</option>
-                <option value="JSON">JSON / JSONL</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500 mb-1">OVariety_schema (Field Names & Types)</label>
-              <textarea id="form-omd-variety-schema" rows="4" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900" placeholder='{"col1": "INTEGER", "col2": "VARCHAR"}'></textarea>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400">Timestamp</label>
-              <input id="form-omd-variety-ts" type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-mono text-slate-600" readonly>
-            </div>
-          </div>
-
-          <!-- OVariability Attributes -->
-          <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
-            <div class="flex items-center space-x-2 text-slate-700 font-semibold text-xs border-b border-slate-100 pb-1">
-              <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-              <span>OVariability Attributes</span>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Last Modified Timestamp</label>
-              <input id="form-omd-variability-modified" type="text" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900">
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500">Deletion Timestamp (if tombstoned)</label>
-              <input id="form-omd-variability-deleted" type="text" placeholder="null" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs font-mono text-slate-900">
+            <p class="text-[11px] text-emerald-800 leading-snug">
+              Click <b class="text-emerald-900">+</b> to open the scrollable <b>OMD Tree Editor</b> (OVolume, OVariety, OVariability) with visual dashed connectors.
+            </p>
+            <div class="flex items-center justify-between text-[10px] text-emerald-700 pt-1.5 border-t border-emerald-200">
+              <span id="omd-tree-summary"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Standard OMD indicators active</span>
+              <span class="text-emerald-600 font-mono text-[9px]">Click + to customize</span>
             </div>
           </div>
         </div>
@@ -731,6 +577,106 @@
         </div>
       </div>
     </aside>
+  </div>
+
+  <!-- 7 V-WORDS & OMD EXTENSIBLE TREE EDITOR MODAL -->
+  <div id="vword-tree-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-slate-800">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+          <div id="tree-modal-badge" class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-sitemap text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 id="tree-modal-title" class="font-bold text-base text-slate-900">7 V-Words Indicator Model (TMD)</h3>
+              <span id="tree-modal-entity-id" class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-100 text-sky-800 font-semibold border border-sky-200">ds_id</span>
+            </div>
+            <p id="tree-modal-subtitle" class="text-xs text-slate-500 mt-0.5">
+              Click the <b class="text-sky-600">+</b> button beside any parameter to add sub-parameters connected by dashed lines, or enter concrete values.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="applyStoragePaperPreset()" id="btn-tree-preset" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 flex items-center space-x-1.5 transition cursor-pointer shadow-xs">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+            <span>Paper Fig 4 Preset</span>
+          </button>
+          <button onclick="resetTreeToDefaults()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium border border-slate-200 flex items-center space-x-1.5 transition cursor-pointer">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Reset</span>
+          </button>
+          <button onclick="closeVWordTreeModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Search / Filter Bar -->
+      <div class="px-6 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div class="relative flex-1 max-w-sm">
+          <i class="fa-solid fa-search absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+          <input type="text" id="tree-search-filter" oninput="filterTreeIndicators(this.value)" placeholder="Search indicators (e.g. size, storage, encryption)..."
+                 class="w-full pl-8 pr-3 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white">
+        </div>
+        <div class="flex items-center space-x-2 text-[11px] text-slate-500">
+          <span class="inline-flex items-center space-x-1"><i class="fa-solid fa-circle text-[6px] text-sky-500"></i><span>Dashed lines connect parent &amp; child indicators</span></span>
+        </div>
+      </div>
+
+      <!-- Modal Body: Scrollable Form with all 7 V-Words / OMD -->
+      <div id="tree-modal-container" class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/60 custom-scrollbar">
+        <!-- Dynamically rendered V-Word cards -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2 text-xs text-slate-500">
+          <i class="fa-solid fa-circle-info text-sky-500"></i>
+          <span>Hierarchical parameters serialize cleanly into MeDOM 3-Tier JSON and Catalog Manifests.</span>
+        </div>
+        <div class="flex items-center space-x-2.5">
+          <button onclick="closeVWordTreeModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition cursor-pointer">
+            Cancel
+          </button>
+          <button onclick="saveVWordTree()" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center space-x-2 shadow-md hover:shadow transition transform active:scale-95 cursor-pointer">
+            <i class="fa-solid fa-check"></i>
+            <span>Apply & Save Indicators</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INLINE PROMPT SUB-PARAMETER MODAL -->
+  <div id="tree-subparam-modal" style="z-index: 9999;" class="hidden fixed inset-0 bg-slate-900/30 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-xl max-w-sm w-full p-4 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <span class="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+          <i class="fa-solid fa-plus-circle text-sky-600"></i>
+          <span id="subparam-modal-title">Add Sub-Parameter</span>
+        </span>
+        <button onclick="closeSubparamModal()" class="text-slate-400 hover:text-slate-600 text-xs cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div>
+        <label class="block text-[11px] text-slate-600 mb-1">Sub-Parameter Name / Indicator Label:</label>
+        <input type="text" id="subparam-name-input" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-500" placeholder="e.g. Physical Storage, Compressed Storage" onkeydown="if(event.key==='Enter') confirmAddSubparam()">
+      </div>
+      <div id="subparam-suggestions" class="space-y-1">
+        <span class="text-[10px] text-slate-400 uppercase font-semibold">Quick Suggestions:</span>
+        <div id="subparam-pill-container" class="flex flex-wrap gap-1.5">
+          <!-- Suggested pills -->
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+        <button onclick="closeSubparamModal()" class="px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs cursor-pointer">Cancel</button>
+        <button onclick="confirmAddSubparam()" class="px-3.5 py-1 rounded bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow cursor-pointer">Add Sub-Parameter</button>
+      </div>
+    </div>
   </div>
 
   <!-- EDGE KIND POPUP MODAL -->
@@ -1540,8 +1486,6 @@
       document.getElementById('form-entity-type').innerText = entityType;
       document.getElementById('form-entity-id').innerText = node.id();
       document.getElementById('form-name').value = node.data('name') || '';
-      document.getElementById('form-desc-group').classList.remove('hidden');
-      document.getElementById('form-desc').value = node.data('description') || '';
 
       const badge = document.getElementById('inspector-badge');
       const dsProps = document.getElementById('group-dataset-props');
@@ -1553,6 +1497,16 @@
       if (entityType === 'DataSet') {
         badge.className = "w-2.5 h-2.5 rounded-full bg-sky-500";
         document.getElementById('inspector-title').innerText = "TMD Inspector (Dataset Tier)";
+        document.getElementById('form-entity-type').innerText = "DataSet";
+        document.getElementById('form-entity-type').className = "text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200";
+        const tmdBadge = document.getElementById('tmd-tree-summary');
+        if (tmdBadge) {
+          if (node.data('tmd_tree')) {
+            tmdBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Customized 7 V-Words active';
+          } else {
+            tmdBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Standard 7 V-Words active';
+          }
+        }
         dsProps.classList.remove('hidden');
         objProps.classList.add('hidden');
         stkProps.classList.add('hidden');
@@ -1596,6 +1550,16 @@
       } else if (entityType === 'DataObject') {
         badge.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
         document.getElementById('inspector-title').innerText = "OMD Inspector (Object Tier)";
+        document.getElementById('form-entity-type').innerText = "Data Object";
+        document.getElementById('form-entity-type').className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200";
+        const omdBadge = document.getElementById('omd-tree-summary');
+        if (omdBadge) {
+          if (node.data('omd_tree')) {
+            omdBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Customized OMD active';
+          } else {
+            omdBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Standard OMD indicators active';
+          }
+        }
         dsProps.classList.add('hidden');
         objProps.classList.remove('hidden');
         stkProps.classList.add('hidden');
@@ -1656,7 +1620,6 @@
       document.getElementById('form-entity-type').innerText = "Relationship (RMD)";
       document.getElementById('form-entity-id').innerText = edge.id();
       document.getElementById('form-name').value = edge.data('label') || edge.data('kind');
-      document.getElementById('form-desc-group').classList.add('hidden');
 
       document.getElementById('group-dataset-props').classList.add('hidden');
       document.getElementById('group-object-props').classList.add('hidden');
@@ -1710,7 +1673,6 @@
 
       if (selectedElement.isNode()) {
         const entityType = selectedElement.data('entityType');
-        selectedElement.data('description', document.getElementById('form-desc').value);
 
         if (entityType === 'DataSet') {
           selectedElement.data('structureType', document.getElementById('form-structure-type').value);
@@ -2136,7 +2098,8 @@
             generalization_children: genChildren,
             processed_from: procFrom,
             volume_records: d.volume_records || 50000,
-            volume_bytes: d.volume_bytes || 5242880
+            volume_bytes: d.volume_bytes || 5242880,
+            dynamic_parameter_tree: d.tmd_tree || d.dynamic_parameter_tree || {}
           });
         } else if (d.entityType === 'DataObject') {
           let parentDsId = d.datasetId || null;
@@ -2152,7 +2115,8 @@
             name: d.name,
             physical_type: d.physicalType || 'Parquet',
             storage_path: d.description || `s3://mimic4/${d.name}`,
-            dataset_id: parentDsId
+            dataset_id: parentDsId,
+            dynamic_parameter_tree: d.omd_tree || d.dynamic_parameter_tree || {}
           });
         } else if (d.entityType === 'Stakeholder') {
           stakeholders.push({
@@ -2275,7 +2239,8 @@
             TVeracity_accuracy: d.tmd_veracity_accuracy !== undefined ? d.tmd_veracity_accuracy : (d.veracity_completeness || 0.99),
             TVeracity_precision: d.tmd_veracity_precision !== undefined ? d.tmd_veracity_precision : 0.98,
             timestamp: d.tmd_volume_ts || new Date().toISOString()
-          }
+          },
+          dynamic_parameter_tree: d.tmd_tree || d.dynamic_parameter_tree || {}
         };
         if (d.lifecycleStage === 'Processed') {
           tmd_obj.attributes.TValue_origin = d.tmd_value_origin || (d.processed_from && d.processed_from.length ? d.processed_from.join(', ') : "ds_admissions");
@@ -2306,7 +2271,8 @@
             OVariability_last_modified: d.omd_variability_modified || new Date().toISOString(),
             OVariability_deletion_timestamp: d.omd_variability_deleted || null,
             timestamp: d.omd_volume_ts || new Date().toISOString()
-          }
+          },
+          dynamic_parameter_tree: d.omd_tree || d.dynamic_parameter_tree || {}
         });
       });
 
@@ -2446,6 +2412,1094 @@
       setTimeout(() => {
         banner.classList.add('hidden');
       }, 4000);
+    }
+
+    // =====================================================================
+    // TECHNICAL INDICATOR MODEL (TIM) EXTENSIBLE TREE EDITOR
+    // =====================================================================
+    let currentTreeMode = 'TMD'; // 'TMD' (7 V-Words) or 'OMD' (Object Metadata)
+    let activeTreeData = null;
+    let pendingSubparamTarget = null; // { vwordKey, parentId, parentLabel }
+
+    function getDefaultTMDTree(nodeData) {
+      const d = nodeData || {};
+      const now = new Date().toISOString();
+      return {
+        "Volume": {
+          label: "Volume (TV-Volume)",
+          formula: "< size, timestamp >",
+          color: "indigo",
+          description: "Aggregate storage consumption and dataset capacity indicators",
+          parameters: [
+            {
+              id: "tmd_vol_size",
+              key: "size",
+              label: "size",
+              type: "number",
+              value: d.tmd_volume_bytes !== undefined ? d.tmd_volume_bytes : (d.volume_bytes || 5242880),
+              unit: "bytes",
+              children: []
+            },
+            {
+              id: "tmd_vol_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: d.tmd_volume_ts || now,
+              children: []
+            }
+          ]
+        },
+        "Velocity": {
+          label: "Velocity (TV-Velocity)",
+          formula: "< speed, timestamp >",
+          color: "cyan",
+          description: "Ingestion frequency and arrival rate characteristics",
+          parameters: [
+            {
+              id: "tmd_vel_speed",
+              key: "speed",
+              label: "speed",
+              type: "text",
+              value: d.tmd_velocity_speed || "Fixed",
+              children: []
+            },
+            {
+              id: "tmd_vel_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: d.tmd_velocity_ts || now,
+              children: []
+            }
+          ]
+        },
+        "Variety": {
+          label: "Variety (TV-Variety)",
+          formula: "< Nature, Logical Schema, Physical representation, Timestamp, TTL >",
+          color: "amber",
+          description: "Structural typology, schema mapping, and retention policy",
+          parameters: [
+            {
+              id: "tmd_var_nature",
+              key: "Nature",
+              label: "Nature",
+              type: "text",
+              value: d.tmd_variety_nature || "Structured",
+              children: []
+            },
+            {
+              id: "tmd_var_schema",
+              key: "Logical Schema",
+              label: "Logical Schema",
+              type: "text",
+              value: '{"col1": "INT", "col2": "VARCHAR"}',
+              children: []
+            },
+            {
+              id: "tmd_var_rep",
+              key: "Physical representation",
+              label: "Physical representation",
+              type: "text",
+              value: d.tmd_variety_rep || (d.variety_format || "Parquet"),
+              children: []
+            },
+            {
+              id: "tmd_var_ts",
+              key: "Timestamp",
+              label: "Timestamp",
+              type: "text",
+              value: d.tmd_variety_ts || now,
+              children: []
+            },
+            {
+              id: "tmd_var_ttl",
+              key: "TTL",
+              label: "TTL",
+              type: "text",
+              value: d.tmd_variety_ttl || "Forever",
+              children: []
+            }
+          ]
+        },
+        "Veracity": {
+          label: "Veracity (TV-Veracity)",
+          formula: "< Source, source attributes, timestamp >",
+          color: "emerald",
+          description: "Origin provenance, data accuracy, completeness, and reliability metrics",
+          parameters: [
+            {
+              id: "tmd_ver_source",
+              key: "Source",
+              label: "Source",
+              type: "text",
+              value: d.tmd_veracity_source || "Hospital Enterprise EHR",
+              children: []
+            },
+            {
+              id: "tmd_ver_attrs",
+              key: "source attributes",
+              label: "source attributes",
+              children: [
+                {
+                  id: "tmd_ver_dev",
+                  key: "device_type",
+                  label: "Device type",
+                  type: "text",
+                  value: d.tmd_veracity_device || "EHR Database Server",
+                  children: []
+                },
+                {
+                  id: "tmd_ver_acc",
+                  key: "accuracy",
+                  label: "Accuracy",
+                  type: "number",
+                  value: d.tmd_veracity_accuracy !== undefined ? d.tmd_veracity_accuracy : 0.99,
+                  children: []
+                },
+                {
+                  id: "tmd_ver_prec",
+                  key: "precision",
+                  label: "Precision",
+                  type: "number",
+                  value: d.tmd_veracity_precision !== undefined ? d.tmd_veracity_precision : 0.98,
+                  children: []
+                }
+              ]
+            },
+            {
+              id: "tmd_ver_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: d.tmd_veracity_ts || now,
+              children: []
+            }
+          ]
+        },
+        "Variability": {
+          label: "Variability (TV-Variability)",
+          formula: "Change in any V-word indicator as reflected by timestamp",
+          color: "slate",
+          description: "Chronological longitudinal drift and schema evolution tracking",
+          parameters: [
+            {
+              id: "tmd_vbl_indicator",
+              key: "V-word changed",
+              label: "V-word changed",
+              type: "text",
+              value: "TV-Volume",
+              children: []
+            },
+            {
+              id: "tmd_vbl_desc",
+              key: "Change description",
+              label: "Change description",
+              type: "text",
+              value: "Periodic partition creation / schema evolution",
+              children: []
+            },
+            {
+              id: "tmd_vbl_last_mod",
+              key: "Last modified",
+              label: "Last modified",
+              type: "text",
+              value: now,
+              children: []
+            },
+            {
+              id: "tmd_vbl_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: now,
+              children: []
+            }
+          ]
+        },
+        "Value": {
+          label: "Value (TV-Value)",
+          formula: "< Origin data, Destination data, Value_adding_action, timestamp >",
+          color: "purple",
+          description: "Operational purpose, downstream analytics target, and derivation action",
+          parameters: [
+            {
+              id: "tmd_val_origin",
+              key: "Origin data",
+              label: "Origin data",
+              type: "text",
+              value: d.tmd_value_origin || (d.processed_from && d.processed_from.length ? d.processed_from.join(', ') : "ds_admissions"),
+              children: []
+            },
+            {
+              id: "tmd_val_dest",
+              key: "Destination data",
+              label: "Destination data",
+              type: "text",
+              value: d.tmd_value_dest || "ds_icu_summary",
+              children: []
+            },
+            {
+              id: "tmd_val_action",
+              key: "Value_adding_action",
+              label: "Value_adding_action",
+              type: "text",
+              value: d.tmd_value_transformation || "Aggregate vitals and compute SOFA scores",
+              children: []
+            },
+            {
+              id: "tmd_val_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: d.tmd_value_ts || now,
+              children: []
+            }
+          ]
+        },
+        "Vulnerability": {
+          label: "Vulnerability (TV-Vulnerability)",
+          formula: "< data protection, timestamp > < authentication, timestamp > < access control, timestamp > < accountability, timestamp >",
+          color: "rose",
+          description: "Security posture, access authorization, encryption, and audit logs",
+          parameters: [
+            {
+              id: "tmd_vuln_dp",
+              key: "data protection",
+              label: "data protection",
+              children: [
+                {
+                  id: "tmd_vuln_dp_method",
+                  key: "data_protection_method",
+                  label: "protection method",
+                  type: "text",
+                  value: "De-identified",
+                  children: []
+                },
+                {
+                  id: "tmd_vuln_dp_ts",
+                  key: "timestamp",
+                  label: "timestamp",
+                  type: "text",
+                  value: now,
+                  children: []
+                }
+              ]
+            },
+            {
+              id: "tmd_vuln_auth",
+              key: "authentication",
+              label: "authentication",
+              children: [
+                {
+                  id: "tmd_vuln_auth_req",
+                  key: "authentication_required",
+                  label: "authentication required",
+                  type: "text",
+                  value: "true",
+                  children: []
+                },
+                {
+                  id: "tmd_vuln_auth_ts",
+                  key: "timestamp",
+                  label: "timestamp",
+                  type: "text",
+                  value: now,
+                  children: []
+                }
+              ]
+            },
+            {
+              id: "tmd_vuln_ac",
+              key: "access control",
+              label: "access control",
+              children: [
+                {
+                  id: "tmd_vuln_ac_policy",
+                  key: "access_control_policy",
+                  label: "access control policy",
+                  type: "text",
+                  value: "Credentialed Lakehouse Access",
+                  children: []
+                },
+                {
+                  id: "tmd_vuln_ac_ts",
+                  key: "timestamp",
+                  label: "timestamp",
+                  type: "text",
+                  value: now,
+                  children: []
+                }
+              ]
+            },
+            {
+              id: "tmd_vuln_acc",
+              key: "accountability",
+              label: "accountability",
+              children: [
+                {
+                  id: "tmd_vuln_acc_role",
+                  key: "accountability_role",
+                  label: "audited steward role",
+                  type: "text",
+                  value: "Lead Clinical Data Steward",
+                  children: []
+                },
+                {
+                  id: "tmd_vuln_acc_ts",
+                  key: "timestamp",
+                  label: "timestamp",
+                  type: "text",
+                  value: now,
+                  children: []
+                }
+              ]
+            }
+          ]
+        }
+      };
+    }
+
+    function getDefaultOMDTree(nodeData) {
+      const d = nodeData || {};
+      const now = new Date().toISOString();
+      return {
+        "Volume": {
+          label: "Volume (OVolume)",
+          formula: "< size, timestamp > (logical columns, physical bytes, nulls, inapplicable columns)",
+          color: "emerald",
+          description: "Physical and logical size indicators for this Data Object",
+          parameters: [
+            {
+              id: "omd_vol_size",
+              key: "size",
+              label: "size",
+              children: [
+                {
+                  id: "omd_vol_physical_bytes",
+                  key: "physical_bytes",
+                  label: "physical bytes",
+                  type: "number",
+                  value: d.omd_volume_bytes !== undefined ? d.omd_volume_bytes : (d.volume_bytes || 2621440),
+                  unit: "bytes",
+                  children: []
+                },
+                {
+                  id: "omd_vol_logical_records",
+                  key: "logical_records",
+                  label: "logical records",
+                  type: "number",
+                  value: d.omd_volume_rows !== undefined ? d.omd_volume_rows : (d.volume_records || 25000),
+                  unit: "rows",
+                  children: []
+                },
+                {
+                  id: "omd_vol_logical_cols",
+                  key: "logical_columns",
+                  label: "logical columns",
+                  type: "number",
+                  value: d.omd_volume_cols !== undefined ? d.omd_volume_cols : (d.variety_cols || 8),
+                  unit: "cols",
+                  children: []
+                },
+                {
+                  id: "omd_vol_null_cols",
+                  key: "nulls",
+                  label: "null columns",
+                  type: "number",
+                  value: d.omd_volume_nulls !== undefined ? d.omd_volume_nulls : 0,
+                  children: []
+                },
+                {
+                  id: "omd_vol_inapp_cols",
+                  key: "inapplicable_columns",
+                  label: "inapplicable columns",
+                  type: "number",
+                  value: d.omd_volume_inapplicable !== undefined ? d.omd_volume_inapplicable : 0,
+                  children: []
+                }
+              ]
+            },
+            {
+              id: "omd_vol_ts",
+              key: "timestamp",
+              label: "timestamp",
+              type: "text",
+              value: d.omd_volume_ts || now,
+              children: []
+            }
+          ]
+        },
+        "Variety": {
+          label: "Variety (OVariety)",
+          formula: "< Nature, Local Schema, Physical representation, Timestamp, TTL >",
+          color: "teal",
+          description: "Atomic schema, physical format representation, and retention duration",
+          parameters: [
+            {
+              id: "omd_var_nature",
+              key: "Nature",
+              label: "Nature",
+              type: "text",
+              value: "Structured",
+              children: []
+            },
+            {
+              id: "omd_var_schema",
+              key: "Local Schema",
+              label: "Local Schema",
+              type: "text",
+              value: typeof d.omd_variety_schema === 'string' ? d.omd_variety_schema : JSON.stringify(d.omd_variety_schema || {"subject_id": "INTEGER", "hadm_id": "INTEGER", "charttime": "TIMESTAMP"}),
+              children: []
+            },
+            {
+              id: "omd_var_rep",
+              key: "Physical representation",
+              label: "Physical representation",
+              type: "text",
+              value: d.omd_variety_format || (d.physicalType || "Parquet"),
+              children: []
+            },
+            {
+              id: "omd_var_ts",
+              key: "Timestamp",
+              label: "Timestamp",
+              type: "text",
+              value: d.omd_variety_ts || now,
+              children: []
+            },
+            {
+              id: "omd_var_ttl",
+              key: "TTL",
+              label: "TTL",
+              type: "text",
+              value: "Forever",
+              children: []
+            }
+          ]
+        },
+        "Variability": {
+          label: "Variability (OVariability)",
+          formula: "< Last Modified, Deletion Timestamp, Version, Timestamp >",
+          color: "slate",
+          description: "Storage unit lifecycle, tombstone status, and version lineage",
+          parameters: [
+            {
+              id: "omd_vbl_mod",
+              key: "Last Modified",
+              label: "Last Modified",
+              type: "text",
+              value: d.omd_variability_modified || now,
+              children: []
+            },
+            {
+              id: "omd_vbl_del",
+              key: "Deletion Timestamp",
+              label: "Deletion Timestamp",
+              type: "text",
+              value: d.omd_variability_deleted || "null",
+              children: []
+            },
+            {
+              id: "omd_vbl_ver",
+              key: "Version",
+              label: "Version",
+              type: "text",
+              value: "v1.0",
+              children: []
+            },
+            {
+              id: "omd_vbl_ts",
+              key: "Timestamp",
+              label: "Timestamp",
+              type: "text",
+              value: now,
+              children: []
+            }
+          ]
+        }
+      };
+    }
+
+    function openVWordTreeModal(mode) {
+      if (!selectedElement || !selectedElement.isNode()) {
+        showToast('Please select a DataSet or Data Object first', 'warning');
+        return;
+      }
+
+      currentTreeMode = mode || (selectedElement.data('entityType') === 'DataObject' ? 'OMD' : 'TMD');
+      const d = selectedElement.data();
+
+      // Set headers and badge
+      const badge = document.getElementById('tree-modal-badge');
+      const title = document.getElementById('tree-modal-title');
+      const entityId = document.getElementById('tree-modal-entity-id');
+      const subtitle = document.getElementById('tree-modal-subtitle');
+      entityId.innerText = selectedElement.id();
+
+      if (currentTreeMode === 'TMD') {
+        badge.className = "w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md";
+        badge.innerHTML = '<i class="fa-solid fa-sitemap text-lg"></i>';
+        title.innerText = "7 V-Words Indicator Model (TMD Object)";
+        subtitle.innerHTML = 'Hierarchical Technical Indicators for DataSet. Click <b class="text-sky-600">+</b> beside any parameter to add sub-parameters connected by dashed lines.';
+        activeTreeData = d.tmd_tree ? JSON.parse(JSON.stringify(d.tmd_tree)) : getDefaultTMDTree(d);
+      } else {
+        badge.className = "w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md";
+        badge.innerHTML = '<i class="fa-solid fa-database text-lg"></i>';
+        title.innerText = "OMD Technical Indicator Model (Data Object Tier)";
+        subtitle.innerHTML = 'Object Metadata Indicators for Data Object. Click <b class="text-emerald-600">+</b> beside any parameter to branch, or input concrete values.';
+        activeTreeData = d.omd_tree ? JSON.parse(JSON.stringify(d.omd_tree)) : getDefaultOMDTree(d);
+      }
+
+      document.getElementById('tree-search-filter').value = '';
+      renderVWordTreeContainer();
+      document.getElementById('vword-tree-modal').classList.remove('hidden');
+    }
+
+    function closeVWordTreeModal() {
+      document.getElementById('vword-tree-modal').classList.add('hidden');
+    }
+
+    function renderVWordTreeContainer(filterQuery) {
+      const container = document.getElementById('tree-modal-container');
+      if (!activeTreeData) return;
+
+      const q = (filterQuery || '').toLowerCase().trim();
+      let html = '';
+
+      const colorMap = {
+        indigo: { border: 'border-indigo-200', bg: 'bg-indigo-50/70', title: 'text-indigo-900', badge: 'bg-indigo-100 text-indigo-800' },
+        cyan: { border: 'border-cyan-200', bg: 'bg-cyan-50/70', title: 'text-cyan-900', badge: 'bg-cyan-100 text-cyan-800' },
+        amber: { border: 'border-amber-200', bg: 'bg-amber-50/70', title: 'text-amber-900', badge: 'bg-amber-100 text-amber-800' },
+        emerald: { border: 'border-emerald-200', bg: 'bg-emerald-50/70', title: 'text-emerald-900', badge: 'bg-emerald-100 text-emerald-800' },
+        slate: { border: 'border-slate-300', bg: 'bg-slate-100/70', title: 'text-slate-900', badge: 'bg-slate-200 text-slate-800' },
+        purple: { border: 'border-purple-200', bg: 'bg-purple-50/70', title: 'text-purple-900', badge: 'bg-purple-100 text-purple-800' },
+        rose: { border: 'border-rose-200', bg: 'bg-rose-50/70', title: 'text-rose-900', badge: 'bg-rose-100 text-rose-800' },
+        teal: { border: 'border-teal-200', bg: 'bg-teal-50/70', title: 'text-teal-900', badge: 'bg-teal-100 text-teal-800' }
+      };
+
+      for (const [vwordKey, section] of Object.entries(activeTreeData)) {
+        const theme = colorMap[section.color] || colorMap.indigo;
+
+        // Check if matching filter
+        if (q) {
+          const matchesTitle = vwordKey.toLowerCase().includes(q) || (section.label && section.label.toLowerCase().includes(q));
+          const matchesParams = nodeMatchesSearch(section.parameters, q);
+          if (!matchesTitle && !matchesParams) continue;
+        }
+
+        html += `
+          <div class="bg-white rounded-xl border ${theme.border} shadow-sm overflow-hidden" data-vword="${vwordKey}">
+            <!-- Section Header -->
+            <div class="${theme.bg} px-4 py-3 border-b ${theme.border} flex items-center justify-between">
+              <div class="flex items-center space-x-2.5">
+                <span class="font-bold text-xs uppercase tracking-wide ${theme.title}">${section.label}</span>
+                <span class="text-[11px] font-mono text-slate-600 bg-white/80 px-2 py-0.5 rounded border border-slate-200">${section.formula}</span>
+              </div>
+            </div>
+            
+            <!-- Parameters Tree -->
+            <div class="p-4 space-y-1.5">
+              ${(section.parameters && section.parameters.length > 0)
+                ? section.parameters.map(param => renderTreeNode(param, vwordKey)).join('')
+                : '<div class="text-xs text-slate-400 italic py-2">No indicators defined.</div>'
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html || '<div class="text-center py-10 text-slate-400 text-xs">No indicators match your search query.</div>';
+    }
+
+    function nodeMatchesSearch(nodes, query) {
+      if (!nodes || !nodes.length) return false;
+      for (const n of nodes) {
+        if (n.label && n.label.toLowerCase().includes(query)) return true;
+        if (n.value !== undefined && String(n.value).toLowerCase().includes(query)) return true;
+        if (n.children && nodeMatchesSearch(n.children, query)) return true;
+      }
+      return false;
+    }
+
+    function renderTreeNode(node, vwordKey) {
+      const isBranch = node.children && node.children.length > 0;
+      const safeLabel = escapeHtml(node.label);
+      const safeValue = escapeHtml(node.value !== undefined && node.value !== null ? String(node.value) : '');
+
+      return `
+        <div class="tim-tree-node" id="node-${node.id}">
+          <div class="tim-node-card flex items-center justify-between p-2.5 bg-slate-50/80 border border-slate-200 rounded-lg hover:bg-white hover:border-sky-300 shadow-xs transition group">
+            <div class="flex items-center space-x-2 flex-1 min-w-0 mr-3">
+              <span class="font-semibold text-xs text-slate-800">${safeLabel}</span>
+              ${isBranch 
+                ? `<span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-200">${node.children.length} sub-params</span>`
+                : ''
+              }
+            </div>
+
+            <div class="flex items-center space-x-2 shrink-0">
+              <!-- Leaf Value Input -->
+              ${!isBranch ? `
+                <div class="flex items-center space-x-1.5">
+                  <input type="${node.type === 'number' ? 'number' : 'text'}" 
+                         value="${safeValue}" 
+                         placeholder="Enter value..."
+                         onchange="updateTreeNodeValue('${vwordKey}', '${node.id}', this.value)"
+                         class="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-900 w-44 font-mono focus:border-sky-500 focus:outline-none shadow-2xs">
+                  ${node.unit ? `<span class="text-[10px] text-slate-400 font-mono">${node.unit}</span>` : ''}
+                </div>
+              ` : ''}
+
+              <!-- The + Button beside every parameter -->
+              <button type="button" 
+                      onclick="promptAddSubparam('${vwordKey}', '${node.id}', '${escapeJs(node.label)}')"
+                      title="Add sub-parameter under '${safeLabel}'"
+                      class="px-2.5 py-1 rounded bg-sky-50 hover:bg-sky-100 text-sky-700 hover:text-sky-900 border border-sky-300 text-xs font-bold flex items-center space-x-1 shadow-2xs transition cursor-pointer">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span class="text-[10px]">Sub-param</span>
+              </button>
+
+              <!-- Delete Button for user-added parameter -->
+              ${node.isCustom ? `
+                <button type="button" 
+                        onclick="removeTreeNode('${vwordKey}', '${node.id}')"
+                        title="Delete parameter"
+                        class="p-1 rounded text-rose-400 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Indented Recursive Branch with Dashed Connecting Line -->
+          ${isBranch ? `
+            <div class="tim-tree-branch">
+              ${node.children.map(child => renderTreeNode(child, vwordKey)).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function promptAddSubparam(vwordKey, parentId, parentLabel) {
+      pendingSubparamTarget = { vwordKey, parentId, parentLabel };
+      const title = document.getElementById('subparam-modal-title');
+      const input = document.getElementById('subparam-name-input');
+      const pillBox = document.getElementById('subparam-pill-container');
+
+      title.innerText = parentId ? `Add Sub-Parameter under "${parentLabel}"` : `Add Indicator to "${parentLabel}"`;
+      input.value = '';
+
+      // Determine context-aware suggestions
+      let suggestions = ["Physical Storage", "Logical Storage", "Compressed Storage", "Bytesize", "TTL", "Rate of Change"];
+      const lower = (parentLabel || '').toLowerCase();
+      if (lower.includes('size')) {
+        suggestions = ["Physical Storage", "Logical Storage", "Compressed Storage", "Uncompressed Storage", "Bytesize", "Record Count"];
+      } else if (lower.includes('physical')) {
+        suggestions = ["Bytesize", "Compressed Storage", "Block Size", "Partition Allocation", "Device Path"];
+      } else if (lower.includes('logical')) {
+        suggestions = ["Logical Row Count", "Column Count", "Table Count", "Schema Version"];
+      } else if (lower.includes('compressed')) {
+        suggestions = ["Compressed Bytes", "Compression Algorithm", "Compression Ratio", "Scope"];
+      } else if (lower.includes('source')) {
+        suggestions = ["Device Type", "System Origin", "Validation Rules Passed", "Data Drift Score", "Accuracy"];
+      } else if (lower.includes('protection')) {
+        suggestions = ["De-identification Standard", "Encryption Algorithm", "Key Rotation Interval", "Masking Rule"];
+      } else if (lower.includes('auth')) {
+        suggestions = ["MFA Required", "SSO Provider", "Session Expiry", "Token Format"];
+      } else if (lower.includes('access')) {
+        suggestions = ["RBAC Policy Role", "ABAC Condition", "Retention Days", "Max Query Rate"];
+      }
+
+      pillBox.innerHTML = suggestions.map(s => `
+        <button type="button" onclick="selectSubparamPill('${escapeJs(s)}')"
+                class="px-2 py-0.5 rounded text-[10px] bg-slate-100 hover:bg-sky-100 text-slate-700 hover:text-sky-800 border border-slate-200 transition cursor-pointer">
+          + ${s}
+        </button>
+      `).join('');
+
+      document.getElementById('tree-subparam-modal').classList.remove('hidden');
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function selectSubparamPill(name) {
+      document.getElementById('subparam-name-input').value = name;
+    }
+
+    function closeSubparamModal() {
+      document.getElementById('tree-subparam-modal').classList.add('hidden');
+      pendingSubparamTarget = null;
+    }
+
+    function confirmAddSubparam() {
+      if (!pendingSubparamTarget || !activeTreeData) return;
+      const input = document.getElementById('subparam-name-input');
+      const name = input.value.trim();
+      if (!name) {
+        showToast('Please enter a parameter name', 'warning');
+        return;
+      }
+
+      const { vwordKey, parentId } = pendingSubparamTarget;
+      const section = activeTreeData[vwordKey];
+      if (!section) return;
+
+      const newChild = {
+        id: 'param_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        key: name.toLowerCase().replace(/\s+/g, '_'),
+        label: name,
+        value: '',
+        children: [],
+        isCustom: true
+      };
+
+      if (!parentId) {
+        // Adding at section root
+        section.parameters.push(newChild);
+      } else {
+        // Find parent and attach
+        const parent = findNodeInTree(section.parameters, parentId);
+        if (parent) {
+          if (!parent.children) parent.children = [];
+          parent.children.push(newChild);
+          parent.value = undefined; // clear scalar value as it is now a branch
+        }
+      }
+
+      closeSubparamModal();
+      renderVWordTreeContainer();
+      showToast(`Added sub-parameter "${name}"`, 'success');
+    }
+
+    function findNodeInTree(nodes, id) {
+      if (!nodes) return null;
+      for (const n of nodes) {
+        if (n.id === id) return n;
+        if (n.children && n.children.length > 0) {
+          const res = findNodeInTree(n.children, id);
+          if (res) return res;
+        }
+      }
+      return null;
+    }
+
+    function updateTreeNodeValue(vwordKey, nodeId, newValue) {
+      if (!activeTreeData || !activeTreeData[vwordKey]) return;
+      const node = findNodeInTree(activeTreeData[vwordKey].parameters, nodeId);
+      if (node) {
+        node.value = newValue;
+      }
+    }
+
+    function removeTreeNode(vwordKey, nodeId) {
+      if (!activeTreeData || !activeTreeData[vwordKey]) return;
+      function removeRecursive(nodes) {
+        const idx = nodes.findIndex(n => n.id === nodeId);
+        if (idx !== -1) {
+          nodes.splice(idx, 1);
+          return true;
+        }
+        for (const n of nodes) {
+          if (n.children && n.children.length > 0) {
+            if (removeRecursive(n.children)) return true;
+          }
+        }
+        return false;
+      }
+      removeRecursive(activeTreeData[vwordKey].parameters);
+      renderVWordTreeContainer();
+      showToast('Parameter removed', 'info');
+    }
+
+    function filterTreeIndicators(query) {
+      renderVWordTreeContainer(query);
+    }
+
+    function resetTreeToDefaults() {
+      if (!selectedElement) return;
+      const d = selectedElement.data();
+      if (currentTreeMode === 'TMD') {
+        activeTreeData = getDefaultTMDTree(d);
+      } else {
+        activeTreeData = getDefaultOMDTree(d);
+      }
+      renderVWordTreeContainer();
+      showToast('Reset indicators to base structure', 'info');
+    }
+
+    function applyStoragePaperPreset() {
+      if (!activeTreeData) return;
+      const now = new Date().toISOString();
+
+      if (currentTreeMode === 'TMD') {
+        // Fig 4(a) Paper Storage Breakdown
+        activeTreeData["Volume"].parameters = [
+          {
+            id: "tmd_vol_size",
+            key: "size",
+            label: "size",
+            children: [
+              {
+                id: "tmd_vol_phys_storage",
+                key: "physical_storage_size",
+                label: "Physical_Storage_size",
+                children: [
+                  {
+                    id: "tmd_vol_bytesize",
+                    key: "bytesize",
+                    label: "Bytesize",
+                    type: "number",
+                    value: 48318382080,
+                    unit: "bytes",
+                    children: []
+                  },
+                  {
+                    id: "tmd_vol_comp_storage",
+                    key: "compressed_storage",
+                    label: "Compressed Storage",
+                    children: [
+                      {
+                        id: "tmd_vol_comp_bytes",
+                        key: "compressed_bytes",
+                        label: "Bytesize",
+                        type: "number",
+                        value: 12582912,
+                        unit: "bytes",
+                        children: []
+                      },
+                      {
+                        id: "tmd_vol_comp_scope",
+                        key: "scope",
+                        label: "Scope",
+                        type: "text",
+                        value: "Table Partition",
+                        children: []
+                      },
+                      {
+                        id: "tmd_vol_comp_algo",
+                        key: "algorithm",
+                        label: "Algorithm",
+                        type: "text",
+                        value: "Snappy",
+                        children: []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: "tmd_vol_log_storage",
+                key: "logical_storage_size",
+                label: "Logical_Storage_size",
+                children: [
+                  {
+                    id: "tmd_vol_records",
+                    key: "number_of_records",
+                    label: "Number of records",
+                    type: "number",
+                    value: 380000,
+                    unit: "records",
+                    children: []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: "tmd_vol_ts",
+            key: "timestamp",
+            label: "timestamp",
+            type: "text",
+            value: now,
+            children: []
+          }
+        ];
+        renderVWordTreeContainer();
+        showToast('✓ Applied Section 7 Fig 4(a) TVolume Storage Breakdown!', 'success');
+      } else {
+        // Fig 4(b) Paper OVolume Breakdown
+        activeTreeData["Volume"].parameters = [
+          {
+            id: "omd_vol_size",
+            key: "size",
+            label: "size",
+            children: [
+              {
+                id: "omd_vol_log_size",
+                key: "logical_size",
+                label: "Logical size",
+                children: [
+                  { id: "omd_vol_cols", key: "columns", label: "Columns", type: "number", value: 12, children: [] },
+                  { id: "omd_vol_null_cols", key: "null_columns", label: "Null columns", type: "number", value: 0, children: [] },
+                  { id: "omd_vol_inapp_cols", key: "inapplicable_columns", label: "Inapplicable columns", type: "number", value: 0, children: [] }
+                ]
+              },
+              {
+                id: "omd_vol_phys_size",
+                key: "physical_size",
+                label: "Physical size",
+                children: [
+                  { id: "omd_vol_width", key: "width_bytes", label: "Width (Bytes)", type: "number", value: 25165824, unit: "bytes", children: [] }
+                ]
+              }
+            ]
+          },
+          {
+            id: "omd_vol_ts",
+            key: "timestamp",
+            label: "timestamp",
+            type: "text",
+            value: now,
+            children: []
+          }
+        ];
+        renderVWordTreeContainer();
+        showToast('✓ Applied Section 7 Fig 4(b) OVolume Breakdown!', 'success');
+      }
+    }
+
+    function saveVWordTree() {
+      if (!selectedElement || !activeTreeData) return;
+
+      const treeClone = JSON.parse(JSON.stringify(activeTreeData));
+      let totalNodes = 0;
+      function countNodes(nodes) {
+        if (!nodes) return;
+        totalNodes += nodes.length;
+        for (const n of nodes) {
+          if (n.children && n.children.length > 0) countNodes(n.children);
+        }
+      }
+      for (const s of Object.values(treeClone)) {
+        if (s.parameters) countNodes(s.parameters);
+      }
+
+      if (currentTreeMode === 'TMD') {
+        selectedElement.data('tmd_tree', treeClone);
+
+        // Sync basic scalar metrics
+        const findVal = (keySubstr) => {
+          let found = null;
+          function walk(nodes) {
+            if (found !== null || !nodes) return;
+            for (const n of nodes) {
+              if (n.label && n.label.toLowerCase().includes(keySubstr) && n.value !== undefined && n.value !== '') {
+                found = n.value;
+                return;
+              }
+              if (n.children) walk(n.children);
+            }
+          }
+          for (const s of Object.values(treeClone)) walk(s.parameters);
+          return found;
+        };
+
+        const bytes = findVal('bytesize') || findVal('size') || findVal('physical');
+        if (bytes !== null) {
+          const bNum = parseInt(bytes) || 0;
+          selectedElement.data('tmd_volume_bytes', bNum);
+          selectedElement.data('volume_bytes', bNum);
+          const inp = document.getElementById('form-tmd-volume-bytes');
+          if (inp) inp.value = bNum;
+        }
+
+        const rows = findVal('records') || findVal('row');
+        if (rows !== null) {
+          const rNum = parseInt(rows) || 0;
+          selectedElement.data('tmd_volume_rows', rNum);
+          selectedElement.data('volume_records', rNum);
+          const inp = document.getElementById('form-tmd-volume-rows');
+          if (inp) inp.value = rNum;
+        }
+
+        const speed = findVal('speed');
+        if (speed !== null) {
+          selectedElement.data('tmd_velocity_speed', speed);
+          const inp = document.getElementById('form-tmd-velocity-speed');
+          if (inp) inp.value = speed;
+        }
+
+        const nature = findVal('nature');
+        if (nature !== null) {
+          selectedElement.data('tmd_variety_nature', nature);
+          const inp = document.getElementById('form-tmd-variety-nature');
+          if (inp) inp.value = nature;
+        }
+
+        const summaryBadge = document.getElementById('tmd-tree-summary');
+        if (summaryBadge) {
+          summaryBadge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Customized 7 V-Words (${totalNodes} indicators)`;
+        }
+      } else {
+        selectedElement.data('omd_tree', treeClone);
+
+        const findVal = (keySubstr) => {
+          let found = null;
+          function walk(nodes) {
+            if (found !== null || !nodes) return;
+            for (const n of nodes) {
+              if (n.label && n.label.toLowerCase().includes(keySubstr) && n.value !== undefined && n.value !== '') {
+                found = n.value;
+                return;
+              }
+              if (n.children) walk(n.children);
+            }
+          }
+          for (const s of Object.values(treeClone)) walk(s.parameters);
+          return found;
+        };
+
+        const bytes = findVal('bytes') || findVal('width') || findVal('physical');
+        if (bytes !== null) {
+          const bNum = parseInt(bytes) || 0;
+          selectedElement.data('omd_volume_bytes', bNum);
+          selectedElement.data('volume_bytes', bNum);
+          const inp = document.getElementById('form-omd-volume-bytes');
+          if (inp) inp.value = bNum;
+        }
+
+        const rows = findVal('records') || findVal('row');
+        if (rows !== null) {
+          const rNum = parseInt(rows) || 0;
+          selectedElement.data('omd_volume_rows', rNum);
+          selectedElement.data('volume_records', rNum);
+          const inp = document.getElementById('form-omd-volume-rows');
+          if (inp) inp.value = rNum;
+        }
+
+        const cols = findVal('column');
+        if (cols !== null) {
+          const cNum = parseInt(cols) || 0;
+          selectedElement.data('omd_volume_cols', cNum);
+          selectedElement.data('variety_cols', cNum);
+          const inp = document.getElementById('form-omd-volume-cols');
+          if (inp) inp.value = cNum;
+        }
+
+        const summaryBadge = document.getElementById('omd-tree-summary');
+        if (summaryBadge) {
+          summaryBadge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Customized OMD (${totalNodes} indicators)`;
+        }
+      }
+
+      closeVWordTreeModal();
+      showToast(`✓ Indicators saved for ${selectedElement.data('name')}`, 'success');
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeJs(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
     // -----------------------------------------------------------------

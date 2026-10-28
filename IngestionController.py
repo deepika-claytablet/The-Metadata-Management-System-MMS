@@ -98,7 +98,8 @@ class MetadataRepository:
                 "TVariety_ttl": getattr(tmd.variety, "ttl", "Forever") if tmd else "Forever",
                 "TVeracity_source": (getattr(tmd.veracity, "source_system_name", None) or tmd.veracity.source_origin) if tmd else "Hospital Enterprise EHR",
                 "timestamp": tmd.volume.timestamp.isoformat() if tmd else datetime.now(timezone.utc).isoformat(),
-            }
+            },
+            "dynamic_parameter_tree": getattr(tmd, "dynamic_parameter_tree", {}) or {} if tmd else {},
         }
         if tmd and ds and ds.lifecycle_stage == LifecycleStage.PROCESSED and tmd.value:
             tmd_obj["attributes"]["TValue_origin"] = getattr(tmd.value, "origin_dataset", None)
@@ -119,7 +120,8 @@ class MetadataRepository:
                     "OVariety_schema": omd.variety.schema_definition,
                     "OVariety_physical_rep": getattr(omd.variety, "physical_representation", None) or omd.variety.file_format,
                     "OVariability_last_modified": omd.variability.last_modified_timestamp.isoformat() if getattr(omd.variability, "last_modified_timestamp", None) else omd.variability.timestamp.isoformat(),
-                }
+                },
+                "dynamic_parameter_tree": getattr(omd, "dynamic_parameter_tree", {}) or {},
             })
 
         rmd_list = []
@@ -408,6 +410,7 @@ class DLDSetupEngine:
         variability: VariabilityIndicator,
         value: Optional[ValueIndicator] = None,
         vulnerability: Optional[VulnerabilityIndicator] = None,
+        dynamic_parameter_tree: Optional[Dict[str, Any]] = None,
     ) -> TMDObject:
         if dataset_id not in self.datasets:
             raise KeyError(f"Dataset '{dataset_id}' not registered in Stage A.")
@@ -432,6 +435,7 @@ class DLDSetupEngine:
             variability=variability,
             value=value,
             vulnerability=vulnerability,
+            dynamic_parameter_tree=dynamic_parameter_tree or {},
         )
         self.tmd_objects[dataset_id] = tmd
         return tmd
@@ -443,6 +447,7 @@ class DLDSetupEngine:
         volume: VolumeIndicator,
         variety: VarietyIndicator,
         variability: VariabilityIndicator,
+        dynamic_parameter_tree: Optional[Dict[str, Any]] = None,
     ) -> OMDObject:
         if data_object_id not in self.data_objects:
             raise KeyError(f"DataObject '{data_object_id}' not registered in Stage A.")
@@ -455,6 +460,7 @@ class DLDSetupEngine:
             volume=volume,
             variety=variety,
             variability=variability,
+            dynamic_parameter_tree=dynamic_parameter_tree or {},
         )
         self.omd_objects[data_object_id] = omd
         return omd

@@ -62,6 +62,10 @@ class DataObjectInput(BaseModel):
     name: str
     physical_type: str  # e.g., CSV, Parquet, Relational Table, DICOM, Stream
     storage_path: Optional[str] = None
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Hierarchical dynamic parameter tree for technical indicators (OMD)"
+    )
 
 
 class DataSetInput(BaseModel):
@@ -90,6 +94,10 @@ class DataSetInput(BaseModel):
     data_objects: List[DataObjectInput] = Field(
         default_factory=list,
         description="Data objects contained directly in this dataset"
+    )
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Hierarchical dynamic parameter tree for 7 V-words (TMD)"
     )
 
     @model_validator(mode="after")
@@ -254,6 +262,10 @@ class OMDObject(BaseModel):
     volume: VolumeIndicator
     variety: VarietyIndicator
     variability: VariabilityIndicator
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Dynamic hierarchical technical indicator tree for OV-words"
+    )
     observation_history: List[Dict[str, Any]] = Field(default_factory=list)
 
 
@@ -297,6 +309,10 @@ class TMDObject(BaseModel):
     variability: VariabilityIndicator
     value: Optional[ValueIndicator] = None
     vulnerability: Optional[VulnerabilityIndicator] = None
+    dynamic_parameter_tree: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Dynamic hierarchical technical indicator tree for the 7 V-words"
+    )
     historical_snapshots: List[Dict[str, Any]] = Field(default_factory=list)
 
     @model_validator(mode="after")
